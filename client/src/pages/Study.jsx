@@ -10,7 +10,7 @@ import axios from 'axios';
 const API_URL = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
 
 const Study = () => {
-    const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading } = useStudy();
+    const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading, error } = useStudy();
     const { user } = useAuth();
     const [mode, setMode] = useState('quiz');
     const [saving, setSaving] = useState(false);
@@ -76,6 +76,13 @@ const Study = () => {
                     </button>
                 )}
             </div>
+
+            {error && (
+                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                    <AlertTriangle size={20} />
+                    <p>{error}</p>
+                </div>
+            )}
 
             <div className="flex justify-center gap-4 mb-8">
                 <button

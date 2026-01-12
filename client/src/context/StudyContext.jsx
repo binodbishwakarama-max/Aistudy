@@ -65,7 +65,10 @@ export const StudyProvider = ({ children }) => {
             setFlashcards(parsed);
         } catch (err) {
             console.error(err);
-            setError("Failed to generate flashcards. Please try again.");
+            console.error(err);
+            const errorMsg = "Failed to generate flashcards. " + (err.response?.data?.error || err.message);
+            setError(errorMsg);
+            alert(errorMsg); // Force visibility for debugging
         } finally {
             setLoading(false);
         }
@@ -98,7 +101,10 @@ export const StudyProvider = ({ children }) => {
             setQuiz(parsed);
         } catch (err) {
             console.error(err);
-            setError("Failed to generate quiz. Please try again.");
+            console.error(err);
+            const errorMsg = "Failed to generate quiz. " + (err.response?.data?.error || err.message);
+            setError(errorMsg);
+            alert(errorMsg); // Force visibility for debugging
         } finally {
             setLoading(false);
         }
