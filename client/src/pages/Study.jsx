@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useStudy } from '../context/StudyContext';
 import { useAuth } from '../context/AuthContext';
-import { Layers, HelpCircle, AlertTriangle, Save, CheckCircle, FileText } from 'lucide-react';
+import { Layers, HelpCircle, AlertTriangle, Save, CheckCircle, FileText, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import ReviewSheet from '../components/ReviewSheet';
+import StatsDashboard from '../components/StatsDashboard';
 import axios from 'axios';
 
 let envUrl = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
@@ -119,6 +120,16 @@ const Study = () => {
                     <FileText size={20} />
                     Cheat Sheet
                 </button>
+                <button
+                    onClick={() => setMode('stats')}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-medium ${mode === 'stats'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
+                        : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                        }`}
+                >
+                    <BarChart size={20} />
+                    Statistics
+                </button>
             </div>
 
             <div className="min-h-[400px]">
@@ -163,6 +174,12 @@ const Study = () => {
                 {mode === 'review' && (
                     <div className="animate-fade-in">
                         <ReviewSheet flashcards={flashcards} />
+                    </div>
+                )}
+
+                {mode === 'stats' && (
+                    <div className="animate-fade-in">
+                        <StatsDashboard />
                     </div>
                 )}
             </div>
