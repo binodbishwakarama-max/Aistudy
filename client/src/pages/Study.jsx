@@ -7,7 +7,7 @@ import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
 
 const Study = () => {
     const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading } = useStudy();

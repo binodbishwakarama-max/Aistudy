@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
 
 export const generateContent = async (prompt, system) => {
     try {
