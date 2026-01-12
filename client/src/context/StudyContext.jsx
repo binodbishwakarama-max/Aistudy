@@ -46,7 +46,7 @@ export const StudyProvider = ({ children }) => {
         try {
             // Truncate text to ~300k chars (Llama 3.3 70b supports 128k tokens, ~500k chars)
             const safeText = text.substring(0, 300000);
-            const prompt = `Generate 30 flashcards based on the following text. 
+            const prompt = `Generate 15 flashcards based on the following text. 
       Return the result as a strictly formatted JSON array of objects. 
       Each object must have "question" and "answer" keys.
       Do not output any markdown formatting (like \`\`\`json), just the raw JSON.
@@ -58,11 +58,15 @@ export const StudyProvider = ({ children }) => {
 
             // Parse response
             let content = response.content[0].text;
-            // Clean up markdown code blocks if present despite instructions
             content = content.replace(/```json/g, '').replace(/```/g, '').trim();
 
-            const parsed = JSON.parse(content);
-            setFlashcards(parsed);
+            try {
+                const parsed = JSON.parse(content);
+                setFlashcards(parsed);
+            } catch (parseErr) {
+                console.error("JSON Parse Error. Raw content:", content);
+                throw new Error("AI response was incomplete. Try shorter text.");
+            }
             console.error(err);
             const isNetworkError = err.message === 'Network Error' || !err.response;
             const baseMsg = err.response?.data?.error || err.message;
@@ -80,7 +84,7 @@ export const StudyProvider = ({ children }) => {
         setLoading(true);
         try {
             const safeText = text.substring(0, 300000);
-            const prompt = `Generate 30 multiple-choice questions based on the following text.
+            const prompt = `Generate 15 multiple-choice questions based on the following text.
       Return the result as a strictly formatted JSON array of objects.
       Each object must have:
       - "question": string
@@ -98,8 +102,13 @@ export const StudyProvider = ({ children }) => {
             let content = response.content[0].text;
             content = content.replace(/```json/g, '').replace(/```/g, '').trim();
 
-            const parsed = JSON.parse(content);
-            setQuiz(parsed);
+            try {
+                const parsed = JSON.parse(content);
+                setQuiz(parsed);
+            } catch (parseErr) {
+                console.error("JSON Parse Error. Raw content:", content);
+                throw new Error("AI response was incomplete. Try shorter text.");
+            }
         } catch (err) {
             console.error(err);
             const isNetworkError = err.message === 'Network Error' || !err.response;
