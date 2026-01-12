@@ -62,14 +62,14 @@ const Quiz = ({ questions }) => {
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden text-center p-8 border border-indigo-50 dark:border-gray-700"
+                className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden text-center p-8 border border-indigo-50"
             >
-                <div className="w-24 h-24 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-yellow-600 dark:text-yellow-400">
+                <div className="w-24 h-24 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-6 text-yellow-600">
                     <Trophy size={48} />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Quiz Completed!</h2>
-                <div className="text-6xl font-black text-indigo-600 dark:text-indigo-400 mb-4">{percentage}%</div>
-                <p className="text-gray-500 dark:text-gray-400 mb-8">You answered {score} out of {questions.length} questions correctly.</p>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Quiz Completed!</h2>
+                <div className="text-6xl font-black text-indigo-600 mb-4">{percentage}%</div>
+                <p className="text-gray-500 mb-8">You answered {score} out of {questions.length} questions correctly.</p>
 
                 <button
                     onClick={restartQuiz}
@@ -92,20 +92,20 @@ const Quiz = ({ questions }) => {
                 key={currentIndex}
                 initial={{ x: 20, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
-                className="bg-white dark:bg-gray-800 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 p-8 mb-6"
+                className="bg-white rounded-3xl shadow-lg border border-gray-100 p-8 mb-6"
             >
-                <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-6 leading-relaxed">{currentQuestion.question}</h3>
+                <h3 className="text-xl font-bold text-gray-900 mb-6 leading-relaxed">{currentQuestion.question}</h3>
 
                 <div className="space-y-3">
                     {currentQuestion.options.map((option, index) => {
-                        let stateStyles = "border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-indigo-300 dark:hover:border-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-900/20";
+                        let stateStyles = "border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50";
                         if (isAnswered) {
                             if (index === currentQuestion.correctIndex) {
-                                stateStyles = "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-300";
+                                stateStyles = "border-green-500 bg-green-50 text-green-800";
                             } else if (index === selectedOption) {
-                                stateStyles = "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300";
+                                stateStyles = "border-red-500 bg-red-50 text-red-800";
                             } else {
-                                stateStyles = "border-gray-100 dark:border-gray-800 opacity-50";
+                                stateStyles = "border-gray-100 opacity-50";
                             }
                         }
 
@@ -140,10 +140,10 @@ const Quiz = ({ questions }) => {
                     <motion.div
                         initial={{ opacity: 0, height: 0 }}
                         animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700"
+                        className="mt-6 pt-6 border-t border-gray-100"
                     >
-                        <p className="text-gray-600 dark:text-gray-400 text-sm">
-                            <span className="font-bold text-gray-900 dark:text-gray-200">Explanation:</span> {currentQuestion.explanation}
+                        <p className="text-gray-600 text-sm">
+                            <span className="font-bold text-gray-900">Explanation:</span> {currentQuestion.explanation}
                         </p>
                         <div className="mt-6 flex justify-end">
                             <button
@@ -161,3 +161,4 @@ const Quiz = ({ questions }) => {
 };
 
 export default Quiz;
+
