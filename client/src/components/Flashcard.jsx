@@ -42,13 +42,13 @@ const Flashcard = ({ cards }) => {
             <motion.div
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden text-center p-8 border border-indigo-50"
+                className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-xl overflow-hidden text-center p-8 border border-indigo-50 dark:border-gray-700"
             >
-                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600 dark:text-green-400">
                     <CheckCircle size={48} />
                 </div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Well Done!</h2>
-                <p className="text-gray-500 mb-8">You've reviewed all {cards.length} flashcards.</p>
+                <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Well Done!</h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-8">You've reviewed all {cards.length} flashcards.</p>
 
                 <button
                     onClick={restart}
@@ -76,10 +76,10 @@ const Flashcard = ({ cards }) => {
                     onClick={() => setIsFlipped(!isFlipped)}
                 >
                     {/* Front */}
-                    <div className="absolute w-full h-full backface-hidden bg-white rounded-3xl shadow-xl shadow-indigo-100/50 border border-indigo-50 flex flex-col items-center justify-center p-8 text-center"
+                    <div className="absolute w-full h-full backface-hidden bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-indigo-100/50 dark:shadow-none border border-indigo-50 dark:border-gray-700 flex flex-col items-center justify-center p-8 text-center"
                         style={{ backfaceVisibility: 'hidden' }}>
-                        <span className="text-indigo-500 text-xs font-bold uppercase tracking-wider mb-6 bg-indigo-50 px-3 py-1 rounded-full">Question</span>
-                        <h3 className="text-2xl font-bold text-gray-800 leading-snug">{currentCard.question}</h3>
+                        <span className="text-indigo-500 text-xs font-bold uppercase tracking-wider mb-6 bg-indigo-50 dark:bg-indigo-900/30 px-3 py-1 rounded-full">Question</span>
+                        <h3 className="text-2xl font-bold text-gray-800 dark:text-gray-100 leading-snug">{currentCard.question}</h3>
                         <div className="absolute bottom-6 text-gray-400 text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                             <RotateCw size={14} /> Click to flip
                         </div>
@@ -98,13 +98,13 @@ const Flashcard = ({ cards }) => {
                 <button
                     onClick={prevCard}
                     disabled={currentIndex === 0}
-                    className="p-4 rounded-full bg-white shadow-sm border border-gray-100 text-gray-600 hover:text-indigo-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="p-4 rounded-full bg-white dark:bg-gray-800 shadow-sm border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                     <ChevronLeft size={24} />
                 </button>
                 <button
                     onClick={nextCard}
-                    className="p-4 rounded-full bg-indigo-600 shadow-lg shadow-indigo-200 text-white hover:bg-indigo-700 hover:scale-110 transition-all"
+                    className="p-4 rounded-full bg-indigo-600 shadow-lg shadow-indigo-200 dark:shadow-none text-white hover:bg-indigo-700 hover:scale-110 transition-all"
                 >
                     {currentIndex === cards.length - 1 ? <CheckCircle size={24} /> : <ChevronRight size={24} />}
                 </button>

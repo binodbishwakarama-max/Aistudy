@@ -24,58 +24,58 @@ const Register = () => {
 
     return (
         <div className="flex items-center justify-center min-h-[60vh]">
-            <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl border border-indigo-50">
+            <div className="w-full max-w-md bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl border border-indigo-50 dark:border-gray-700">
                 <div className="text-center mb-8">
-                    <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600">
+                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-indigo-600 dark:text-indigo-400">
                         <UserPlus size={24} />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900">Create Account</h2>
-                    <p className="text-gray-500">Join to save your progress</p>
+                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Create Account</h2>
+                    <p className="text-gray-500 dark:text-gray-400">Join to save your progress</p>
                 </div>
 
-                {error && <div className="p-3 mb-4 text-sm text-red-700 bg-red-50 rounded-lg">{error}</div>}
+                {error && <div className="p-3 mb-4 text-sm text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-900/20 rounded-lg">{error}</div>}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Full Name</label>
                         <input
                             type="text"
                             required
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
                         <input
                             type="email"
                             required
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
                         <input
                             type="password"
                             required
-                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
+                            className="w-full px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                         />
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200"
+                        className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition shadow-lg shadow-indigo-200 dark:shadow-none"
                     >
                         Sign Up
                     </button>
                 </form>
 
-                <div className="mt-6 text-center text-sm text-gray-500">
-                    Already have an account? <Link to="/login" className="text-indigo-600 font-bold hover:underline">Sign in</Link>
+                <div className="mt-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                    Already have an account? <Link to="/login" className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Sign in</Link>
                 </div>
             </div>
         </div>

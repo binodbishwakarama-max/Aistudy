@@ -44,22 +44,22 @@ const FileUpload = () => {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-3xl shadow-xl shadow-indigo-100 overflow-hidden border border-indigo-50"
+                className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-indigo-100 dark:shadow-none overflow-hidden border border-indigo-50 dark:border-gray-700"
             >
                 <div className="p-8 sm:p-12">
                     <div className="text-center mb-8">
-                        <div className="inline-flex p-3 bg-indigo-50 rounded-2xl mb-4 text-indigo-600">
+                        <div className="inline-flex p-3 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl mb-4 text-indigo-600 dark:text-indigo-400">
                             <Sparkles size={24} />
                         </div>
-                        <h2 className="text-3xl font-bold text-gray-900 mb-2">Start Your Study Session</h2>
-                        <p className="text-gray-500">Upload your lecture notes or PDF to instantly generate flashcards and quizzes.</p>
+                        <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Start Your Study Session</h2>
+                        <p className="text-gray-500 dark:text-gray-400">Upload your lecture notes or PDF to instantly generate flashcards and quizzes.</p>
                     </div>
 
                     <div
                         className={`relative border-3 border-dashed rounded-3xl p-10 transition-all duration-300 ease-in-out cursor-pointer group
-              ${isDragging ? 'border-indigo-500 bg-indigo-50 scale-[1.02]' : 'border-gray-200 hover:border-indigo-400 hover:bg-gray-50'}
+              ${isDragging ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 scale-[1.02]' : 'border-gray-200 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-gray-50 dark:hover:bg-gray-700/50'}
               ${loading ? 'pointer-events-none opacity-50' : ''}
-              ${text ? 'border-green-400 bg-green-50' : ''}
+              ${text ? 'border-green-400 bg-green-50 dark:bg-green-900/20' : ''}
             `}
                         onDragOver={onDragOver}
                         onDragLeave={onDragLeave}
@@ -84,8 +84,8 @@ const FileUpload = () => {
                                         exit={{ scale: 0.8, opacity: 0 }}
                                         className="flex flex-col items-center"
                                     >
-                                        <Loader2 className="w-16 h-16 text-indigo-600 animate-spin mb-4" />
-                                        <p className="text-indigo-600 font-medium animate-pulse">Analyzing text...</p>
+                                        <Loader2 className="w-16 h-16 text-indigo-600 dark:text-indigo-400 animate-spin mb-4" />
+                                        <p className="text-indigo-600 dark:text-indigo-400 font-medium animate-pulse">Analyzing text...</p>
                                     </motion.div>
                                 ) : text ? (
                                     <motion.div
@@ -94,11 +94,11 @@ const FileUpload = () => {
                                         animate={{ scale: 1, opacity: 1 }}
                                         className="flex flex-col items-center"
                                     >
-                                        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 mb-4">
+                                        <div className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-green-200 dark:shadow-none mb-4">
                                             <CheckCircle size={32} />
                                         </div>
-                                        <h3 className="text-xl font-bold text-gray-900">{fileName}</h3>
-                                        <p className="text-green-600 font-medium">Ready for generation!</p>
+                                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{fileName}</h3>
+                                        <p className="text-green-600 dark:text-green-400 font-medium">Ready for generation!</p>
                                     </motion.div>
                                 ) : (
                                     <motion.div
@@ -108,13 +108,13 @@ const FileUpload = () => {
                                         exit={{ scale: 0.8, opacity: 0 }}
                                         className="flex flex-col items-center"
                                     >
-                                        <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 mb-6 group-hover:scale-110 transition-transform duration-300">
+                                        <div className="w-20 h-20 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400 mb-6 group-hover:scale-110 transition-transform duration-300">
                                             <Upload size={32} />
                                         </div>
-                                        <h3 className="text-xl font-semibold text-gray-900">
+                                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                                             Click to upload or drag and drop
                                         </h3>
-                                        <p className="text-gray-500 mt-2">PDF or TXT files (max 1GB)</p>
+                                        <p className="text-gray-500 dark:text-gray-400 mt-2">PDF or TXT files (max 1GB)</p>
                                     </motion.div>
                                 )}
                             </AnimatePresence>

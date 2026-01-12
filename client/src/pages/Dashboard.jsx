@@ -56,12 +56,12 @@ const Dashboard = () => {
             </div>
 
             {history.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                <div className="text-center py-20 bg-white dark:bg-gray-800 rounded-3xl border border-dashed border-gray-300 dark:border-gray-700">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
                         <Activity size={32} />
                     </div>
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">No Study Sessions Yet</h3>
-                    <p className="text-gray-500 mb-6">Upload a document to start your first session.</p>
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No Study Sessions Yet</h3>
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">Upload a document to start your first session.</p>
                     <button
                         onClick={() => navigate('/')}
                         className="px-6 py-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition"
@@ -75,10 +75,10 @@ const Dashboard = () => {
                         <div
                             key={session._id}
                             onClick={() => handleResume(session)}
-                            className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group"
+                            className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-xl hover:scale-[1.02] transition-all cursor-pointer group"
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                                <div className="p-3 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                                     <BookOpen size={24} />
                                 </div>
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
@@ -86,18 +86,18 @@ const Dashboard = () => {
                                 </span>
                             </div>
 
-                            <h3 className="text-xl font-bold text-gray-900 mb-2 truncate">{session.title}</h3>
+                            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 truncate">{session.title}</h3>
 
-                            <div className="flex gap-4 text-sm text-gray-500 mt-4">
+                            <div className="flex gap-4 text-sm text-gray-500 dark:text-gray-400 mt-4">
                                 <span className="flex items-center gap-1">
-                                    <span className="font-bold text-gray-900">{session.flashcards?.length || 0}</span> Cards
+                                    <span className="font-bold text-gray-900 dark:text-white">{session.flashcards?.length || 0}</span> Cards
                                 </span>
                                 <span className="flex items-center gap-1">
-                                    <span className="font-bold text-gray-900">{session.quiz?.length || 0}</span> Questions
+                                    <span className="font-bold text-gray-900 dark:text-white">{session.quiz?.length || 0}</span> Questions
                                 </span>
                             </div>
 
-                            <button className="w-full mt-6 py-2 text-indigo-600 font-bold bg-indigo-50 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors flex items-center justify-center gap-2">
+                            <button className="w-full mt-6 py-2 text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-50 dark:bg-indigo-900/20 rounded-lg group-hover:bg-indigo-600 group-hover:text-white transition-colors flex items-center justify-center gap-2">
                                 Resume Session <ChevronRight size={16} />
                             </button>
                         </div>

@@ -64,14 +64,14 @@ const Study = () => {
     return (
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-2xl font-bold text-gray-800">Your Study Session</h1>
+                <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Your Study Session</h1>
                 {(flashcards.length > 0 || quiz.length > 0) && (
                     <button
                         onClick={handleSave}
                         disabled={saving || saved}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${saved
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                            : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
                             }`}
                     >
                         {saved ? <CheckCircle size={18} /> : <Save size={18} />}
@@ -81,7 +81,7 @@ const Study = () => {
             </div>
 
             {error && (
-                <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center gap-2">
+                <div className="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-lg flex items-center gap-2">
                     <AlertTriangle size={20} />
                     <p>{error}</p>
                 </div>
@@ -91,8 +91,8 @@ const Study = () => {
                 <button
                     onClick={() => setMode('quiz')}
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-medium ${mode === 'quiz'
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     <HelpCircle size={20} />
@@ -101,8 +101,8 @@ const Study = () => {
                 <button
                     onClick={() => setMode('flashcards')}
                     className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all font-medium ${mode === 'flashcards'
-                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200'
-                        : 'bg-white text-gray-600 hover:bg-gray-50'
+                        ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none'
+                        : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
                         }`}
                 >
                     <Layers size={20} />
@@ -115,7 +115,7 @@ const Study = () => {
                     <div className="animate-fade-in">
                         {flashcards.length === 0 ? (
                             <div className="text-center py-20">
-                                <h3 className="text-xl font-semibold text-gray-800 mb-4">Generate Flashcards?</h3>
+                                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Generate Flashcards?</h3>
                                 <button
                                     onClick={generateFlashcards}
                                     disabled={loading}
@@ -134,7 +134,7 @@ const Study = () => {
                     <div className="animate-fade-in">
                         {quiz.length === 0 ? (
                             <div className="text-center py-20">
-                                <h3 className="text-xl font-semibold text-gray-800 mb-4">Ready for a Challenge?</h3>
+                                <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-4">Ready for a Challenge?</h3>
                                 <button
                                     onClick={generateQuiz}
                                     disabled={loading}
