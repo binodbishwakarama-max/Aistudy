@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, BookOpen, ChevronRight, Activity } from 'lucide-react';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 const Dashboard = () => {
     const { user } = useAuth();
     const { loadSession } = useStudy();
@@ -20,7 +22,7 @@ const Dashboard = () => {
 
         const fetchHistory = async () => {
             try {
-                const response = await axios.get('http://localhost:3000/api/study/history', {
+                const response = await axios.get(`${API_URL}/study/history`, {
                     headers: { Authorization: `Bearer ${user.token}` }
                 });
                 setHistory(response.data);

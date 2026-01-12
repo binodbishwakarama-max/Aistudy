@@ -7,6 +7,8 @@ import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import axios from 'axios';
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+
 const Study = () => {
     const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading } = useStudy();
     const { user } = useAuth();
@@ -20,7 +22,7 @@ const Study = () => {
         setSaving(true);
         try {
             const token = user.token;
-            await axios.post('http://localhost:3000/api/study/save', {
+            await axios.post(`${API_URL}/study/save`, {
                 title: 'Study Session ' + new Date().toLocaleDateString(),
                 originalText: text,
                 flashcards,
@@ -65,8 +67,8 @@ const Study = () => {
                         onClick={handleSave}
                         disabled={saving || saved}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${saved
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
                             }`}
                     >
                         {saved ? <CheckCircle size={18} /> : <Save size={18} />}
