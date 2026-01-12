@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL = (import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api') + '/auth';
+let envUrl = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
+if (envUrl.endsWith('/')) envUrl = envUrl.slice(0, -1);
+if (!envUrl.endsWith('/api')) envUrl += '/api';
+const API_URL = envUrl + '/auth';
 
 export const login = async (email, password) => {
     const response = await axios.post(`${API_URL}/login`, { email, password });

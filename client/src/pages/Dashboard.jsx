@@ -5,7 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { Clock, BookOpen, ChevronRight, Activity } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
+let envUrl = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
+if (envUrl.endsWith('/')) envUrl = envUrl.slice(0, -1);
+if (!envUrl.endsWith('/api')) envUrl += '/api';
+const API_URL = envUrl;
 
 const Dashboard = () => {
     const { user } = useAuth();

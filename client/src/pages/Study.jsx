@@ -7,7 +7,10 @@ import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
+let envUrl = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
+if (envUrl.endsWith('/')) envUrl = envUrl.slice(0, -1);
+if (!envUrl.endsWith('/api')) envUrl += '/api';
+const API_URL = envUrl;
 
 const Study = () => {
     const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading, error } = useStudy();
