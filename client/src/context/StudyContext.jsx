@@ -67,6 +67,7 @@ export const StudyProvider = ({ children }) => {
                 console.error("JSON Parse Error. Raw content:", content);
                 throw new Error("AI response was incomplete. Try shorter text.");
             }
+        } catch (err) {
             console.error(err);
             const isNetworkError = err.message === 'Network Error' || !err.response;
             const baseMsg = err.response?.data?.error || err.message;
