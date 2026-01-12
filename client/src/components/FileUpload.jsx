@@ -57,9 +57,9 @@ const FileUpload = () => {
 
                     <div
                         className={`relative border-3 border-dashed rounded-3xl p-10 transition-all duration-300 ease-in-out cursor-pointer group
-              ${isDragging ? 'border-indigo-500 bg-indigo-50 scale-[1.02]' : 'border-gray-200 hover:border-indigo-400 hover:bg-gray-50
+              ${isDragging ? 'border-indigo-500 bg-indigo-50 scale-[1.02]' : 'border-gray-200 hover:border-indigo-400 hover:bg-gray-50'}
               ${loading ? 'pointer-events-none opacity-50' : ''}
-              ${text ? 'border-green-400 bg-green-50 : ''}
+              ${text ? 'border-green-400 bg-green-50' : ''}
             `}
                         onDragOver={onDragOver}
                         onDragLeave={onDragLeave}
