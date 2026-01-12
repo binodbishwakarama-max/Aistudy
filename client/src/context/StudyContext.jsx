@@ -63,12 +63,13 @@ export const StudyProvider = ({ children }) => {
 
             const parsed = JSON.parse(content);
             setFlashcards(parsed);
-        } catch (err) {
             console.error(err);
-            console.error(err);
-            const errorMsg = "Failed to generate flashcards. " + (err.response?.data?.error || err.message);
-            setError(errorMsg);
-            alert(errorMsg); // Force visibility for debugging
+            const isNetworkError = err.message === 'Network Error' || !err.response;
+            const baseMsg = err.response?.data?.error || err.message;
+            const finalMsg = isNetworkError
+                ? `Network Error: ${baseMsg}. (Try disabling Ad Blocker)`
+                : `Error: ${baseMsg}`;
+            setError(finalMsg);
         } finally {
             setLoading(false);
         }
@@ -101,10 +102,12 @@ export const StudyProvider = ({ children }) => {
             setQuiz(parsed);
         } catch (err) {
             console.error(err);
-            console.error(err);
-            const errorMsg = "Failed to generate quiz. " + (err.response?.data?.error || err.message);
-            setError(errorMsg);
-            alert(errorMsg); // Force visibility for debugging
+            const isNetworkError = err.message === 'Network Error' || !err.response;
+            const baseMsg = err.response?.data?.error || err.message;
+            const finalMsg = isNetworkError
+                ? `Network Error: ${baseMsg}. (Try disabling Ad Blocker)`
+                : `Error: ${baseMsg}`;
+            setError(finalMsg);
         } finally {
             setLoading(false);
         }
