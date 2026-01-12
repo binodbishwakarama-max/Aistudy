@@ -1,0 +1,4 @@
+This is a sample study text.
+The mitochondria is the powerhouse of the cell.
+React is a JavaScript library for building user interfaces.
+Photosynthesis is the process by which green plants and some other organisms use sunlight to synthesize foods with the aid of chlorophyll.
