@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCw } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const Flashcard = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFlipped, setIsFlipped] = useState(false);
+    const [isCompleted, setIsCompleted] = useState(false);
 
     const currentCard = cards[currentIndex];
 
@@ -12,7 +14,20 @@ const Flashcard = ({ cards }) => {
         if (currentIndex < cards.length - 1) {
             setIsFlipped(false);
             setCurrentIndex(prev => prev + 1);
+        } else {
+            setIsCompleted(true);
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
         }
+    };
+
+    const restart = () => {
+        setIsCompleted(false);
+        setCurrentIndex(0);
+        setIsFlipped(false);
     };
 
     const prevCard = () => {
@@ -21,6 +36,29 @@ const Flashcard = ({ cards }) => {
             setCurrentIndex(prev => prev - 1);
         }
     };
+
+    if (isCompleted) {
+        return (
+            <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden text-center p-8 border border-indigo-50"
+            >
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                    <CheckCircle size={48} />
+                </div>
+                <h2 className="text-3xl font-bold text-gray-900 mb-2">Well Done!</h2>
+                <p className="text-gray-500 mb-8">You've reviewed all {cards.length} flashcards.</p>
+
+                <button
+                    onClick={restart}
+                    className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold hover:bg-indigo-700 transition flex items-center justify-center gap-2"
+                >
+                    <RefreshCw size={20} /> Review Again
+                </button>
+            </motion.div>
+        );
+    }
 
     return (
         <div className="flex flex-col items-center w-full max-w-2xl mx-auto">
@@ -66,10 +104,9 @@ const Flashcard = ({ cards }) => {
                 </button>
                 <button
                     onClick={nextCard}
-                    disabled={currentIndex === cards.length - 1}
-                    className="p-4 rounded-full bg-white shadow-sm border border-gray-100 text-gray-600 hover:text-indigo-600 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="p-4 rounded-full bg-indigo-600 shadow-lg shadow-indigo-200 text-white hover:bg-indigo-700 hover:scale-110 transition-all"
                 >
-                    <ChevronRight size={24} />
+                    {currentIndex === cards.length - 1 ? <CheckCircle size={24} /> : <ChevronRight size={24} />}
                 </button>
             </div>
         </div>
