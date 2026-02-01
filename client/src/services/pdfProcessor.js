@@ -1,8 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
 
-import pdfWorker from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorker;
+// Set worker to load from public folder (must be copied there or served statically)
+pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
 export const extractTextFromPDF = async (file) => {
     try {

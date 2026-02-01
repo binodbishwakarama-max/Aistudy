@@ -10,9 +10,12 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.60.0",
     "axios": "^1.13.2",
     "canvas-confetti": "^1.9.4",
     "framer-motion": "^12.25.0",
+    "jspdf": "^4.0.0",
+    "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.562.0",
     "pdfjs-dist": "^5.4.530",
     "react": "^19.2.0",

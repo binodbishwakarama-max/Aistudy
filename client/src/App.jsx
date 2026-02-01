@@ -12,22 +12,20 @@ import Dashboard from './pages/Dashboard';
 
 function App() {
   return (
-    <AuthProvider>
-      <StudyProvider>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/study" element={<Study />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/stats" element={<div className="text-center text-gray-500 mt-20">Stats Coming Soon</div>} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </StudyProvider>
-    </AuthProvider>
+    <StudyProvider>
+      <BrowserRouter>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/study" element={<Study />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/stats" element={<div className="text-center text-gray-500 mt-20">Stats Coming Soon</div>} />
+          </Routes>
+        </Layout>
+      </BrowserRouter>
+    </StudyProvider>
   );
 }
 

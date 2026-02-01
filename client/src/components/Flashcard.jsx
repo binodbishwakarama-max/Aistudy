@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle, Shuffle, Star, Smile, Meh, Frown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle, Shuffle, Star, Smile, Meh, Frown, Download } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { exportToPDF } from '../utils/exportUtils';
 
 const Flashcard = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -123,13 +124,21 @@ const Flashcard = ({ cards }) => {
                     <button
                         onClick={isShuffled ? resetOrder : shuffleCards}
                         className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition ${isShuffled
-                                ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                         title={isShuffled ? "Reset to original order" : "Shuffle cards"}
                     >
                         <Shuffle size={18} />
                         {isShuffled ? 'Reset Order' : 'Shuffle'}
+                    </button>
+                    <button
+                        onClick={() => exportToPDF(cards, 'flashcards')}
+                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-indigo-600 transition"
+                        title="Download as PDF"
+                    >
+                        <Download size={18} />
+                        Export PDF
                     </button>
                 </div>
                 <div className="text-sm font-medium text-gray-600">

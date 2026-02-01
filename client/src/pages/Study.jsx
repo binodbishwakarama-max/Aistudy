@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useStudy } from '../context/StudyContext';
-import { useAuth } from '../context/AuthContext';
+import { useUser } from "@clerk/clerk-react"; // Use Clerk
 import { Layers, HelpCircle, AlertTriangle, Save, CheckCircle, FileText, BarChart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Flashcard from '../components/Flashcard';
@@ -16,24 +16,25 @@ const API_URL = envUrl;
 
 const Study = () => {
     const { text, flashcards, quiz, generateFlashcards, generateQuiz, loading, error } = useStudy();
-    const { user } = useAuth();
+    const { user } = useUser(); // Get user from Clerk
     const [mode, setMode] = useState('quiz');
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const navigate = useNavigate();
 
+    console.log("Study Component Rendered:", { textLength: text?.length, flashcards: flashcards?.length, loading, error });
+
     const handleSave = async () => {
         if (!user) return navigate('/login');
         setSaving(true);
         try {
-            const token = user.token;
+            // Clerk handles auth headers automatically if configured, or we can use user.id for identification
             await axios.post(`${API_URL}/study/save`, {
+                userId: user.id, // Clerk User ID
                 title: 'Study Session ' + new Date().toLocaleDateString(),
                 originalText: text,
                 flashcards,
                 quiz
-            }, {
-                headers: { Authorization: `Bearer ${token}` }
             });
             setSaved(true);
             setTimeout(() => setSaved(false), 3000);
