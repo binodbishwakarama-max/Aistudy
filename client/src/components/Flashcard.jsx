@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle, Shuffle, Star, Smile, Meh, Frown, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle, Shuffle, Star, Smile, Meh, Frown } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { exportToPDF } from '../utils/exportUtils';
 
 const Flashcard = ({ cards }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -11,12 +10,11 @@ const Flashcard = ({ cards }) => {
     const [shuffledCards, setShuffledCards] = useState(cards);
     const [isShuffled, setIsShuffled] = useState(false);
     const [favorites, setFavorites] = useState(new Set());
-    const [difficulty, setDifficulty] = useState({}); // Track difficulty ratings
+    const [difficulty, setDifficulty] = useState({});
 
     const currentCard = shuffledCards[currentIndex];
 
     useEffect(() => {
-        // Load favorites and difficulty from localStorage
         const savedFavorites = localStorage.getItem('flashcard_favorites');
         const savedDifficulty = localStorage.getItem('flashcard_difficulty');
         if (savedFavorites) setFavorites(new Set(JSON.parse(savedFavorites)));
@@ -132,14 +130,6 @@ const Flashcard = ({ cards }) => {
                         <Shuffle size={18} />
                         {isShuffled ? 'Reset Order' : 'Shuffle'}
                     </button>
-                    <button
-                        onClick={() => exportToPDF(cards, 'flashcards')}
-                        className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-indigo-600 transition"
-                        title="Download as PDF"
-                    >
-                        <Download size={18} />
-                        Export PDF
-                    </button>
                 </div>
                 <div className="text-sm font-medium text-gray-600">
                     {currentIndex + 1} / {shuffledCards.length}
@@ -186,7 +176,7 @@ const Flashcard = ({ cards }) => {
                 </motion.div>
             </div>
 
-            {/* Difficulty Rating (Spaced Repetition) */}
+            {/* Difficulty Rating */}
             {isFlipped && (
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}

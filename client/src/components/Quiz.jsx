@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, ArrowRight, RefreshCw, Trophy, Shuffle, Clock, Download } from 'lucide-react';
+import { Check, X, ArrowRight, RefreshCw, Trophy, Shuffle, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { exportToPDF } from '../utils/exportUtils';
 
 const Quiz = ({ questions }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -49,7 +48,6 @@ const Quiz = ({ questions }) => {
             setScore(prev => prev + 1);
         }
 
-        // Save statistics to localStorage
         const stats = JSON.parse(localStorage.getItem('quiz_stats') || '{}');
         stats.totalQuestions = (stats.totalQuestions || 0) + 1;
         stats.correctAnswers = (stats.correctAnswers || 0) + (isCorrect ? 1 : 0);
@@ -144,14 +142,6 @@ const Quiz = ({ questions }) => {
                 >
                     <Shuffle size={18} />
                     {isShuffled ? 'Reset Order' : 'Shuffle'}
-                </button>
-                <button
-                    onClick={() => exportToPDF(questions, 'quiz')}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-indigo-600 transition ml-2 mr-auto"
-                    title="Download Quiz as PDF"
-                >
-                    <Download size={18} />
-                    Export PDF
                 </button>
                 <div className="flex items-center gap-4">
                     <div className="text-sm font-medium text-gray-600">
