@@ -63,8 +63,8 @@ export const StudyProvider = ({ children }) => {
             try {
                 const parsed = JSON.parse(content);
                 setFlashcards(parsed);
-            } catch (parseErr) {
-                console.error("JSON Parse Error. Raw content:", content);
+            } catch (error) {
+                console.error("JSON Parse Error:", error);
                 throw new Error("AI response was incomplete. Try shorter text.");
             }
         } catch (err) {
@@ -106,8 +106,8 @@ export const StudyProvider = ({ children }) => {
             try {
                 const parsed = JSON.parse(content);
                 setQuiz(parsed);
-            } catch (parseErr) {
-                console.error("JSON Parse Error. Raw content:", content);
+            } catch (error) {
+                console.error("JSON Parse Error:", error);
                 throw new Error("AI response was incomplete. Try shorter text.");
             }
         } catch (err) {

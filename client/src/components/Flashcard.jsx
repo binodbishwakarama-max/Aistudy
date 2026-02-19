@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState } from 'react';
+import { useGamification } from '../context/GamificationContext';
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight, RotateCw, Trophy, RefreshCw, CheckCircle, Shuffle, Star, Smile, Meh, Frown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -9,17 +11,18 @@ const Flashcard = ({ cards }) => {
     const [isCompleted, setIsCompleted] = useState(false);
     const [shuffledCards, setShuffledCards] = useState(cards);
     const [isShuffled, setIsShuffled] = useState(false);
-    const [favorites, setFavorites] = useState(new Set());
-    const [difficulty, setDifficulty] = useState({});
+    const [favorites, setFavorites] = useState(() => {
+        const saved = localStorage.getItem('flashcard_favorites');
+        return saved ? new Set(JSON.parse(saved)) : new Set();
+    });
+    const [difficulty, setDifficulty] = useState(() => {
+        const saved = localStorage.getItem('flashcard_difficulty');
+        return saved ? JSON.parse(saved) : {};
+    });
+
+    const { addXP, updateStreak } = useGamification();
 
     const currentCard = shuffledCards[currentIndex];
-
-    useEffect(() => {
-        const savedFavorites = localStorage.getItem('flashcard_favorites');
-        const savedDifficulty = localStorage.getItem('flashcard_difficulty');
-        if (savedFavorites) setFavorites(new Set(JSON.parse(savedFavorites)));
-        if (savedDifficulty) setDifficulty(JSON.parse(savedDifficulty));
-    }, []);
 
     const saveFavorites = (newFavorites) => {
         localStorage.setItem('flashcard_favorites', JSON.stringify([...newFavorites]));
@@ -46,6 +49,11 @@ const Flashcard = ({ cards }) => {
         const newDifficulty = { ...difficulty, [cardId]: level };
         setDifficulty(newDifficulty);
         saveDifficulty(newDifficulty);
+
+        // Gamification
+        addXP(5); // 5 XP for reviewing a card
+        updateStreak(); // Reviewing cards counts as study
+
         nextCard();
     };
 

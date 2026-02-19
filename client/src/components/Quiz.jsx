@@ -1,4 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useGamification } from '../context/GamificationContext';
+// eslint-disable-next-line no-unused-vars
 import { motion } from 'framer-motion';
 import { Check, X, ArrowRight, RefreshCw, Trophy, Shuffle, Clock } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -11,14 +13,24 @@ const Quiz = ({ questions }) => {
     const [showResults, setShowResults] = useState(false);
     const [shuffledQuestions, setShuffledQuestions] = useState(questions);
     const [isShuffled, setIsShuffled] = useState(false);
-    const [startTime, setStartTime] = useState(Date.now());
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    const startTimeRef = useRef(null);
     const [timeSpent, setTimeSpent] = useState(0);
     const [questionTimes, setQuestionTimes] = useState([]);
 
     const currentQuestion = shuffledQuestions[currentIndex];
 
+    const { addXP, updateStreak } = useGamification();
+
     useEffect(() => {
-        setStartTime(Date.now());
+        startTimeRef.current = Date.now();
+        setElapsedSeconds(0);
+
+        const timer = setInterval(() => {
+            setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
+        }, 1000);
+
+        return () => clearInterval(timer);
     }, [currentIndex]);
 
     const shuffleQuestions = () => {
@@ -37,7 +49,7 @@ const Quiz = ({ questions }) => {
     const handleOptionClick = (index) => {
         if (isAnswered) return;
 
-        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
         setQuestionTimes([...questionTimes, timeTaken]);
 
         setSelectedOption(index);
@@ -46,6 +58,9 @@ const Quiz = ({ questions }) => {
         const isCorrect = index === currentQuestion.correctIndex;
         if (isCorrect) {
             setScore(prev => prev + 1);
+            addXP(10); // 10 XP per correct answer
+        } else {
+            addXP(2); // 2 XP for attempting but wrong
         }
 
         const stats = JSON.parse(localStorage.getItem('quiz_stats') || '{}');
@@ -65,7 +80,12 @@ const Quiz = ({ questions }) => {
             setTimeSpent(totalTime);
             setShowResults(true);
 
+            // Completion Rewards
+            updateStreak();
+            addXP(50); // Bonus for finishing
+
             if (score / shuffledQuestions.length >= 0.7) {
+                addXP(100); // Bonus for good score
                 confetti({
                     particleCount: 150,
                     spread: 100,
@@ -82,7 +102,8 @@ const Quiz = ({ questions }) => {
         setScore(0);
         setShowResults(false);
         setQuestionTimes([]);
-        setStartTime(Date.now());
+        startTimeRef.current = Date.now();
+        setElapsedSeconds(0);
     };
 
     if (showResults) {
@@ -149,7 +170,7 @@ const Quiz = ({ questions }) => {
                     </div>
                     <div className="flex items-center gap-1 text-sm text-gray-500">
                         <Clock size={16} />
-                        <span>{Math.floor((Date.now() - startTime) / 1000)}s</span>
+                        <span>{elapsedSeconds}s</span>
                     </div>
                 </div>
             </div>

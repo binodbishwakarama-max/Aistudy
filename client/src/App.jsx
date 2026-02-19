@@ -9,24 +9,32 @@ import { StudyProvider } from './context/StudyContext';
 import { AuthProvider } from './context/AuthContext';
 
 import Dashboard from './pages/Dashboard';
+import StatsDashboard from './components/StatsDashboard';
+
+import { GamificationProvider } from './context/GamificationContext';
+
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
     <AuthProvider>
-      <StudyProvider>
-        <BrowserRouter>
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/study" element={<Study />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/stats" element={<div className="text-center text-gray-500 mt-20">Stats Coming Soon</div>} />
-            </Routes>
-          </Layout>
-        </BrowserRouter>
-      </StudyProvider>
+      <GamificationProvider>
+        <StudyProvider>
+          <Toaster position="top-center" />
+          <BrowserRouter>
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/study" element={<Study />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/stats" element={<StatsDashboard />} />
+              </Routes>
+            </Layout>
+          </BrowserRouter>
+        </StudyProvider>
+      </GamificationProvider>
     </AuthProvider>
   );
 }

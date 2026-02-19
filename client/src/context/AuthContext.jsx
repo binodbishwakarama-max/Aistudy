@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { login, register, logout, getCurrentUser } from '../services/authService';
 
 const AuthContext = createContext();
@@ -6,14 +6,8 @@ const AuthContext = createContext();
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const user = getCurrentUser();
-        setUser(user);
-        setLoading(false);
-    }, []);
+    const [user, setUser] = useState(() => getCurrentUser());
+    const [loading] = useState(false);
 
     const handleLogin = async (email, password) => {
         const data = await login(email, password);

@@ -1,0 +1,75 @@
+﻿
+> client@0.0.0 lint
+> eslint .
+
+
+D:\AIstudy\client\src\components\FileUpload.jsx
+  5:27  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+D:\AIstudy\client\src\components\Flashcard.jsx
+    1:27  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+    2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+   30:24  error  'currentCard' is not defined                                                      no-undef
+   42:24  error  'currentCard' is not defined                                                      no-undef
+  157:62  error  'currentCard' is not defined                                                      no-undef
+  161:92  error  'currentCard' is not defined                                                      no-undef
+  170:80  error  'currentCard' is not defined                                                      no-undef
+
+D:\AIstudy\client\src\components\Quiz.jsx
+   2:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-unused-vars
+  15:33  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  13 |     const [isShuffled, setIsShuffled] = useState(false);
+  14 |     const [elapsedSeconds, setElapsedSeconds] = useState(0);
+> 15 |     const startTimeRef = useRef(Date.now());
+     |                                 ^^^^^^^^^^ Cannot call impure function
+  16 |     const [timeSpent, setTimeSpent] = useState(0);
+  17 |     const [questionTimes, setQuestionTimes] = useState([]);
+  18 |  react-hooks/purity
+  48:39  error  Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  46 |         if (isAnswered) return;
+  47 |
+> 48 |         const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
+     |                                       ^^^^^^^^^^ Cannot call impure function
+  49 |         setQuestionTimes([...questionTimes, timeTaken]);
+  50 |
+  51 |         setSelectedOption(index);                                                                 react-hooks/purity
+
+D:\AIstudy\client\src\components\StatsDashboard.jsx
+   26:9   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  24 |         const easyCards = Object.values(difficulty).filter(d => d === 'easy').length;
+  25 |
+> 26 |         setStats({
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  27 |             totalQuestions: quizStats.totalQuestions || 0,
+  28 |             correctAnswers: quizStats.correctAnswers || 0,
+  29 |             totalTimeSpent: quizStats.totalTimeSpent || 0,  react-hooks/set-state-in-effect
+  152:27  error  'Icon' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   no-unused-vars
+
+D:\AIstudy\client\src\context\AuthContext.jsx
+   1:54  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                no-unused-vars
+   6:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+  10:21  error  'setLoading' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                      no-unused-vars
+
+D:\AIstudy\client\src\context\StudyContext.jsx
+    7:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+   66:22  error  'error' is defined but never used                                                                                               no-unused-vars
+  109:22  error  'error' is defined but never used                                                                                               no-unused-vars
+
+D:\AIstudy\client\src\pages\Home.jsx
+  3:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+Γ£û 20 problems (20 errors, 0 warnings)
+

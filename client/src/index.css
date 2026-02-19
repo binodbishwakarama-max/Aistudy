@@ -1,1 +1,60 @@
 @import "tailwindcss";
+
+@layer utilities {
+    .glass {
+        @apply bg-white/10 backdrop-blur-lg border border-white/20 shadow-xl;
+    }
+
+    .glass-card {
+        @apply bg-white/40 backdrop-blur-md border border-white/30 shadow-lg rounded-2xl hover:bg-white/50 transition-all duration-300;
+    }
+
+    .glass-input {
+        @apply bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all;
+    }
+
+    .text-gradient {
+        @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600;
+    }
+
+    .animate-float {
+        animation: float 6s ease-in-out infinite;
+    }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+body {
+    background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    min-height: 100vh;
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+}
+
+@keyframes gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
