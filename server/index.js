@@ -21,8 +21,11 @@ app.use(express.json({ limit: '1024mb' }));
 // Routes
 const authRoutes = require('./routes/auth');
 const studyRoutes = require('./routes/study');
+const chatRoutes = require('./routes/chat');
+
 app.use('/api/auth', authRoutes);
 app.use('/api/study', studyRoutes);
+app.use('/api/chat', chatRoutes);
 
 // --- AI CONFIGURATION ---
 const groq = new Groq({
@@ -38,16 +41,19 @@ async function checkGeminiConnection() {
         console.log("ℹ️  No Gemini API Key found. Using Groq.");
         return;
     }
+    console.log("DEBUG: Gemini Key Prefix:", process.env.GEMINI_API_KEY.substring(0, 4) + "...");
+    console.log("DEBUG: Groq Key Prefix:", process.env.GROQ_API_KEY ? process.env.GROQ_API_KEY.substring(0, 4) + "..." : "None");
+
 
     console.log("🔄 Testing Gemini Connection...");
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
         await model.generateContent("Test");
         isGeminiActive = true;
         console.log("✅ Gemini is ONLINE and Active. (Primary Model)");
     } catch (err) {
         console.warn("⚠️ Gemini Connection Failed on Startup. Defaulting to Groq for all requests.");
-        // console.warn(`   Reason: ${err.message}`);
+        console.warn(`   Reason: ${err.message}`);
         isGeminiActive = false;
     }
 }
@@ -70,7 +76,7 @@ app.post('/api/generate', async (req, res) => {
         if (isGeminiActive) {
             try {
                 const model = genAI.getGenerativeModel({
-                    model: "gemini-1.5-flash",
+                    model: "gemini-flash-latest",
                     systemInstruction: system || "You are a helpful study assistant."
                 });
                 const result = await model.generateContent(prompt);

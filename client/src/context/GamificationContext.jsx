@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { toast } from 'react-hot-toast'; // We might need to add this package or use a simple alert/custom toast
+
 
 const GamificationContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useGamification = () => useContext(GamificationContext);
 
 export const GamificationProvider = ({ children }) => {
