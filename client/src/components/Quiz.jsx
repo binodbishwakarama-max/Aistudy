@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { useGamification } from '../context/GamificationContext';
 import { ArrowRight, Check, Clock, RefreshCw, Shuffle, Trophy, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -21,20 +21,7 @@ const Quiz = ({ questions }) => {
   const { addXP, updateStreak } = useGamification();
 
   useEffect(() => {
-    setShuffledQuestions(questions);
-    setIsShuffled(false);
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsAnswered(false);
-    setScore(0);
-    setResultScore(null);
-    setShowResults(false);
-    setQuestionTimes([]);
-  }, [questions]);
-
-  useEffect(() => {
     startTimeRef.current = Date.now();
-    setElapsedSeconds(0);
     const timer = setInterval(() => {
       setElapsedSeconds(Math.floor((Date.now() - startTimeRef.current) / 1000));
     }, 1000);
@@ -68,10 +55,10 @@ const Quiz = ({ questions }) => {
   const handleOptionClick = (index) => {
     if (isAnswered) return;
 
-    const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    const timeTaken = elapsedSeconds;
     const isCorrect = index === currentQuestion.correctIndex;
 
-    setQuestionTimes([...questionTimes, timeTaken]);
+    setQuestionTimes((prev) => [...prev, timeTaken]);
     setSelectedOption(index);
     setIsAnswered(true);
     if (isCorrect) {
@@ -94,6 +81,7 @@ const Quiz = ({ questions }) => {
 
   const nextQuestion = () => {
     if (currentIndex < shuffledQuestions.length - 1) {
+      setElapsedSeconds(0);
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
@@ -118,13 +106,13 @@ const Quiz = ({ questions }) => {
     const avgTime = Math.floor(questionTimes.length ? totalTime / shuffledQuestions.length : 0);
 
     return (
-      <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md">
-        <div className="section-shell p-8 text-center">
+      <Motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md">
+        <div className="section-shell p-6 text-center sm:p-8">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
             <Trophy size={30} />
           </div>
-          <h2 className="font-heading mt-6 text-3xl font-bold">Quiz complete</h2>
-          <div className="mt-4 text-6xl font-semibold tracking-tight text-[var(--accent)]">{percentage}%</div>
+          <h2 className="font-heading mt-6 text-2xl font-bold sm:text-3xl">Quiz complete</h2>
+          <div className="mt-4 text-5xl font-semibold tracking-tight text-[var(--accent)] sm:text-6xl">{percentage}%</div>
           <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
             You answered {displayScore} out of {shuffledQuestions.length} questions correctly.
           </p>
@@ -147,21 +135,21 @@ const Quiz = ({ questions }) => {
             Try again
           </button>
         </div>
-      </motion.div>
+      </Motion.div>
     );
   }
 
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
           {isShuffled ? 'Reset order' : 'Shuffle'}
         </button>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="info-chip font-mono">
             Question {currentIndex + 1} / {shuffledQuestions.length}
           </div>
@@ -176,8 +164,10 @@ const Quiz = ({ questions }) => {
         <div className="h-full rounded-full bg-[var(--accent)] transition-all duration-300" style={{ width: `${progress}%` }} />
       </div>
 
-      <motion.div key={currentIndex} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-8">
-        <h3 className="font-heading text-2xl font-bold leading-10 text-[var(--text-primary)]">{currentQuestion?.question}</h3>
+      <Motion.div key={currentIndex} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-5 sm:p-8">
+        <h3 className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10">
+          {currentQuestion?.question}
+        </h3>
 
         <div className="mt-6 space-y-3">
           {currentQuestion?.options?.map((option, index) => {
@@ -198,7 +188,7 @@ const Quiz = ({ questions }) => {
                 key={index}
                 onClick={() => handleOptionClick(index)}
                 disabled={isAnswered}
-                className={`w-full rounded-2xl border px-4 py-4 text-left transition-mindflow ${stateStyles}`}
+                className={`w-full rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-medium">{option}</span>
@@ -213,21 +203,21 @@ const Quiz = ({ questions }) => {
         </div>
 
         {isAnswered && currentQuestion?.explanation && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-4">
+          <Motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-4">
             <p className="text-sm leading-7 text-[var(--text-secondary)]">
               <span className="font-semibold text-[var(--text-primary)]">Explanation:</span> {currentQuestion.explanation}
             </p>
-          </motion.div>
+          </Motion.div>
         )}
-      </motion.div>
+      </Motion.div>
 
       {isAnswered && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-          <button onClick={nextQuestion} className="primary-button px-6">
+        <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+          <button onClick={nextQuestion} className="primary-button w-full justify-center px-6 sm:w-auto">
             {currentIndex < shuffledQuestions.length - 1 ? 'Next question' : 'See results'}
             <ArrowRight size={18} />
           </button>
-        </motion.div>
+        </Motion.div>
       )}
     </div>
   );

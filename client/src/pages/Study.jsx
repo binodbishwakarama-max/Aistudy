@@ -1,9 +1,8 @@
 import React, { useMemo, useState } from 'react';
-import { toast } from 'react-hot-toast';
-import { useNavigate } from 'react-router-dom';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import {
-  AlertTriangle,
   ArrowLeft,
   BarChart3,
   BookOpen,
@@ -20,10 +19,11 @@ import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import ReviewSheet from '../components/ReviewSheet';
 import SRSDashboard from '../components/SRSDashboard';
-import StatsDashboard from '../components/StatsDashboard';
 import StudyLibrary from '../components/StudyLibrary';
 import { useAuth } from '../context/AuthContext';
 import { useStudy } from '../context/StudyContext';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
 
 const modeDetails = {
   flashcards: {
@@ -31,16 +31,12 @@ const modeDetails = {
     description: 'Review the source one prompt at a time.',
   },
   quiz: {
-    title: 'Quiz',
-    description: 'Check recall with multiple-choice questions.',
+    title: 'Quizzes',
+    description: 'Pressure test recall with multiple-choice questions.',
   },
   review: {
     title: 'Review sheet',
-    description: 'Scan a simpler written summary before deeper review.',
-  },
-  stats: {
-    title: 'Stats',
-    description: 'See learning trends for this session and overall progress.',
+    description: 'Scan the core ideas before a deeper study pass.',
   },
   library: {
     title: 'Library',
@@ -48,29 +44,43 @@ const modeDetails = {
   },
 };
 
+const buildSessionKey = (items) => items.map((item) => JSON.stringify(item)).join('|');
+
+const getModeFromLocation = (pathname, search, hasText) => {
+  if (pathname === '/flashcards') return 'flashcards';
+  if (pathname === '/quizzes') return 'quiz';
+
+  const params = new URLSearchParams(search);
+  const queryMode = params.get('mode');
+
+  if (queryMode === 'review') return 'review';
+  if (queryMode === 'library') return 'library';
+
+  return hasText ? 'flashcards' : 'library';
+};
+
 const Study = () => {
-  const { text, flashcards, quiz, generateFlashcards, generateQuiz, saveSession, loading, error } = useStudy();
-  const { user } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [mode, setMode] = useState(() => (text ? 'flashcards' : 'library'));
+  const { user } = useAuth();
+  const { text, flashcards, quiz, generateFlashcards, generateQuiz, saveSession, loading, error } = useStudy();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const mode = getModeFromLocation(location.pathname, location.search, Boolean(text));
+  const activeMode = modeDetails[mode] || modeDetails.library;
   const sourceCharacters = text.length;
-  const approximateWords = useMemo(
-    () => (text ? text.trim().split(/\s+/).filter(Boolean).length : 0),
-    [text],
-  );
+  const approximateWords = useMemo(() => (text ? text.trim().split(/\s+/).filter(Boolean).length : 0), [text]);
+  const flashcardSessionKey = useMemo(() => buildSessionKey(flashcards), [flashcards]);
+  const quizSessionKey = useMemo(() => buildSessionKey(quiz), [quiz]);
 
   const tabs = [
-    { id: 'flashcards', label: 'Flashcards', icon: Layers },
-    { id: 'quiz', label: 'Quiz', icon: HelpCircle },
-    { id: 'review', label: 'Review', icon: FileText },
-    { id: 'stats', label: 'Stats', icon: BarChart3 },
-    { id: 'library', label: 'Library', icon: BookOpen },
+    { id: 'flashcards', label: 'Flashcards', icon: Layers, to: '/flashcards' },
+    { id: 'quiz', label: 'Quizzes', icon: HelpCircle, to: '/quizzes' },
+    { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
+    { id: 'library', label: 'Library', icon: BookOpen, to: '/study' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, to: '/analytics' },
   ];
-
-  const activeMode = modeDetails[mode];
 
   const handleSave = async () => {
     if (!user) {
@@ -95,242 +105,200 @@ const Study = () => {
 
   if (!text && mode !== 'library') {
     return (
-      <div className="flex min-h-[70vh] items-center justify-center">
-        <div className="section-shell w-full max-w-2xl p-8 text-center sm:p-10">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bg-strong)] text-[var(--accent)]">
-            <BookOpen size={28} />
-          </div>
-          <div className="mt-6 flex justify-center">
-            <div className="pill-badge">
-              <Sparkles size={14} className="text-[var(--accent)]" />
-              Start a study session
-            </div>
-          </div>
-          <h2 className="font-heading mt-5 text-4xl font-bold tracking-tight">Upload a source to begin.</h2>
-          <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-            Add a document from the dashboard to generate flashcards, quizzes, and a review sheet, or open a saved
-            session from your library.
-          </p>
-          <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-            <button onClick={() => navigate('/dashboard')} className="primary-button justify-center px-7">
-              Upload document
-            </button>
-            <button onClick={() => setMode('library')} className="secondary-button justify-center px-7">
-              Open library
-            </button>
-          </div>
+      <Card className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center p-6 text-center sm:p-10">
+        <div className="pill-badge">
+          <Sparkles size={14} className="text-[var(--accent)]" />
+          Start a study session
         </div>
-      </div>
+        <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-4xl">Upload a source before you start reviewing.</h1>
+        <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
+          Add a document from the upload screen to generate flashcards, quizzes, and a review sheet, or open a saved
+          session from your library.
+        </p>
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button onClick={() => navigate('/upload')}>Upload document</Button>
+          <Button variant="secondary" onClick={() => navigate('/study')}>
+            Open library
+          </Button>
+        </div>
+      </Card>
     );
   }
 
-  const contentShellClass = 'section-shell min-h-[520px] p-6 sm:p-8';
+  const contentShellClass = 'min-h-[420px] sm:min-h-[520px]';
 
   return (
     <div className="space-y-6">
-      <Motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="section-shell p-6 sm:p-8"
-      >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <div className="pill-badge">
-              <Target size={14} className="text-[var(--accent)]" />
-              {activeMode.title}
+      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card variant="accent" className="p-6 sm:p-10">
+          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
+            <div className="max-w-3xl">
+              <div className="pill-badge">
+                <Target size={14} className="text-[var(--accent)]" />
+                {activeMode.title}
+              </div>
+              <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
+                {mode === 'library' ? 'Continue a saved study session' : 'Keep your revision flow in one place'}
+              </h1>
+              <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">{activeMode.description}</p>
+              {text && (
+                <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--text-muted)]">
+                  {text.replace(/\s+/g, ' ').trim().slice(0, 240)}
+                  {text.length > 240 ? '...' : ''}
+                </p>
+              )}
             </div>
-            <h1 className="font-heading mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-              {mode === 'library' ? 'Open a saved session' : 'Keep your study flow in one place'}
-            </h1>
-            <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">{activeMode.description}</p>
-            {text && (
-              <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--text-muted)]">
-                {text.replace(/\s+/g, ' ').trim().slice(0, 240)}
-                {text.length > 240 ? '...' : ''}
-              </p>
-            )}
-          </div>
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            {text && (
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className={`secondary-button justify-center px-6 text-sm ${
-                  saved ? 'border-[rgba(24,128,56,0.35)] bg-[rgba(24,128,56,0.08)] text-[var(--success)]' : ''
-                }`}
-              >
-                {saved ? <CheckCircle size={16} /> : <Save size={16} />}
-                {saved ? 'Saved' : saving ? 'Saving...' : 'Save session'}
-              </button>
-            )}
-            <button onClick={() => navigate('/dashboard')} className="secondary-button justify-center px-6 text-sm">
-              <ArrowLeft size={16} />
-              New document
-            </button>
-          </div>
-        </div>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          <div className="glass-card p-4">
-            <div className="text-sm font-medium text-[var(--text-muted)]">Source</div>
-            <div className="mt-2 text-lg font-semibold">{text ? `${sourceCharacters.toLocaleString()} characters` : 'No source loaded'}</div>
-          </div>
-          <div className="glass-card p-4">
-            <div className="text-sm font-medium text-[var(--text-muted)]">Words</div>
-            <div className="mt-2 text-lg font-semibold">{text ? approximateWords.toLocaleString() : 0}</div>
-          </div>
-          <div className="glass-card p-4">
-            <div className="text-sm font-medium text-[var(--text-muted)]">Generated</div>
-            <div className="mt-2 text-lg font-semibold">
-              {flashcards.length} cards · {quiz.length} questions
+            <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
+              {text && (
+                <Button
+                  onClick={handleSave}
+                  loading={saving}
+                  variant={saved ? 'subtle' : 'secondary'}
+                  leftIcon={saved ? CheckCircle : Save}
+                  className="w-full justify-center sm:w-auto"
+                >
+                  {saved ? 'Saved' : 'Save session'}
+                </Button>
+              )}
+              <Button variant="ghost" leftIcon={ArrowLeft} onClick={() => navigate('/upload')} className="w-full justify-center sm:w-auto">
+                New document
+              </Button>
             </div>
           </div>
-        </div>
 
-        <div className="mt-6 flex flex-wrap gap-2">
-          {tabs.map((tab) => {
-            const isActive = mode === tab.id;
+          <div className="mt-6 grid gap-3 sm:grid-cols-3">
+            <Card className="p-4">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Source</div>
+              <div className="mt-2 text-lg font-semibold">{text ? `${sourceCharacters.toLocaleString()} characters` : 'No source loaded'}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Words</div>
+              <div className="mt-2 text-lg font-semibold">{text ? approximateWords.toLocaleString() : 0}</div>
+            </Card>
+            <Card className="p-4">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Generated</div>
+              <div className="mt-2 text-lg font-semibold">
+                {flashcards.length} cards - {quiz.length} questions
+              </div>
+            </Card>
+          </div>
 
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setMode(tab.id)}
-                className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-mindflow ${
-                  isActive
-                    ? 'border border-[var(--border-accent)] bg-[var(--bg-strong)] text-[var(--accent)]'
-                    : 'border border-[var(--border)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]'
-                }`}
-              >
-                <tab.icon size={16} />
-                {tab.label}
-              </button>
-            );
-          })}
-        </div>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {tabs.map((tab) => {
+              const isActive = tab.id === mode || (tab.id === 'analytics' && location.pathname === '/analytics');
+              return (
+                <Link
+                  key={tab.id}
+                  to={tab.to}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-mindflow ${
+                    isActive
+                      ? 'border border-[var(--border-accent)] bg-[var(--bg-strong)] text-[var(--accent)]'
+                      : 'border border-[var(--border)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]'
+                  }`}
+                >
+                  <tab.icon size={16} />
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
+        </Card>
       </Motion.section>
 
       {error && (
         <div className="flex items-start gap-3 rounded-2xl border border-[rgba(217,48,37,0.22)] bg-[rgba(217,48,37,0.06)] px-4 py-3 text-sm">
-          <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
+          <Sparkles size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
           <span>{error}</span>
         </div>
       )}
 
-      <AnimatePresence mode="wait">
-        {mode === 'flashcards' && (
+      <div className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
+        <AnimatePresence mode="wait">
           <Motion.section
-            key="flashcards"
-            initial={{ opacity: 0, y: 10 }}
+            key={mode}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
+            exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.22 }}
-            className={contentShellClass}
           >
-            {flashcards.length === 0 ? (
-              <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-                <div className="pill-badge">
-                  <Layers size={14} className="text-[var(--accent)]" />
-                  Flashcards
-                </div>
-                <h2 className="font-heading mt-5 text-3xl font-bold">Generate a focused card deck.</h2>
-                <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-                  Create a set of prompt-and-answer cards you can work through quickly without leaving this page.
-                </p>
-                <button onClick={generateFlashcards} disabled={loading} className="primary-button mt-8 justify-center px-7">
-                  {loading ? 'Generating...' : 'Generate flashcards'}
-                </button>
-              </div>
-            ) : (
-              <Flashcard cards={flashcards} />
-            )}
+            <Card className={`p-5 sm:p-8 ${contentShellClass}`}>
+              {mode === 'flashcards' && (
+                <>
+                  {flashcards.length === 0 ? (
+                    <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
+                      <div className="pill-badge">
+                        <Layers size={14} className="text-[var(--accent)]" />
+                        Flashcards
+                      </div>
+                      <h2 className="font-heading mt-5 text-3xl font-bold">Generate a focused card deck.</h2>
+                      <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
+                        Create prompt-and-answer cards from your uploaded source and move straight into active recall.
+                      </p>
+                      <Button className="mt-8" loading={loading} onClick={generateFlashcards}>
+                        Generate flashcards
+                      </Button>
+                    </div>
+                  ) : (
+                    <Flashcard key={flashcardSessionKey} cards={flashcards} />
+                  )}
+                </>
+              )}
+
+              {mode === 'quiz' && (
+                <>
+                  {quiz.length === 0 ? (
+                    <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
+                      <div className="pill-badge">
+                        <HelpCircle size={14} className="text-[var(--accent)]" />
+                        Quizzes
+                      </div>
+                      <h2 className="font-heading mt-5 text-3xl font-bold">Turn the source into a quick recall check.</h2>
+                      <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
+                        Generate multiple-choice questions to pressure test understanding and surface weak spots quickly.
+                      </p>
+                      <Button className="mt-8" loading={loading} onClick={generateQuiz}>
+                        Generate quiz
+                      </Button>
+                    </div>
+                  ) : (
+                    <Quiz key={quizSessionKey} questions={quiz} />
+                  )}
+                </>
+              )}
+
+              {mode === 'review' && <ReviewSheet flashcards={flashcards} />}
+
+              {mode === 'library' && <StudyLibrary onSelect={() => navigate('/flashcards')} />}
+            </Card>
           </Motion.section>
-        )}
+        </AnimatePresence>
 
-        {mode === 'quiz' && (
-          <Motion.section
-            key="quiz"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-            className={contentShellClass}
-          >
-            {quiz.length === 0 ? (
-              <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-                <div className="pill-badge">
-                  <HelpCircle size={14} className="text-[var(--accent)]" />
-                  Quiz
-                </div>
-                <h2 className="font-heading mt-5 text-3xl font-bold">Turn the source into a quick recall check.</h2>
-                <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-                  Generate multiple-choice questions to test understanding and find weak spots quickly.
-                </p>
-                <button onClick={generateQuiz} disabled={loading} className="primary-button mt-8 justify-center px-7">
-                  {loading ? 'Generating...' : 'Generate quiz'}
-                </button>
-              </div>
-            ) : (
-              <Quiz questions={quiz} />
-            )}
-          </Motion.section>
-        )}
+        <div className="grid gap-6">
+          <Card className="p-5">
+            <SRSDashboard />
+          </Card>
 
-        {mode === 'review' && (
-          <Motion.section
-            key="review"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-            className={contentShellClass}
-          >
-            <ReviewSheet flashcards={flashcards} />
-          </Motion.section>
-        )}
+          <Card className="p-5 sm:p-6">
+            <div className="kicker">Source preview</div>
+            <h2 className="font-heading mt-3 text-2xl font-bold tracking-tight">What you are studying right now</h2>
+            <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
+              {text
+                ? `${text.replace(/\s+/g, ' ').trim().slice(0, 620)}${text.length > 620 ? '...' : ''}`
+                : 'Open a saved session or upload a new source from the upload page.'}
+            </p>
+          </Card>
 
-        {mode === 'stats' && (
-          <Motion.section
-            key="stats"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-            className={contentShellClass}
-          >
-            <StatsDashboard />
-          </Motion.section>
-        )}
-
-        {mode === 'library' && (
-          <Motion.section
-            key="library"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-            className={contentShellClass}
-          >
-            <StudyLibrary onSelect={setMode} />
-          </Motion.section>
-        )}
-      </AnimatePresence>
-
-      <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
-        <section className="section-shell p-5">
-          <SRSDashboard />
-        </section>
-
-        <section className="section-shell p-6">
-          <div className="kicker">Source preview</div>
-          <h2 className="font-heading mt-3 text-2xl font-bold tracking-tight">What you are studying right now</h2>
-          <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-            {text
-              ? text.replace(/\s+/g, ' ').trim().slice(0, 520) + (text.length > 520 ? '...' : '')
-              : 'Open a saved session or upload a new source from the dashboard.'}
-          </p>
-        </section>
+          <Card variant="accent" className="p-5 sm:p-6">
+            <div className="text-sm font-semibold text-[var(--text-primary)]">Need a broader progress view?</div>
+            <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
+              Analytics shows your weekly output, heatmap, accuracy, and study momentum across sessions.
+            </p>
+            <Button variant="secondary" className="mt-5" onClick={() => navigate('/analytics')}>
+              Open analytics
+            </Button>
+          </Card>
+        </div>
       </div>
 
       <ChatInterface />

@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { useGamification } from '../context/GamificationContext';
 import { ChevronLeft, ChevronRight, CheckCircle, RefreshCw, RotateCw, Shuffle, Smile, Meh, Frown, Star } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -19,14 +19,6 @@ const Flashcard = ({ cards }) => {
 
   const { addXP, updateStreak } = useGamification();
   const currentCard = shuffledCards[currentIndex];
-
-  useEffect(() => {
-    setShuffledCards(cards);
-    setIsShuffled(false);
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setIsCompleted(false);
-  }, [cards]);
 
   const saveFavorites = (newFavorites) => {
     writeJSONStorage('flashcard_favorites', [...newFavorites]);
@@ -95,8 +87,8 @@ const Flashcard = ({ cards }) => {
 
   if (isCompleted) {
     return (
-      <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md text-center">
-        <div className="section-shell p-8">
+      <Motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md text-center">
+        <div className="section-shell p-6 sm:p-8">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[rgba(24,128,56,0.12)] text-[var(--success)]">
             <CheckCircle size={30} />
           </div>
@@ -109,7 +101,7 @@ const Flashcard = ({ cards }) => {
             Review again
           </button>
         </div>
-      </motion.div>
+      </Motion.div>
     );
   }
 
@@ -121,7 +113,7 @@ const Flashcard = ({ cards }) => {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
+    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleCards} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
@@ -132,16 +124,16 @@ const Flashcard = ({ cards }) => {
         </div>
       </div>
 
-      <div className="relative h-[26rem]">
-        <motion.div className="h-full w-full cursor-pointer perspective-1000" onClick={() => setIsFlipped(!isFlipped)}>
-          <motion.div
+      <div className="relative h-[22rem] sm:h-[26rem] lg:h-[28rem]">
+        <Motion.div className="h-full w-full cursor-pointer perspective-1000" onClick={() => setIsFlipped(!isFlipped)}>
+          <Motion.div
             className="relative h-full w-full"
             initial={false}
             animate={{ rotateY: isFlipped ? 180 : 0 }}
             transition={{ duration: 0.45 }}
             style={{ transformStyle: 'preserve-3d' }}
           >
-            <div className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-white p-8 shadow-[var(--shadow-soft)] backface-hidden">
+            <div className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-soft)] backface-hidden sm:p-8">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-medium text-[var(--text-muted)]">Question</div>
                 <button
@@ -156,7 +148,7 @@ const Flashcard = ({ cards }) => {
               </div>
 
               <div className="flex flex-1 items-center justify-center text-center">
-                <h3 className="font-heading text-2xl font-bold leading-10 text-[var(--text-primary)] md:text-3xl">
+                <h3 className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10 md:text-3xl">
                   {currentCard?.question}
                 </h3>
               </div>
@@ -165,21 +157,21 @@ const Flashcard = ({ cards }) => {
             </div>
 
             <div
-              className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-[var(--bg-elevated)] p-8 shadow-[var(--shadow-soft)] backface-hidden"
+              className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)] backface-hidden sm:p-8"
               style={{ transform: 'rotateY(180deg)' }}
             >
               <div className="text-sm font-medium text-[var(--text-muted)]">Answer</div>
               <div className="flex flex-1 items-center justify-center text-center">
-                <p className="text-lg leading-9 text-[var(--text-primary)]">{currentCard?.answer}</p>
+                <p className="text-base leading-7 text-[var(--text-primary)] sm:text-lg sm:leading-9">{currentCard?.answer}</p>
               </div>
               <div className="text-sm text-[var(--text-muted)]">Rate how well you knew it</div>
             </div>
-          </motion.div>
-        </motion.div>
+          </Motion.div>
+        </Motion.div>
       </div>
 
       {isFlipped && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {ratingButtons.map(({ rating, icon: Icon, label, color }) => (
             <button
               key={rating}
@@ -193,10 +185,10 @@ const Flashcard = ({ cards }) => {
               </span>
             </button>
           ))}
-        </motion.div>
+        </Motion.div>
       )}
 
-      <div className="flex justify-center gap-3">
+      <div className="flex flex-wrap justify-center gap-3">
         <button
           onClick={prevCard}
           disabled={currentIndex === 0}

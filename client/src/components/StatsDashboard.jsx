@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion as Motion } from 'framer-motion';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Brain, BookOpen, Clock, Flame, Sparkles, Target, Trophy, Zap } from 'lucide-react';
 import { useGamification } from '../context/GamificationContext';
@@ -79,7 +79,7 @@ const DifficultyBar = ({ label, value, total, color }) => {
         <span className="font-semibold text-[var(--text-primary)]">{percentage}%</span>
       </div>
       <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
-        <motion.div
+        <Motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -173,7 +173,7 @@ const StatsDashboard = () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-6 sm:p-8">
+      <Motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-5 sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <div className="pill-badge">
@@ -186,7 +186,7 @@ const StatsDashboard = () => {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <div className="info-chip">
               <Trophy size={14} className="text-[var(--warm)]" />
               <span>Level {gameState.level}</span>
@@ -198,26 +198,26 @@ const StatsDashboard = () => {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} subtitle={`${stats.correctAnswers}/${stats.totalQuestions} correct`} />
           <StatCard icon={BookOpen} label="Cards reviewed" value={stats.cardsReviewed} subtitle="Flashcards" />
           <StatCard icon={Clock} label="Study time" value={formatTime(stats.totalTimeSpent)} subtitle="Total time" />
           <StatCard icon={Zap} label="XP earned" value={gameState.xp} subtitle="Current total" accent />
         </div>
-      </motion.section>
+      </Motion.section>
 
-      <motion.section
+      <Motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.05 }}
-        className="section-shell p-6"
+        className="section-shell p-5 sm:p-6"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-xl font-semibold">Weekly activity</h3>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">Cards and quizzes completed this week</p>
           </div>
-          <div className="flex items-center gap-4 text-xs font-medium text-[var(--text-secondary)]">
+          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[var(--text-secondary)]">
             <span className="flex items-center gap-2">
               <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
               Cards
@@ -229,7 +229,7 @@ const StatsDashboard = () => {
           </div>
         </div>
 
-        <div className="mt-6 h-56">
+        <div className="mt-6 h-52 sm:h-56">
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
@@ -269,20 +269,20 @@ const StatsDashboard = () => {
             </AreaChart>
           </ResponsiveContainer>
         </div>
-      </motion.section>
+      </Motion.section>
 
-      <motion.section
+      <Motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="section-shell p-6"
+        className="section-shell p-5 sm:p-6"
       >
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-xl font-semibold">Study heatmap</h3>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">{activeDays} active days in the last 12 weeks</p>
           </div>
-          <div className="flex items-center gap-1.5 text-[10px] font-medium text-[var(--text-muted)]">
+          <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-[var(--text-muted)]">
             <span>Less</span>
             <span className="h-3 w-3 rounded-sm bg-[var(--bg-elevated)]" />
             <span className="h-3 w-3 rounded-sm bg-[rgba(26,115,232,0.18)]" />
@@ -311,16 +311,16 @@ const StatsDashboard = () => {
             </div>
           ))}
         </div>
-      </motion.section>
+      </Motion.section>
 
       {stats.cardsReviewed > 0 && (
-        <motion.section
+        <Motion.section
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="section-shell p-6"
-        >
-          <div className="flex items-center gap-2">
+        className="section-shell p-5 sm:p-6"
+      >
+          <div className="flex flex-wrap items-center gap-2">
             <Brain size={18} className="text-[var(--accent)]" />
             <h3 className="text-xl font-semibold">Knowledge breakdown</h3>
           </div>
@@ -330,7 +330,7 @@ const StatsDashboard = () => {
             <DifficultyBar label="Learning" value={stats.difficulty.medium} total={stats.cardsReviewed} color="#F29900" />
             <DifficultyBar label="Needs review" value={stats.difficulty.hard} total={stats.cardsReviewed} color="#D93025" />
           </div>
-        </motion.section>
+        </Motion.section>
       )}
     </div>
   );

@@ -1,11 +1,31 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, BookOpen, Clock3, Layers, Plus, Sparkles, Target, TrendingUp } from 'lucide-react';
-import FileUpload from '../components/FileUpload';
+import {
+  ArrowRight,
+  BookOpen,
+  BrainCircuit,
+  Clock3,
+  FileStack,
+  Sparkles,
+  Target,
+  TrendingUp,
+  Upload,
+} from 'lucide-react';
+import { getStudyHistory } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
-import { getStudyHistory } from '../services/api';
+import { useStudy } from '../context/StudyContext';
+import Button from '../components/ui/Button';
+import Card from '../components/ui/Card';
+
+const formatDate = (value) =>
+  new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(new Date(value));
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -14,35 +34,37 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
-const formatDate = (value) =>
-  new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(value));
-
 const Dashboard = () => {
   const { user } = useAuth();
   const { gameState } = useGamification();
+  const { loadDeck } = useStudy();
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
-      navigate('/login');
-      return;
-    }
+    let active = true;
 
     const fetchHistory = async () => {
       try {
         const data = await getStudyHistory();
+        if (!active) return;
         setHistory(data || []);
       } catch (error) {
         console.error('Failed to load history', error);
       } finally {
-        setLoading(false);
+        if (active) {
+          setLoading(false);
+        }
       }
     };
 
     fetchHistory();
-  }, [user, navigate]);
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
   const totalCards = useMemo(
@@ -53,178 +75,216 @@ const Dashboard = () => {
     () => history.reduce((sum, session) => sum + (session.question_count || session.quiz?.length || 0), 0),
     [history],
   );
-  const recentSessions = history.slice(0, 5);
+  const statCards = [
+    { label: 'Notes uploaded', value: history.length, icon: FileStack },
+    { label: 'Flashcards created', value: totalCards, icon: BookOpen },
+    { label: 'Quiz questions', value: totalQuestions, icon: BrainCircuit },
+    { label: 'Current streak', value: `${gameState.streak} days`, icon: TrendingUp },
+  ];
+
+  const openSession = async (sessionId) => {
+    await loadDeck(sessionId);
+    navigate('/flashcards');
+  };
 
   if (loading) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <div className="section-shell w-full max-w-md p-8 text-center">
-          <div className="relative mx-auto mb-4 h-10 w-10">
-            <div className="absolute inset-0 rounded-full border-2 border-[var(--border)]" />
-            <div className="absolute inset-0 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
+      <div className="grid gap-6">
+        <Card className="p-8">
+          <div className="animate-pulse space-y-4">
+            <div className="h-4 w-32 rounded-full bg-[var(--bg-elevated)]" />
+            <div className="h-14 w-2/3 rounded-2xl bg-[var(--bg-elevated)]" />
+            <div className="h-5 w-full rounded-full bg-[var(--bg-elevated)]" />
+            <div className="h-5 w-3/4 rounded-full bg-[var(--bg-elevated)]" />
           </div>
-          <h2 className="font-heading text-2xl font-bold">Loading your dashboard</h2>
-          <p className="mt-2 text-sm text-[var(--text-secondary)]">Pulling in your recent sessions and progress.</p>
+        </Card>
+        <div className="grid gap-4 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((item) => (
+            <Card key={item} className="animate-pulse p-6">
+              <div className="h-11 w-11 rounded-2xl bg-[var(--bg-elevated)]" />
+              <div className="mt-5 h-8 w-16 rounded-xl bg-[var(--bg-elevated)]" />
+              <div className="mt-3 h-4 w-24 rounded-full bg-[var(--bg-elevated)]" />
+            </Card>
+          ))}
         </div>
       </div>
     );
   }
 
-  const statCards = [
-    { icon: Layers, label: 'Sessions', value: history.length },
-    { icon: BookOpen, label: 'Flashcards', value: totalCards },
-    { icon: Target, label: 'Questions', value: totalQuestions },
-    { icon: TrendingUp, label: 'Streak', value: `${gameState.streak}d` },
-  ];
-
   return (
     <div className="space-y-6">
-      <Motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="section-shell p-6 sm:p-8"
-      >
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <div className="pill-badge">
-              <Sparkles size={14} className="text-[var(--accent)]" />
-              {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </div>
-            <h1 className="font-heading mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
-              {getGreeting()}, {userName}
-            </h1>
-            <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">
-              Upload new material, continue a saved session, or check your study progress from one simple dashboard.
-            </p>
+      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+        <Card variant="accent" className="overflow-hidden p-6 sm:p-10">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+            <div className="max-w-3xl">
+              <div className="pill-badge">
+                <Sparkles size={14} className="text-[var(--accent)]" />
+                Overview
+              </div>
+              <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
+                {getGreeting()}, {userName}
+              </h1>
+              <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">
+                Your study workspace is ready. Upload new material, jump into flashcards, or check how your quiz
+                accuracy is trending.
+              </p>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-              <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="primary-button justify-center">
-                <Plus size={18} />
-                Upload a source
-              </button>
-              <button onClick={() => navigate('/study')} className="secondary-button justify-center">
-                Open study space
-                <ArrowRight size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3 lg:w-[420px] lg:grid-cols-1">
-            <div className="glass-card p-5">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Current XP</div>
-              <div className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{gameState.xp}</div>
-            </div>
-            <div className="glass-card p-5">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Level</div>
-              <div className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{gameState.level}</div>
-            </div>
-            <div className="glass-card p-5">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Last session</div>
-              <div className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
-                {history[0]?.created_at ? formatDate(history[0].created_at) : 'No activity yet'}
+              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')}>
+                  Upload Notes
+                </Button>
+                <Button size="lg" variant="secondary" rightIcon={ArrowRight} onClick={() => navigate('/flashcards')}>
+                  Open Flashcards
+                </Button>
               </div>
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+              <Card className="p-5">
+                <div className="text-sm font-medium text-[var(--text-muted)]">Current XP</div>
+                <div className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">{gameState.xp}</div>
+              </Card>
+              <Card className="p-5">
+                <div className="text-sm font-medium text-[var(--text-muted)]">Level</div>
+                <div className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">{gameState.level}</div>
+              </Card>
+              <Card className="p-5">
+                <div className="text-sm font-medium text-[var(--text-muted)]">Most recent session</div>
+                <div className="mt-3 text-sm font-semibold text-[var(--text-primary)]">
+                  {history[0]?.created_at ? formatDate(history[0].created_at) : 'No activity yet'}
+                </div>
+              </Card>
+            </div>
           </div>
+        </Card>
+      </Motion.section>
+
+      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }}>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {statCards.map((stat) => (
+            <Card key={stat.label} className="p-6">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                <stat.icon size={20} />
+              </div>
+              <div className="mt-5 text-3xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
+              <div className="mt-2 text-sm text-[var(--text-secondary)]">{stat.label}</div>
+            </Card>
+          ))}
         </div>
       </Motion.section>
 
-      <Motion.section
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.04, duration: 0.3 }}
-        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
-      >
-        {statCards.map((stat) => (
-          <div key={stat.label} className="glass-card p-5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--bg-elevated)] text-[var(--accent)]">
-              <stat.icon size={18} />
+      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+          <Card className="p-6 sm:p-8">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="kicker">Recent activity</div>
+                <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Continue where you left off</h2>
+              </div>
+              <Button variant="ghost" onClick={() => navigate('/study')}>
+                Open library
+              </Button>
             </div>
-            <div className="mt-5 text-3xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
-            <div className="mt-2 text-sm text-[var(--text-secondary)]">{stat.label}</div>
-          </div>
-        ))}
-      </Motion.section>
 
-      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
-        <Motion.section
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08, duration: 0.3 }}
-          className="section-shell overflow-hidden"
-        >
-          <div className="border-b border-[var(--border)] px-6 pb-4 pt-6 sm:px-8">
-            <div className="kicker">Upload</div>
-            <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Add a new study source</h2>
-            <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-              Drop in a PDF or text file and move straight into cards, quiz mode, or a review sheet.
-            </p>
-          </div>
-          <FileUpload />
+            <div className="mt-6 space-y-3">
+              {history.length > 0 ? (
+                history.slice(0, 5).map((session) => (
+                  <button
+                    key={session.id}
+                    type="button"
+                    onClick={() => openSession(session.id)}
+                    className="w-full rounded-[24px] border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-mindflow hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]"
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="truncate text-base font-semibold text-[var(--text-primary)]">{session.title}</div>
+                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
+                          <span className="info-chip">{formatDate(session.created_at)}</span>
+                          <span className="info-chip">{session.card_count ?? session.flashcards?.length ?? 0} cards</span>
+                          <span className="info-chip">{session.question_count ?? session.quiz?.length ?? 0} questions</span>
+                        </div>
+                      </div>
+                      <ArrowRight size={18} className="mt-1 flex-shrink-0 text-[var(--text-muted)]" />
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <Card variant="muted" className="p-8 text-center">
+                  <h3 className="text-xl font-semibold">No study sessions yet</h3>
+                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+                    Upload your first PDF or note set to start generating flashcards and quizzes.
+                  </p>
+                  <Button className="mt-6" leftIcon={Upload} onClick={() => navigate('/upload')}>
+                    Upload your first source
+                  </Button>
+                </Card>
+              )}
+            </div>
+          </Card>
         </Motion.section>
 
-        <Motion.section
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12, duration: 0.3 }}
-          className="section-shell p-6 sm:p-8"
-        >
-          <div className="flex items-center justify-between gap-3">
-            <div>
-              <div className="kicker">Recent sessions</div>
-              <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Continue where you left off</h2>
-            </div>
-            <button onClick={() => navigate('/study')} className="secondary-button hidden px-5 py-3 text-sm sm:inline-flex">
-              Open library
-            </button>
-          </div>
-
-          <div className="mt-6 space-y-3">
-            {recentSessions.length > 0 ? (
-              recentSessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => navigate('/study')}
-                  className="glass-card w-full p-4 text-left"
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="truncate text-base font-semibold text-[var(--text-primary)]">{session.title}</div>
-                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
-                        <span className="info-chip">{formatDate(session.created_at)}</span>
-                        <span className="info-chip">{session.card_count ?? session.flashcards?.length ?? 0} cards</span>
-                        <span className="info-chip">{session.question_count ?? session.quiz?.length ?? 0} questions</span>
+        <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
+          <div className="grid gap-6">
+            <Card className="p-6 sm:p-8">
+              <div className="kicker">Quick actions</div>
+              <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Move into the next study block fast.</h2>
+              <div className="mt-6 grid gap-4">
+                {[
+                  {
+                    title: 'Upload new notes',
+                    description: 'Import a new source and generate fresh material.',
+                    icon: Upload,
+                    action: () => navigate('/upload'),
+                  },
+                  {
+                    title: 'Run flashcards',
+                    description: 'Jump into active recall from your current session.',
+                    icon: BookOpen,
+                    action: () => navigate('/flashcards'),
+                  },
+                  {
+                    title: 'Check quiz accuracy',
+                    description: 'See your performance and weekly momentum.',
+                    icon: Target,
+                    action: () => navigate('/analytics'),
+                  },
+                ].map((item) => (
+                  <button
+                    key={item.title}
+                    type="button"
+                    onClick={item.action}
+                    className="rounded-[24px] border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-mindflow hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                        <item.icon size={20} />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-base font-semibold text-[var(--text-primary)]">{item.title}</div>
+                        <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{item.description}</p>
                       </div>
                     </div>
-                    <ArrowRight size={18} className="mt-1 flex-shrink-0 text-[var(--text-muted)]" />
-                  </div>
-                </button>
-              ))
-            ) : (
-              <div className="glass-card p-6 text-center">
-                <h3 className="text-xl font-semibold">No saved sessions yet</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-                  Upload your first source to start building your study library.
-                </p>
+                  </button>
+                ))}
               </div>
-            )}
-          </div>
+            </Card>
 
-          <div className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-5">
-            <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--accent)] shadow-[var(--shadow-soft)]">
-                <Clock3 size={18} />
-              </div>
-              <div>
-                <div className="text-base font-semibold">Want a quick progress check?</div>
-                <div className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">
-                  Open the stats page to see activity, study time, and retention trends.
+            <Card variant="accent" className="p-6 sm:p-8">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[var(--accent)] shadow-[var(--shadow-soft)]">
+                  <Clock3 size={20} />
+                </div>
+                <div>
+                  <div className="text-base font-semibold text-[var(--text-primary)]">Need a quick progress check?</div>
+                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
+                    Open analytics to review accuracy, total study time, and how often you are showing up.
+                  </p>
+                  <Button variant="secondary" className="mt-5" onClick={() => navigate('/analytics')}>
+                    View analytics
+                  </Button>
                 </div>
               </div>
-            </div>
-            <button onClick={() => navigate('/stats')} className="secondary-button mt-5 w-full justify-center text-sm">
-              View analytics
-            </button>
+            </Card>
           </div>
         </Motion.section>
       </div>

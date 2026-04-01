@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, ArrowRight, CheckCircle, FileText, Sparkles, Upload } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
 
 const formatFileSize = (size) => {
@@ -71,7 +71,7 @@ const FileUpload = () => {
 
             <AnimatePresence mode="wait">
               {loading ? (
-                <motion.div
+                <Motion.div
                   key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -86,9 +86,9 @@ const FileUpload = () => {
                   <p className="mt-3 max-w-sm text-sm leading-7 text-[var(--text-secondary)]">
                     Extracting text and setting up your study workspace.
                   </p>
-                </motion.div>
+                </Motion.div>
               ) : text ? (
-                <motion.div
+                <Motion.div
                   key="success"
                   initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -119,16 +119,16 @@ const FileUpload = () => {
                   <button
                     onClick={(event) => {
                       event.stopPropagation();
-                      navigate('/study');
+                      navigate('/flashcards');
                     }}
                     className="primary-button mt-6 w-full justify-center sm:w-auto"
                   >
                     Open study space
                     <ArrowRight size={18} />
                   </button>
-                </motion.div>
+                </Motion.div>
               ) : (
-                <motion.div
+                <Motion.div
                   key="idle"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -160,7 +160,7 @@ const FileUpload = () => {
                   <div className="mt-6 text-sm text-[var(--text-muted)]">
                     Tip: smaller, focused source files usually produce cleaner study sets.
                   </div>
-                </motion.div>
+                </Motion.div>
               )}
             </AnimatePresence>
           </div>
@@ -180,14 +180,14 @@ const FileUpload = () => {
         </div>
 
         {error && (
-          <motion.div
+          <Motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             className="mt-4 flex items-start gap-3 rounded-2xl border border-[rgba(217,48,37,0.22)] bg-[rgba(217,48,37,0.06)] px-4 py-3 text-sm"
           >
             <AlertCircle size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
             <span>{error}</span>
-          </motion.div>
+          </Motion.div>
         )}
       </div>
     </div>
