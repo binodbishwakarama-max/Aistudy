@@ -1,11 +1,24 @@
 import axios from 'axios';
 import { supabase } from './supabaseClient';
 
-// --- CONFIGURATION ---
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const normalizeApiBase = (value) => {
+    let base = value || 'http://localhost:3000/api';
+
+    if (base.endsWith('/')) {
+        base = base.slice(0, -1);
+    }
+
+    if (!base.endsWith('/api')) {
+        base = `${base}/api`;
+    }
+
+    return base;
+};
+
+const API_BASE = normalizeApiBase(import.meta.env.VITE_API_URL);
 
 const api = axios.create({
-    baseURL: API_BASE.endsWith('/') ? API_BASE : API_BASE, // Axios handles slash, but we ensure base is correct
+    baseURL: API_BASE,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -13,12 +26,21 @@ const api = axios.create({
 
 // --- INTERCEPTOR: Attach Supabase Token ---
 api.interceptors.request.use(async (config) => {
-    // 1. Get the current session from Supabase
-    const { data: { session } } = await supabase.auth.getSession();
+    try {
+        if (!supabase) {
+            return config;
+        }
 
-    // 2. If logged in, add the token to headers
-    if (session?.access_token) {
-        config.headers.Authorization = `Bearer ${session.access_token}`;
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+            throw error;
+        }
+
+        if (session?.access_token) {
+            config.headers.Authorization = `Bearer ${session.access_token}`;
+        }
+    } catch (error) {
+        console.error('Failed to attach auth token:', error);
     }
 
     return config;
@@ -31,9 +53,9 @@ api.interceptors.request.use(async (config) => {
 /**
  * Generate Flashcards / Quiz using AI (Proxied through backend)
  */
-export const generateContent = async (prompt, system) => {
+export const generateContent = async (prompt, system, contentType = 'text') => {
     try {
-        const response = await api.post('/generate', { prompt, system });
+        const response = await api.post('/generate', { prompt, system, contentType });
         return response.data;
     } catch (error) {
         console.error("AI Generation Error:", error);

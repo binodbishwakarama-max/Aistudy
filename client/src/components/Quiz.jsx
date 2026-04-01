@@ -1,7 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useGamification } from '../context/GamificationContext';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Check, X, ArrowRight, RefreshCw, Trophy, Shuffle, Clock } from 'lucide-react';
+import { useGamification } from '../context/GamificationContext';
+import { ArrowRight, Check, Clock, RefreshCw, Shuffle, Trophy, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 const Quiz = ({ questions }) => {
@@ -14,12 +14,23 @@ const Quiz = ({ questions }) => {
   const [shuffledQuestions, setShuffledQuestions] = useState(questions);
   const [isShuffled, setIsShuffled] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const startTimeRef = useRef(null);
-  const [timeSpent, setTimeSpent] = useState(0);
   const [questionTimes, setQuestionTimes] = useState([]);
+  const startTimeRef = useRef(null);
 
   const currentQuestion = shuffledQuestions[currentIndex];
   const { addXP, updateStreak } = useGamification();
+
+  useEffect(() => {
+    setShuffledQuestions(questions);
+    setIsShuffled(false);
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setScore(0);
+    setResultScore(null);
+    setShowResults(false);
+    setQuestionTimes([]);
+  }, [questions]);
 
   useEffect(() => {
     startTimeRef.current = Date.now();
@@ -29,6 +40,18 @@ const Quiz = ({ questions }) => {
     }, 1000);
     return () => clearInterval(timer);
   }, [currentIndex]);
+
+  const restartQuiz = () => {
+    setCurrentIndex(0);
+    setSelectedOption(null);
+    setIsAnswered(false);
+    setScore(0);
+    setResultScore(null);
+    setShowResults(false);
+    setQuestionTimes([]);
+    startTimeRef.current = Date.now();
+    setElapsedSeconds(0);
+  };
 
   const shuffleQuestions = () => {
     setShuffledQuestions([...questions].sort(() => Math.random() - 0.5));
@@ -44,14 +67,19 @@ const Quiz = ({ questions }) => {
 
   const handleOptionClick = (index) => {
     if (isAnswered) return;
+
     const timeTaken = Math.floor((Date.now() - startTimeRef.current) / 1000);
+    const isCorrect = index === currentQuestion.correctIndex;
+
     setQuestionTimes([...questionTimes, timeTaken]);
     setSelectedOption(index);
     setIsAnswered(true);
-
-    const isCorrect = index === currentQuestion.correctIndex;
-    if (isCorrect) addXP(10);
-    else addXP(2);
+    if (isCorrect) {
+      setScore((prev) => prev + 1);
+      addXP(10);
+    } else {
+      addXP(2);
+    }
 
     try {
       const stats = JSON.parse(localStorage.getItem('quiz_stats') || '{}');
@@ -59,8 +87,8 @@ const Quiz = ({ questions }) => {
       stats.correctAnswers = (stats.correctAnswers || 0) + (isCorrect ? 1 : 0);
       stats.totalTimeSpent = (stats.totalTimeSpent || 0) + timeTaken;
       localStorage.setItem('quiz_stats', JSON.stringify(stats));
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      console.error(error);
     }
   };
 
@@ -69,139 +97,100 @@ const Quiz = ({ questions }) => {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
-    } else {
-      const isLastCorrect = selectedOption === currentQuestion?.correctIndex;
-      const total = isLastCorrect ? score + 1 : score;
-      setResultScore(total);
-      setTimeSpent(questionTimes.reduce((a, b) => a + b, 0));
-      setShowResults(true);
-      updateStreak();
-      addXP(50);
-      if (total / shuffledQuestions.length >= 0.7) {
-        addXP(100);
-        confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
-      }
+      return;
     }
-  };
 
-  const restartQuiz = () => {
-    setCurrentIndex(0);
-    setSelectedOption(null);
-    setIsAnswered(false);
-    setScore(0);
-    setResultScore(null);
-    setShowResults(false);
-    setQuestionTimes([]);
-    startTimeRef.current = Date.now();
-    setElapsedSeconds(0);
+    const finalScore = score;
+    setResultScore(finalScore);
+    setShowResults(true);
+    updateStreak();
+    addXP(50);
+    if (finalScore / shuffledQuestions.length >= 0.7) {
+      addXP(100);
+      confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+    }
   };
 
   if (showResults) {
     const displayScore = resultScore ?? score;
     const percentage = Math.round((displayScore / shuffledQuestions.length) * 100);
-    const avgTime = Math.floor(
-      questionTimes.length ? questionTimes.reduce((a, b) => a + b, 0) / shuffledQuestions.length : 0
-    );
-    const totalTime = questionTimes.reduce((a, b) => a + b, 0);
+    const totalTime = questionTimes.reduce((sum, value) => sum + value, 0);
+    const avgTime = Math.floor(questionTimes.length ? totalTime / shuffledQuestions.length : 0);
 
     return (
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="max-w-md mx-auto glass-card rounded-2xl overflow-hidden text-center p-8"
-      >
-        <div className="w-16 h-16 bg-[var(--warm)]/20 rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--warm)]/30">
-          <Trophy size={32} className="text-[var(--warm)]" />
-        </div>
-        <h2 className="font-heading text-3xl font-bold text-[var(--text-primary)] mb-2">Quiz Completed!</h2>
-        <div className="font-mono text-6xl font-black text-[var(--accent-light)] mb-4">{percentage}%</div>
-        <p className="text-[var(--text-secondary)] mb-4">
-          You answered {displayScore} out of {shuffledQuestions.length} questions correctly.
-        </p>
+      <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md">
+        <div className="section-shell p-8 text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
+            <Trophy size={30} />
+          </div>
+          <h2 className="font-heading mt-6 text-3xl font-bold">Quiz complete</h2>
+          <div className="mt-4 text-6xl font-semibold tracking-tight text-[var(--accent)]">{percentage}%</div>
+          <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+            You answered {displayScore} out of {shuffledQuestions.length} questions correctly.
+          </p>
 
-        <div className="glass-card rounded-xl p-4 mb-6 space-y-2">
-          <div className="flex justify-between text-sm">
-            <span className="text-[var(--text-secondary)]">Total Time:</span>
-            <span className="font-mono font-bold text-[var(--text-primary)]">
-              {Math.floor(totalTime / 60)}m {totalTime % 60}s
-            </span>
+          <div className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-4 text-left">
+            <div className="flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Total time</span>
+              <span className="font-semibold text-[var(--text-primary)]">
+                {Math.floor(totalTime / 60)}m {totalTime % 60}s
+              </span>
+            </div>
+            <div className="mt-3 flex justify-between text-sm">
+              <span className="text-[var(--text-secondary)]">Average per question</span>
+              <span className="font-semibold text-[var(--text-primary)]">{avgTime}s</span>
+            </div>
           </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-[var(--text-secondary)]">Avg per Question:</span>
-            <span className="font-mono font-bold text-[var(--text-primary)]">{avgTime}s</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span className="text-[var(--text-secondary)]">Accuracy:</span>
-            <span
-              className="font-mono font-bold"
-              style={{ color: percentage >= 70 ? 'var(--success)' : 'var(--danger)' }}
-            >
-              {percentage}%
-            </span>
-          </div>
-        </div>
 
-        <button
-          onClick={restartQuiz}
-          className="w-full py-3 bg-[var(--accent)] text-white rounded-xl font-bold hover:bg-[var(--accent-light)] transition-mindflow flex items-center justify-center gap-2 glow-shadow"
-        >
-          <RefreshCw size={18} /> Try Again
-        </button>
+          <button onClick={restartQuiz} className="primary-button mt-8 w-full justify-center">
+            <RefreshCw size={18} />
+            Try again
+          </button>
+        </div>
       </motion.div>
     );
   }
 
+  const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
+
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex justify-between items-center">
-        <button
-          onClick={isShuffled ? resetOrder : shuffleQuestions}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg font-semibold text-sm transition-mindflow ${
-            isShuffled
-              ? 'bg-[var(--accent)]/20 text-[var(--accent-light)] border border-[var(--border-accent)]'
-              : 'glass-card text-[var(--text-secondary)] hover:border-[var(--border-accent)]'
-          }`}
-        >
+    <div className="mx-auto max-w-3xl space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
-          {isShuffled ? 'Reset' : 'Shuffle'}
+          {isShuffled ? 'Reset order' : 'Shuffle'}
         </button>
-        <div className="flex items-center gap-4">
-          <span className="font-mono text-sm text-[var(--text-secondary)]">
+
+        <div className="flex items-center gap-3">
+          <div className="info-chip font-mono">
             Question {currentIndex + 1} / {shuffledQuestions.length}
-          </span>
-          <div className="flex items-center gap-1 text-sm text-[var(--text-muted)]">
-            <Clock size={16} />
+          </div>
+          <div className="info-chip">
+            <Clock size={14} className="text-[var(--accent)]" />
             <span className="font-mono">{elapsedSeconds}s</span>
           </div>
         </div>
       </div>
 
-      <div className="w-full h-1.5 bg-[var(--bg-elevated)] rounded-full overflow-hidden">
-        <div
-          className="h-full bg-[var(--accent)] rounded-full transition-all duration-300"
-          style={{ width: `${((currentIndex + 1) / shuffledQuestions.length) * 100}%` }}
-        />
+      <div className="h-2 overflow-hidden rounded-full bg-[var(--bg-elevated)]">
+        <div className="h-full rounded-full bg-[var(--accent)] transition-all duration-300" style={{ width: `${progress}%` }} />
       </div>
 
-      <motion.div
-        key={currentIndex}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
-        className="glass-card rounded-2xl p-8"
-      >
-        <h3 className="font-heading text-xl font-bold text-[var(--text-primary)] mb-6 leading-relaxed">
-          {currentQuestion?.question}
-        </h3>
+      <motion.div key={currentIndex} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-8">
+        <h3 className="font-heading text-2xl font-bold leading-10 text-[var(--text-primary)]">{currentQuestion?.question}</h3>
 
-        <div className="space-y-3">
+        <div className="mt-6 space-y-3">
           {currentQuestion?.options?.map((option, index) => {
-            let stateStyles = 'border-[var(--border)] text-[var(--text-primary)] hover:border-[var(--accent)]/30 hover:bg-[var(--accent)]/5';
+            let stateStyles = 'border-[var(--border)] bg-white text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]';
+
             if (isAnswered) {
-              if (index === currentQuestion.correctIndex)
-                stateStyles = 'border-[var(--success)] bg-[var(--success)]/10 text-[var(--success)]';
-              else if (index === selectedOption)
-                stateStyles = 'border-[var(--danger)] bg-[var(--danger)]/10 text-[var(--danger)]';
-              else stateStyles = 'border-[var(--border)] opacity-40';
+              if (index === currentQuestion.correctIndex) {
+                stateStyles = 'border-[rgba(24,128,56,0.3)] bg-[rgba(24,128,56,0.08)] text-[var(--success)]';
+              } else if (index === selectedOption) {
+                stateStyles = 'border-[rgba(217,48,37,0.3)] bg-[rgba(217,48,37,0.08)] text-[var(--danger)]';
+              } else {
+                stateStyles = 'border-[var(--border)] bg-white text-[var(--text-muted)] opacity-60';
+              }
             }
 
             return (
@@ -209,15 +198,13 @@ const Quiz = ({ questions }) => {
                 key={index}
                 onClick={() => handleOptionClick(index)}
                 disabled={isAnswered}
-                className={`w-full text-left p-4 rounded-xl border-2 transition-mindflow font-medium ${stateStyles} ${
-                  !isAnswered ? 'cursor-pointer' : 'cursor-default'
-                }`}
+                className={`w-full rounded-2xl border px-4 py-4 text-left transition-mindflow ${stateStyles}`}
               >
-                <div className="flex items-center justify-between">
-                  <span>{option}</span>
-                  {isAnswered && index === currentQuestion.correctIndex && <Check className="text-[var(--success)]" size={20} />}
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-medium">{option}</span>
+                  {isAnswered && index === currentQuestion.correctIndex && <Check className="text-[var(--success)]" size={18} />}
                   {isAnswered && index === selectedOption && index !== currentQuestion.correctIndex && (
-                    <X className="text-[var(--danger)]" size={20} />
+                    <X className="text-[var(--danger)]" size={18} />
                   )}
                 </div>
               </button>
@@ -226,12 +213,8 @@ const Quiz = ({ questions }) => {
         </div>
 
         {isAnswered && currentQuestion?.explanation && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-6 pt-6 border-t border-[var(--border)]"
-          >
-            <p className="text-[var(--text-secondary)] text-sm">
+          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-4">
+            <p className="text-sm leading-7 text-[var(--text-secondary)]">
               <span className="font-semibold text-[var(--text-primary)]">Explanation:</span> {currentQuestion.explanation}
             </p>
           </motion.div>
@@ -239,13 +222,10 @@ const Quiz = ({ questions }) => {
       </motion.div>
 
       {isAnswered && (
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-          <button
-            onClick={nextQuestion}
-            className="flex items-center gap-2 px-8 py-3 bg-[var(--accent)] text-white rounded-xl hover:bg-[var(--accent-light)] font-bold transition-mindflow glow-shadow"
-          >
-            {currentIndex < shuffledQuestions.length - 1 ? 'Next Question' : 'See Results'}
-            <ArrowRight size={20} />
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
+          <button onClick={nextQuestion} className="primary-button px-6">
+            {currentIndex < shuffledQuestions.length - 1 ? 'Next question' : 'See results'}
+            <ArrowRight size={18} />
           </button>
         </motion.div>
       )}

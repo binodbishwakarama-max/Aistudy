@@ -21,6 +21,7 @@ create table public.decks (
   description text,
   is_public boolean default false,
   card_count integer default 0,
+  question_count integer default 0,
   tags text[], 
   created_at timestamptz default now(),
   updated_at timestamptz default now()
@@ -43,7 +44,18 @@ create table public.flashcards (
   created_at timestamptz default now()
 );
 
--- 4. Note Chunks (For RAG / Chat with PDF)
+-- 4. Quiz Questions
+create table public.quiz_questions (
+  id uuid default gen_random_uuid() primary key,
+  deck_id uuid references public.decks(id) on delete cascade not null,
+  prompt text not null,
+  options text[] not null check (array_length(options, 1) = 4),
+  correct_index integer not null check (correct_index between 0 and 3),
+  explanation text,
+  created_at timestamptz default now()
+);
+
+-- 5. Note Chunks (For RAG / Chat with PDF)
 create table public.note_chunks (
   id uuid default gen_random_uuid() primary key,
   deck_id uuid references public.decks(id) on delete cascade not null,
@@ -53,7 +65,7 @@ create table public.note_chunks (
   created_at timestamptz default now()
 );
 
--- 5. Study Sessions (Analytics)
+-- 6. Study Sessions (Analytics)
 create table public.study_sessions (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
@@ -70,6 +82,7 @@ create table public.study_sessions (
 alter table public.profiles enable row level security;
 alter table public.decks enable row level security;
 alter table public.flashcards enable row level security;
+alter table public.quiz_questions enable row level security;
 alter table public.note_chunks enable row level security;
 alter table public.study_sessions enable row level security;
 
@@ -85,6 +98,10 @@ create policy "Users can delete own decks" on public.decks for delete using (aut
 -- Similar policies for cards, chunks, sessions...
 create policy "Users can manage own cards" on public.flashcards for all using (
   exists (select 1 from public.decks where id = flashcards.deck_id and user_id = auth.uid())
+);
+
+create policy "Users can manage own quiz questions" on public.quiz_questions for all using (
+  exists (select 1 from public.decks where id = quiz_questions.deck_id and user_id = auth.uid())
 );
 
 create policy "Users can manage own note chunks" on public.note_chunks for all using (

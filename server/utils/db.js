@@ -1,14 +1,9 @@
-
 const { createClient } = require('@supabase/supabase-js');
+const { serverConfig } = require('../config');
 
-// These should be in your .env file
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY; // Use Service Role Key for backend operations to bypass RLS
-
-if (!supabaseUrl || !supabaseKey) {
-    console.error("❌ Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Check your .env file.");
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(
+    serverConfig.supabase.url,
+    serverConfig.supabase.serviceRoleKey
+);
 
 module.exports = supabase;

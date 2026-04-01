@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getStudyHistory, deleteDeck } from '../services/api';
 import { useStudy } from '../context/StudyContext';
-import { Clock, Book, Trash2, ArrowRight, FolderOpen } from 'lucide-react';
+import { ArrowRight, Book, Clock, FolderOpen, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 
 const StudyLibrary = ({ onSelect }) => {
@@ -31,28 +31,23 @@ const StudyLibrary = ({ onSelect }) => {
     if (onSelect) onSelect('flashcards');
   };
 
-  const handleDelete = async (e, id) => {
-    e.stopPropagation();
+  const handleDelete = async (event, id) => {
+    event.stopPropagation();
     if (window.confirm('Are you sure you want to delete this study set?')) {
       await deleteDeck(id);
-      setDecks((prev) => prev.filter((d) => d.id !== id));
+      setDecks((prev) => prev.filter((deck) => deck.id !== id));
     }
   };
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="glass-card rounded-2xl p-6 h-48 flex flex-col justify-between">
-            <div className="flex justify-between">
-              <div className="w-10 h-10 bg-[var(--bg-elevated)] rounded-xl" />
-              <div className="w-8 h-8 bg-[var(--bg-elevated)] rounded-lg" />
-            </div>
-            <div className="space-y-3">
-              <div className="h-6 bg-[var(--bg-elevated)] rounded w-3/4" />
-              <div className="h-4 bg-[var(--bg-elevated)] rounded w-full" />
-              <div className="h-4 bg-[var(--bg-elevated)] rounded w-1/2" />
-            </div>
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        {[1, 2, 3].map((item) => (
+          <div key={item} className="glass-card h-44 animate-pulse p-6">
+            <div className="h-10 w-10 rounded-2xl bg-[var(--bg-elevated)]" />
+            <div className="mt-6 h-5 w-3/4 rounded bg-[var(--bg-elevated)]" />
+            <div className="mt-3 h-4 w-full rounded bg-[var(--bg-elevated)]" />
+            <div className="mt-2 h-4 w-1/2 rounded bg-[var(--bg-elevated)]" />
           </div>
         ))}
       </div>
@@ -61,63 +56,69 @@ const StudyLibrary = ({ onSelect }) => {
 
   if (decks.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-center glass-card rounded-2xl border-dashed max-w-2xl mx-auto">
-        <div className="w-20 h-20 bg-[var(--accent)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--border-accent)] relative">
-          <FolderOpen size={40} className="text-[var(--accent-light)]" />
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-[var(--accent)] rounded-full border-2 border-[var(--bg-base)] animate-pulse" />
+      <div className="section-shell mx-auto flex max-w-2xl flex-col items-center justify-center py-16 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--bg-strong)] text-[var(--accent)]">
+          <FolderOpen size={28} />
         </div>
-        <h3 className="font-heading text-2xl font-bold text-[var(--text-primary)] mb-3">Your Library is Empty</h3>
-        <p className="text-[var(--text-secondary)] max-w-sm mx-auto mb-8">
-          Upload a document or paste some text to generate your first AI-powered study set.
+        <h3 className="mt-6 text-2xl font-semibold">Your library is empty</h3>
+        <p className="mt-3 max-w-sm text-sm leading-7 text-[var(--text-secondary)]">
+          Upload a document or paste notes from the dashboard to create your first study set.
         </p>
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-xl font-semibold hover:bg-[var(--accent-light)] transition-mindflow glow-shadow"
-        >
-          Start Studying <ArrowRight size={18} />
+        <button onClick={() => navigate('/dashboard')} className="primary-button mt-8 px-5 py-3">
+          Start studying
+          <ArrowRight size={18} />
         </button>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
       {decks.map((deck) => (
         <div
           key={deck.id}
-          className="glass-card rounded-2xl p-6 hover:border-[var(--border-accent)] transition-mindflow cursor-pointer group relative overflow-hidden"
           onClick={() => handleLoad(deck.id)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              event.preventDefault();
+              handleLoad(deck.id);
+            }
+          }}
+          tabIndex={0}
+          role="button"
+          className="glass-card group relative cursor-pointer p-6 text-left"
         >
-          <div className="absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r from-[var(--accent)] to-[var(--accent-light)] transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left" />
-
-          <div className="flex justify-between items-start mb-4">
-            <div className="p-3 bg-[var(--accent)]/20 rounded-xl group-hover:bg-[var(--accent)]/30 transition-mindflow border border-[var(--border-accent)]/50">
-              <Book size={24} className="text-[var(--accent-light)]" />
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--bg-elevated)] text-[var(--accent)]">
+              <Book size={20} />
             </div>
+
             <button
-              onClick={(e) => handleDelete(e, deck.id)}
-              className="p-2 text-[var(--text-muted)] hover:text-[var(--danger)] hover:bg-[var(--danger)]/10 rounded-lg transition-mindflow z-10"
-              title="Delete Deck"
+              onClick={(event) => handleDelete(event, deck.id)}
+              className="rounded-full p-2 text-[var(--text-muted)] transition-mindflow hover:bg-[rgba(217,48,37,0.08)] hover:text-[var(--danger)]"
+              title="Delete deck"
             >
-              <Trash2 size={18} />
+              <Trash2 size={16} />
             </button>
           </div>
 
-          <h3 className="font-heading text-lg font-bold text-[var(--text-primary)] mb-2 line-clamp-1 group-hover:text-[var(--accent-light)] transition-colors">
-            {deck.title}
-          </h3>
-          <p className="text-sm text-[var(--text-secondary)] line-clamp-2 mb-6 h-10 leading-relaxed">
+          <h3 className="mt-5 line-clamp-1 text-lg font-semibold text-[var(--text-primary)]">{deck.title}</h3>
+          <p className="mt-3 line-clamp-2 min-h-[3.5rem] text-sm leading-7 text-[var(--text-secondary)]">
             {deck.description || 'No description provided.'}
           </p>
 
-          <div className="flex justify-between items-center pt-4 border-t border-[var(--border)]">
-            <span className="flex items-center gap-1.5 text-xs text-[var(--text-muted)] font-medium bg-[var(--bg-elevated)] px-2 py-1 rounded-lg">
+          <div className="mt-5 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
+            <span className="info-chip">
               <Clock size={12} />
               {format(new Date(deck.created_at), 'MMM d, yyyy')}
             </span>
-            <span className="text-xs font-bold text-[var(--accent-light)] bg-[var(--accent)]/20 px-2.5 py-1 rounded-full font-mono">
-              {deck.card_count ?? deck.flashcards?.length ?? 0} Cards
-            </span>
+            <span className="info-chip">{deck.card_count ?? deck.flashcards?.length ?? 0} cards</span>
+            <span className="info-chip">{deck.question_count ?? deck.quiz?.length ?? 0} questions</span>
+          </div>
+
+          <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[var(--accent)]">
+            Open session
+            <ArrowRight size={16} />
           </div>
         </div>
       ))}

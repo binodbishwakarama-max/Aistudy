@@ -8,6 +8,7 @@ create table if not exists public.decks (
   title text default 'Untitled Deck',
   description text,
   card_count integer default 0,
+  question_count integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -28,11 +29,23 @@ create table if not exists public.flashcards (
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- 3. Enable Row Level Security (RLS)
+-- 3. Create 'quiz_questions' table
+create table if not exists public.quiz_questions (
+  id uuid default uuid_generate_v4() primary key,
+  deck_id uuid references public.decks(id) on delete cascade not null,
+  prompt text not null,
+  options text[] not null check (array_length(options, 1) = 4),
+  correct_index integer not null check (correct_index between 0 and 3),
+  explanation text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 4. Enable Row Level Security (RLS)
 alter table public.decks enable row level security;
 alter table public.flashcards enable row level security;
+alter table public.quiz_questions enable row level security;
 
--- 4. Create Policies for Decks
+-- 5. Create Policies for Decks
 create policy "Users can view their own decks"
   on public.decks for select
   using ( auth.uid() = user_id );
@@ -45,7 +58,7 @@ create policy "Users can delete their own decks"
   on public.decks for delete
   using ( auth.uid() = user_id );
 
--- 5. Create Policies for Flashcards
+-- 6. Create Policies for Flashcards
 -- (Simple approach: If you own the deck, you own the cards)
 create policy "Users can view their own flashcards"
   on public.flashcards for select
@@ -61,4 +74,21 @@ create policy "Users can update their own flashcards"
 
 create policy "Users can delete their own flashcards"
   on public.flashcards for delete
+  using ( exists ( select 1 from public.decks where decks.id = deck_id and decks.user_id = auth.uid() ) );
+
+-- 7. Create Policies for Quiz Questions
+create policy "Users can view their own quiz questions"
+  on public.quiz_questions for select
+  using ( exists ( select 1 from public.decks where decks.id = quiz_questions.deck_id and decks.user_id = auth.uid() ) );
+
+create policy "Users can insert their own quiz questions"
+  on public.quiz_questions for insert
+  with check ( exists ( select 1 from public.decks where decks.id = deck_id and decks.user_id = auth.uid() ) );
+
+create policy "Users can update their own quiz questions"
+  on public.quiz_questions for update
+  using ( exists ( select 1 from public.decks where decks.id = deck_id and decks.user_id = auth.uid() ) );
+
+create policy "Users can delete their own quiz questions"
+  on public.quiz_questions for delete
   using ( exists ( select 1 from public.decks where decks.id = deck_id and decks.user_id = auth.uid() ) );

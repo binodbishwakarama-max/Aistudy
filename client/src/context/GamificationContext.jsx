@@ -1,28 +1,40 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
-
+import { readJSONStorage, writeJSONStorage } from '../utils/storage';
 
 const GamificationContext = createContext();
+const DEFAULT_GAME_STATE = {
+    xp: 0,
+    level: 1,
+    streak: 0,
+    lastStudyDate: null,
+    achievements: []
+};
+
+const getInitialGameState = () => {
+    const saved = readJSONStorage('mindflow_gamification', null);
+
+    if (!saved || typeof saved !== 'object') {
+        return DEFAULT_GAME_STATE;
+    }
+
+    return {
+        ...DEFAULT_GAME_STATE,
+        ...saved,
+        achievements: Array.isArray(saved.achievements) ? saved.achievements : []
+    };
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useGamification = () => useContext(GamificationContext);
 
 export const GamificationProvider = ({ children }) => {
-    const [gameState, setGameState] = useState(() => {
-        const saved = localStorage.getItem('mindflow_gamification');
-        return saved ? JSON.parse(saved) : {
-            xp: 0,
-            level: 1,
-            streak: 0,
-            lastStudyDate: null, // ISO string YYYY-MM-DD
-            achievements: [] // Array of strings (achievement IDs)
-        };
-    });
+    const [gameState, setGameState] = useState(getInitialGameState);
 
     const [showLevelUp, setShowLevelUp] = useState(false);
 
     useEffect(() => {
-        localStorage.setItem('mindflow_gamification', JSON.stringify(gameState));
+        writeJSONStorage('mindflow_gamification', gameState);
     }, [gameState]);
 
     const getXpToNextLevel = (level) => {

@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../services/supabaseClient';
+import { supabase, supabaseConfigError } from '../services/supabaseClient';
 import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
+const AUTH_BOOT_TIMEOUT_MS = 4000;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
@@ -10,30 +11,80 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [authError, setAuthError] = useState(null);
 
     useEffect(() => {
-        // 1. Check active session on load
-        const getSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                setUser(session.user);
-            }
+        let isMounted = true;
+        let subscription;
+
+        if (!supabase) {
+            setAuthError(supabaseConfigError);
             setLoading(false);
+            return undefined;
+        }
+
+        // Keep the UI responsive even if auth bootstrap is slow.
+        const getSession = async () => {
+            const timeoutId = window.setTimeout(() => {
+                if (!isMounted) return;
+                setAuthError('Authentication is taking longer than expected. Showing the app without blocking.');
+                setLoading(false);
+            }, AUTH_BOOT_TIMEOUT_MS);
+
+            try {
+                const { data: { session }, error } = await supabase.auth.getSession();
+                if (error) {
+                    throw error;
+                }
+
+                if (!isMounted) return;
+                setUser(session?.user ?? null);
+                setAuthError(null);
+            } catch (error) {
+                console.error('Failed to restore auth session:', error);
+
+                if (!isMounted) return;
+                setUser(null);
+                setAuthError(error?.message || 'Unable to verify your session right now.');
+            } finally {
+                window.clearTimeout(timeoutId);
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
         };
 
         getSession();
 
         // 2. Listen for auth changes (Login, Logout, Auto-refresh)
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+            if (!isMounted) return;
             setUser(session?.user ?? null);
+            setAuthError(null);
             setLoading(false);
         });
 
-        return () => subscription?.unsubscribe();
+        subscription = data.subscription;
+
+        return () => {
+            isMounted = false;
+            subscription?.unsubscribe();
+        };
     }, []);
 
+    const requireSupabase = () => {
+        if (!supabase) {
+            const error = new Error(supabaseConfigError || 'Authentication is unavailable right now.');
+            toast.error(error.message);
+            throw error;
+        }
+
+        return supabase;
+    };
+
     const login = async (email, password) => {
-        const { data, error } = await supabase.auth.signInWithPassword({
+        const client = requireSupabase();
+        const { data, error } = await client.auth.signInWithPassword({
             email,
             password,
         });
@@ -48,7 +99,8 @@ export const AuthProvider = ({ children }) => {
     };
 
     const register = async (name, email, password) => {
-        const { data, error } = await supabase.auth.signUp({
+        const client = requireSupabase();
+        const { data, error } = await client.auth.signUp({
             email,
             password,
             options: {
@@ -68,14 +120,16 @@ export const AuthProvider = ({ children }) => {
     };
 
     const logout = async () => {
-        await supabase.auth.signOut();
+        const client = requireSupabase();
+        await client.auth.signOut();
         toast.success("Logged out successfully");
         setUser(null);
     };
 
     const loginWithGoogle = async () => {
         try {
-            const { error } = await supabase.auth.signInWithOAuth({
+            const client = requireSupabase();
+            const { error } = await client.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
                     redirectTo: `${window.location.origin}/dashboard`
@@ -97,12 +151,13 @@ export const AuthProvider = ({ children }) => {
         loginWithGoogle,
         register,
         logout,
-        loading
+        loading,
+        authError
     };
 
     return (
         <AuthContext.Provider value={value}>
-            {!loading && children}
+            {children}
         </AuthContext.Provider>
     );
 };

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import React, { useEffect, useMemo, useState } from 'react';
+import { motion as Motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { getStudyHistory } from '../services/api';
-import { BookOpen, Plus, Sparkles, Layers, Target, TrendingUp, FileText } from 'lucide-react';
+import { ArrowRight, BookOpen, Clock3, Layers, Plus, Sparkles, Target, TrendingUp } from 'lucide-react';
 import FileUpload from '../components/FileUpload';
-import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { useGamification } from '../context/GamificationContext';
+import { getStudyHistory } from '../services/api';
 
 const getGreeting = () => {
   const hour = new Date().getHours();
@@ -13,8 +14,12 @@ const getGreeting = () => {
   return 'Good evening';
 };
 
+const formatDate = (value) =>
+  new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(value));
+
 const Dashboard = () => {
   const { user } = useAuth();
+  const { gameState } = useGamification();
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,137 +29,205 @@ const Dashboard = () => {
       navigate('/login');
       return;
     }
+
     const fetchHistory = async () => {
       try {
         const data = await getStudyHistory();
         setHistory(data || []);
-      } catch (err) {
-        console.error('Failed to load history', err);
+      } catch (error) {
+        console.error('Failed to load history', error);
       } finally {
         setLoading(false);
       }
     };
+
     fetchHistory();
   }, [user, navigate]);
 
-  const totalCards = history.reduce((sum, s) => sum + (s.flashcards?.length || s.card_count || 0), 0);
-  const totalQuestions = history.reduce((sum, s) => sum + (s.quiz?.length || 0), 0);
-  const userName = user?.user?.name || user?.user_metadata?.full_name || 'there';
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
+  const totalCards = useMemo(
+    () => history.reduce((sum, session) => sum + (session.flashcards?.length || session.card_count || 0), 0),
+    [history],
+  );
+  const totalQuestions = useMemo(
+    () => history.reduce((sum, session) => sum + (session.question_count || session.quiz?.length || 0), 0),
+    [history],
+  );
+  const recentSessions = history.slice(0, 5);
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="relative w-10 h-10 mx-auto mb-4">
-            <div className="absolute inset-0 border-2 border-[var(--border)] rounded-full" />
-            <div className="absolute inset-0 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="section-shell w-full max-w-md p-8 text-center">
+          <div className="relative mx-auto mb-4 h-10 w-10">
+            <div className="absolute inset-0 rounded-full border-2 border-[var(--border)]" />
+            <div className="absolute inset-0 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
           </div>
-          <p className="text-sm font-medium text-[var(--text-muted)]">Loading your workspace...</p>
+          <h2 className="font-heading text-2xl font-bold">Loading your dashboard</h2>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">Pulling in your recent sessions and progress.</p>
         </div>
       </div>
     );
   }
 
+  const statCards = [
+    { icon: Layers, label: 'Sessions', value: history.length },
+    { icon: BookOpen, label: 'Flashcards', value: totalCards },
+    { icon: Target, label: 'Questions', value: totalQuestions },
+    { icon: TrendingUp, label: 'Streak', value: `${gameState.streak}d` },
+  ];
+
   return (
-    <div className="max-w-6xl mx-auto">
-      <motion.div
+    <div className="space-y-6">
+      <Motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
-        className="mb-10"
+        transition={{ duration: 0.3 }}
+        className="section-shell p-6 sm:p-8"
       >
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-          <div>
-            <p className="text-sm font-medium text-[var(--text-muted)] font-mono">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <div className="pill-badge">
+              <Sparkles size={14} className="text-[var(--accent)]" />
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            </p>
-            <h1 className="font-heading text-3xl sm:text-4xl font-bold tracking-tight text-[var(--text-primary)] mt-1">
+            </div>
+            <h1 className="font-heading mt-5 text-4xl font-bold tracking-tight sm:text-5xl">
               {getGreeting()}, {userName}
             </h1>
-          </div>
-          <button
-            onClick={() => document.querySelector('input[type="file"]')?.click()}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] text-white rounded-xl text-sm font-semibold hover:bg-[var(--accent-light)] transition-mindflow glow-shadow self-start sm:self-auto"
-          >
-            <Plus size={16} /> New Session
-          </button>
-        </div>
-      </motion.div>
+            <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">
+              Upload new material, continue a saved session, or check your study progress from one simple dashboard.
+            </p>
 
-      <motion.div
+            <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <button onClick={() => document.querySelector('input[type="file"]')?.click()} className="primary-button justify-center">
+                <Plus size={18} />
+                Upload a source
+              </button>
+              <button onClick={() => navigate('/study')} className="secondary-button justify-center">
+                Open study space
+                <ArrowRight size={18} />
+              </button>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3 lg:w-[420px] lg:grid-cols-1">
+            <div className="glass-card p-5">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Current XP</div>
+              <div className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{gameState.xp}</div>
+            </div>
+            <div className="glass-card p-5">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Level</div>
+              <div className="mt-2 text-3xl font-semibold text-[var(--text-primary)]">{gameState.level}</div>
+            </div>
+            <div className="glass-card p-5">
+              <div className="text-sm font-medium text-[var(--text-muted)]">Last session</div>
+              <div className="mt-2 text-lg font-semibold text-[var(--text-primary)]">
+                {history[0]?.created_at ? formatDate(history[0].created_at) : 'No activity yet'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </Motion.section>
+
+      <Motion.section
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, delay: 0.08 }}
-        className="grid grid-cols-1 lg:grid-cols-5 gap-5"
+        transition={{ delay: 0.04, duration: 0.3 }}
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-4"
       >
-        {/* Upload — 3 cols */}
-        <div className="lg:col-span-3 glass-card rounded-2xl overflow-hidden">
-          <div className="px-6 pt-6 pb-2">
-            <div className="flex items-center gap-2 mb-1">
-              <Sparkles size={14} className="text-[var(--accent)]" />
-              <span className="text-xs font-mono font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                Quick Start
-              </span>
+        {statCards.map((stat) => (
+          <div key={stat.label} className="glass-card p-5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--bg-elevated)] text-[var(--accent)]">
+              <stat.icon size={18} />
             </div>
-            <p className="text-sm font-medium text-[var(--text-secondary)]">
-              Upload notes or lecture PDF to generate study materials
+            <div className="mt-5 text-3xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
+            <div className="mt-2 text-sm text-[var(--text-secondary)]">{stat.label}</div>
+          </div>
+        ))}
+      </Motion.section>
+
+      <div className="grid gap-6 lg:grid-cols-[1.15fr_0.85fr]">
+        <Motion.section
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.08, duration: 0.3 }}
+          className="section-shell overflow-hidden"
+        >
+          <div className="border-b border-[var(--border)] px-6 pb-4 pt-6 sm:px-8">
+            <div className="kicker">Upload</div>
+            <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Add a new study source</h2>
+            <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
+              Drop in a PDF or text file and move straight into cards, quiz mode, or a review sheet.
             </p>
           </div>
           <FileUpload />
-        </div>
+        </Motion.section>
 
-        {/* Stats grid — 2 cols */}
-        <div className="lg:col-span-2 grid grid-cols-2 gap-4">
-          {[
-            { icon: Layers, label: 'Sessions', value: history.length },
-            { icon: BookOpen, label: 'Flashcards', value: totalCards },
-            { icon: Target, label: 'Questions', value: totalQuestions },
-            {
-              icon: TrendingUp,
-              label: 'Active Rate',
-              value: history.length > 0 ? `${Math.min(history.length * 15, 100)}%` : '—',
-              accent: true,
-            },
-          ].map((stat, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 + i * 0.05 }}
-              className={`glass-card rounded-xl p-5 flex flex-col justify-between transition-mindflow ${
-                stat.accent ? 'bg-[var(--accent)]/10 border-[var(--border-accent)]' : ''
-              }`}
-            >
-              <div
-                className={`w-9 h-9 rounded-lg flex items-center justify-center mb-auto ${
-                  stat.accent ? 'bg-[var(--accent)]/20' : 'bg-[var(--bg-elevated)]'
-                }`}
-              >
-                <stat.icon
-                  size={16}
-                  className={stat.accent ? 'text-[var(--accent-light)]' : 'text-[var(--text-secondary)]'}
-                />
-              </div>
-              <div className="mt-4">
-                <div
-                  className={`font-mono text-2xl font-bold tracking-tight leading-none ${
-                    stat.accent ? 'text-[var(--accent-light)]' : 'text-[var(--text-primary)]'
-                  }`}
+        <Motion.section
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.12, duration: 0.3 }}
+          className="section-shell p-6 sm:p-8"
+        >
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="kicker">Recent sessions</div>
+              <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Continue where you left off</h2>
+            </div>
+            <button onClick={() => navigate('/study')} className="secondary-button hidden px-5 py-3 text-sm sm:inline-flex">
+              Open library
+            </button>
+          </div>
+
+          <div className="mt-6 space-y-3">
+            {recentSessions.length > 0 ? (
+              recentSessions.map((session) => (
+                <button
+                  key={session.id}
+                  onClick={() => navigate('/study')}
+                  className="glass-card w-full p-4 text-left"
                 >
-                  {stat.value}
-                </div>
-                <div
-                  className={`text-xs font-medium mt-1 ${
-                    stat.accent ? 'text-[var(--accent-light)]/80' : 'text-[var(--text-secondary)]'
-                  }`}
-                >
-                  {stat.label}
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate text-base font-semibold text-[var(--text-primary)]">{session.title}</div>
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
+                        <span className="info-chip">{formatDate(session.created_at)}</span>
+                        <span className="info-chip">{session.card_count ?? session.flashcards?.length ?? 0} cards</span>
+                        <span className="info-chip">{session.question_count ?? session.quiz?.length ?? 0} questions</span>
+                      </div>
+                    </div>
+                    <ArrowRight size={18} className="mt-1 flex-shrink-0 text-[var(--text-muted)]" />
+                  </div>
+                </button>
+              ))
+            ) : (
+              <div className="glass-card p-6 text-center">
+                <h3 className="text-xl font-semibold">No saved sessions yet</h3>
+                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+                  Upload your first source to start building your study library.
+                </p>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-5">
+            <div className="flex items-start gap-3">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-[var(--accent)] shadow-[var(--shadow-soft)]">
+                <Clock3 size={18} />
+              </div>
+              <div>
+                <div className="text-base font-semibold">Want a quick progress check?</div>
+                <div className="mt-1 text-sm leading-7 text-[var(--text-secondary)]">
+                  Open the stats page to see activity, study time, and retention trends.
                 </div>
               </div>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+            </div>
+            <button onClick={() => navigate('/stats')} className="secondary-button mt-5 w-full justify-center text-sm">
+              View analytics
+            </button>
+          </div>
+        </Motion.section>
+      </div>
     </div>
   );
 };

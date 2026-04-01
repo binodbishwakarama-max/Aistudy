@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readJSONStorage } from '../utils/storage';
 
 let envUrl = import.meta.env.VITE_API_URL || 'https://mindflow-api-k5ex.onrender.com/api';
 if (envUrl.endsWith('/')) envUrl = envUrl.slice(0, -1);
@@ -26,5 +27,5 @@ export const logout = () => {
 };
 
 export const getCurrentUser = () => {
-    return JSON.parse(localStorage.getItem('user'));
+    return readJSONStorage('user', null);
 };

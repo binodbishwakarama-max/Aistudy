@@ -10,7 +10,7 @@ const ChatInterface = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: "Hi! I'm MindFlow AI. I've read your notes. Ask me anything! 🧠" },
+    { role: 'assistant', content: "Hi! I'm MindFlow AI. I've read your notes. Ask me anything about them." },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -158,7 +158,7 @@ const ChatInterface = () => {
               {msg.role === 'user' ? (
                 msg.content
               ) : (
-                <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-invert">
+                <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-li:text-[var(--text-secondary)]">
                   <Markdown>{msg.content}</Markdown>
                 </div>
               )}

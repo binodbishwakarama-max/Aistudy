@@ -1,71 +1,185 @@
 const express = require('express');
-const router = express.Router();
+const { createClient } = require('@supabase/supabase-js');
+const { serverConfig } = require('../config');
 const supabase = require('../utils/db');
 const authMiddleware = require('../middleware/auth');
+const {
+    normalizeDeckResponse,
+    prepareStudySetForSave
+} = require('../utils/studyContracts');
+const { logger } = require('../utils/logger');
 
-/**
- * 🔒 Use Auth Middleware for all routes in this file
- */
+const router = express.Router();
+
 router.use(authMiddleware);
 
-// --- 1. SAVE STUDY SET (DECK + FLASHCARDS) ---
-router.post('/save', async (req, res) => {
-    try {
-        const { title, originalText, flashcards } = req.body;
-        const userId = req.user.id;
+const isMissingQuizPersistenceError = (error) => {
+    const details = `${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`.toLowerCase();
+    return (
+        error?.code === '42P01'
+        || details.includes('quiz_questions')
+        || details.includes('question_count')
+    );
+};
 
-        // Create authenticated client using the user's token to pass RLS
-        const token = req.headers.authorization?.split(' ')[1];
-        const { createClient } = require('@supabase/supabase-js');
-        const userSupabase = createClient(
-            process.env.SUPABASE_URL,
-            process.env.SUPABASE_SERVICE_ROLE_KEY, // Using the key available (likely anon)
-            { global: { headers: { Authorization: `Bearer ${token}` } } }
-        );
+const createAuthedSupabaseClient = (token) => createClient(
+    serverConfig.supabase.url,
+    serverConfig.supabase.serviceRoleKey,
+    { global: { headers: { Authorization: `Bearer ${token}` } } }
+);
 
-        // 1. Insert Deck (Study Set)
-        const { data: deck, error: deckError } = await userSupabase
+const insertDeckRecord = async (userSupabase, deckPayload) => {
+    let warning = null;
+    let response = await userSupabase
+        .from('decks')
+        .insert(deckPayload)
+        .select()
+        .single();
+
+    if (response.error && isMissingQuizPersistenceError(response.error)) {
+        warning = 'Quiz persistence migration is not fully applied yet. Quiz counts may not appear in history until you run the latest SQL.';
+        const fallbackPayload = { ...deckPayload };
+        delete fallbackPayload.question_count;
+
+        response = await userSupabase
             .from('decks')
-            .insert({
-                user_id: userId,
-                title: title || 'Untitled Study Set',
-                description: originalText ? originalText.substring(0, 100) + '...' : '',
-                card_count: flashcards.length
-            })
+            .insert(fallbackPayload)
             .select()
             .single();
+    }
+
+    return {
+        deck: response.data,
+        error: response.error,
+        warning
+    };
+};
+
+const normalizeQuizRowsForClient = (rows = []) => rows.map((row) => ({
+    question: row.prompt,
+    options: row.options,
+    correctIndex: row.correct_index,
+    explanation: row.explanation
+}));
+
+const fetchQuizRowsForDeck = async (deckId) => {
+    const { data, error } = await supabase
+        .from('quiz_questions')
+        .select('*')
+        .eq('deck_id', deckId)
+        .order('created_at', { ascending: true });
+
+    if (error && isMissingQuizPersistenceError(error)) {
+        logger.warn('Quiz persistence schema not available while loading deck', {
+            deckId,
+            reason: error.message
+        });
+        return [];
+    }
+
+    if (error) throw error;
+    return data || [];
+};
+
+router.post('/save', async (req, res) => {
+    let userSupabase;
+    let createdDeckId = null;
+
+    try {
+        const { title, originalText, flashcards = [], quiz = [] } = req.body;
+        const token = req.headers.authorization?.split(' ')[1];
+        const preparedStudySet = prepareStudySetForSave({ flashcards, quiz });
+        userSupabase = createAuthedSupabaseClient(token);
+
+        const { deck, error: deckError, warning } = await insertDeckRecord(userSupabase, {
+                user_id: req.user.id,
+                title: typeof title === 'string' && title.trim() ? title.trim() : 'Untitled Study Set',
+                description: typeof originalText === 'string' && originalText.trim()
+                    ? `${originalText.trim().substring(0, 100)}...`
+                    : '',
+                card_count: preparedStudySet.flashcards.length,
+                question_count: preparedStudySet.quiz.length
+            });
 
         if (deckError) throw deckError;
+        createdDeckId = deck.id;
 
-        // 2. Prepare Flashcards
-        const cardsToInsert = flashcards.map(card => ({
+        const cardsToInsert = preparedStudySet.flashcards.map((card) => ({
             deck_id: deck.id,
             front: card.front,
             back: card.back,
-            explanation: card.explanation || ''
+            explanation: card.explanation
         }));
 
-        // 3. Batch Insert
-        const { error: cardsError } = await userSupabase
-            .from('flashcards')
-            .insert(cardsToInsert);
+        if (cardsToInsert.length > 0) {
+            const { error: cardsError } = await userSupabase
+                .from('flashcards')
+                .insert(cardsToInsert);
 
-        if (cardsError) throw cardsError;
+            if (cardsError) throw cardsError;
+        }
 
-        res.json({ success: true, deckId: deck.id, message: "Saved to Cloud!" });
+        const quizToInsert = preparedStudySet.quiz.map((question) => ({
+            deck_id: deck.id,
+            prompt: question.prompt,
+            options: question.options,
+            correct_index: question.correct_index,
+            explanation: question.explanation
+        }));
 
+        if (quizToInsert.length > 0) {
+            const { error: quizError } = await userSupabase
+                .from('quiz_questions')
+                .insert(quizToInsert);
+
+            if (quizError) {
+                if (isMissingQuizPersistenceError(quizError)) {
+                    throw new Error(
+                        'Quiz persistence schema is missing. Run the latest SQL migration before saving quizzes.'
+                    );
+                }
+                throw quizError;
+            }
+        }
+
+        res.json({
+            success: true,
+            deckId: deck.id,
+            message: 'Saved to Cloud!',
+            warnings: warning ? [warning] : []
+        });
     } catch (error) {
-        console.error('Save Error:', error);
+        if (createdDeckId && userSupabase) {
+            const { error: rollbackError } = await userSupabase
+                .from('decks')
+                .delete()
+                .eq('id', createdDeckId);
 
+            if (rollbackError) {
+                logger.error('Rollback after failed save also failed', {
+                    deckId: createdDeckId,
+                    reason: rollbackError.message
+                });
+            }
+        }
 
+        logger.error('Save study set failed', {
+            code: error.code,
+            details: error.details,
+            reason: error.message
+        });
 
-        if (error.code) console.error('PG Error Code:', error.code);
-        if (error.details) console.error('Error Details:', error.details);
-        res.status(500).json({ error: error.message, details: error.details || "Check server logs" });
+        const statusCode = /required|must include|must be an array|not supported|missing/i.test(error.message)
+            ? 400
+            : 500;
+
+        res.status(statusCode).json({
+            error: error.message,
+            details: error.details || 'Check server logs'
+        });
     }
 });
 
-// --- 2. GET USER HISTORY (DECKS) ---
 router.get('/history', async (req, res) => {
     try {
         const { data: decks, error } = await supabase
@@ -77,16 +191,15 @@ router.get('/history', async (req, res) => {
         if (error) throw error;
         res.json(decks);
     } catch (error) {
+        logger.error('Fetch history failed', { reason: error.message });
         res.status(500).json({ error: error.message });
     }
 });
 
-// --- 3. GET A SPECIFIC DECK (WITH CARDS) ---
 router.get('/deck/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Fetch Deck Metadata
         const { data: deck, error: deckError } = await supabase
             .from('decks')
             .select('*')
@@ -95,32 +208,33 @@ router.get('/deck/:id', async (req, res) => {
 
         if (deckError) throw deckError;
 
-        // Check Ownership (RLS handles this too, but good for custom logic)
         if (deck.user_id !== req.user.id) {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 
-        // Fetch Cards
-        const { data: cards, error: cardsError } = await supabase
+        const { data: flashcards, error: cardsError } = await supabase
             .from('flashcards')
             .select('*')
             .eq('deck_id', id);
 
         if (cardsError) throw cardsError;
+        const quizRows = await fetchQuizRowsForDeck(id);
 
-        res.json({ deck, cards });
-
+        res.json(normalizeDeckResponse({
+            deck,
+            flashcards,
+            quiz: normalizeQuizRowsForClient(quizRows)
+        }));
     } catch (error) {
+        logger.error('Load deck failed', { reason: error.message });
         res.status(500).json({ error: error.message });
     }
 });
 
-// --- 4. SUBMIT FLASHCARD REVIEW (SRS ALGORITHM) ---
 router.post('/review', async (req, res) => {
     try {
-        const { cardId, rating } = req.body; // rating: 1 (Again), 2 (Hard), 3 (Good), 4 (Easy)
+        const { cardId, rating } = req.body;
 
-        // 1. Fetch current card data
         const { data: card, error: fetchError } = await supabase
             .from('flashcards')
             .select('*')
@@ -129,17 +243,26 @@ router.post('/review', async (req, res) => {
 
         if (fetchError) throw fetchError;
 
-        // 2. Calculate new SRS values (Simplified SM-2)
-        // Defaults if first review
+        const { data: deck, error: deckError } = await supabase
+            .from('decks')
+            .select('user_id')
+            .eq('id', card.deck_id)
+            .single();
+
+        if (deckError) throw deckError;
+
+        if (deck.user_id !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
         let interval = card.srs_interval || 0;
         let easeFactor = card.srs_ease_factor || 2.5;
         let repetitions = card.srs_repetitions || 0;
 
-        if (rating === 1) { // Again / Failed
+        if (rating === 1) {
             repetitions = 0;
-            interval = 1; // 1 day
+            interval = 1;
         } else {
-            // Success (Hard, Good, Easy)
             if (repetitions === 0) {
                 interval = 1;
             } else if (repetitions === 1) {
@@ -150,18 +273,13 @@ router.post('/review', async (req, res) => {
             repetitions += 1;
         }
 
-        // Adjust Ease Factor
-        // standard formula: EF' = EF + (0.1 - (5-q) * (0.08 + (5-q)*0.02))
-        // mapping our 1-4 rating to 2-5 standard scale for math
         const q = rating + 1;
         easeFactor = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
         if (easeFactor < 1.3) easeFactor = 1.3;
 
-        // Calculate Next Review Date
         const nextReviewDate = new Date();
         nextReviewDate.setDate(nextReviewDate.getDate() + interval);
 
-        // 3. Update Card in DB
         const { error: updateError } = await supabase
             .from('flashcards')
             .update({
@@ -175,58 +293,28 @@ router.post('/review', async (req, res) => {
         if (updateError) throw updateError;
 
         res.json({ success: true, nextReview: nextReviewDate, interval });
-
     } catch (error) {
-        console.error("Review Error:", error);
+        logger.error('Review flashcard failed', { reason: error.message });
         res.status(500).json({ error: error.message });
     }
 });
 
-// --- 5. GET FULL DECK (LOAD SESSION) ---
-router.get('/deck/:id', authMiddleware, async (req, res) => {
+router.delete('/deck/:id', async (req, res) => {
     try {
         const { id } = req.params;
 
-        // Fetch deck details
         const { data: deck, error: deckError } = await supabase
             .from('decks')
-            .select('*')
+            .select('user_id')
             .eq('id', id)
             .single();
 
         if (deckError) throw deckError;
 
-        // Fetch associated flashcards
-        const { data: flashcards, error: cardsError } = await supabase
-            .from('flashcards')
-            .select('*')
-            .eq('deck_id', id);
+        if (deck.user_id !== req.user.id) {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
 
-        if (cardsError) throw cardsError;
-
-        // TODO: Fetch associated quiz (if we had a quiz table, for now we might store quiz in metadata or separate table)
-        // For this MVP, we might re-generate quiz or store it. 
-        // Let's assume quiz is stored in a 'quizzes' table or JSON column in decks.
-        // For now, returning empty quiz if not found.
-
-        res.json({
-            ...deck,
-            flashcards,
-            quiz: [] // Placeholder until we persist quizzes properly
-        });
-
-    } catch (error) {
-        console.error("Load Deck Error:", error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// --- 6. DELETE DECK ---
-router.delete('/deck/:id', authMiddleware, async (req, res) => {
-    try {
-        const { id } = req.params;
-
-        // Delete deck (Cascade should handle cards if configured, otherwise delete cards first)
         const { error } = await supabase
             .from('decks')
             .delete()
@@ -236,7 +324,7 @@ router.delete('/deck/:id', authMiddleware, async (req, res) => {
 
         res.json({ success: true });
     } catch (error) {
-        console.error("Delete Deck Error:", error);
+        logger.error('Delete deck failed', { reason: error.message });
         res.status(500).json({ error: error.message });
     }
 });

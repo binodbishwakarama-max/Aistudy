@@ -1,8 +1,33 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link, Navigate } from 'react-router-dom';
-import { Sparkles, Zap, Brain, Trophy, ArrowRight, ShieldCheck, FileText, BookOpen, BarChart3, Layers, Clock, Star, CheckCircle } from 'lucide-react';
+import { ArrowRight, BookOpen, Brain, CheckCircle, Clock3, Sparkles, Target } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import BrandMark from '../components/BrandMark';
+
+const features = [
+  {
+    icon: Sparkles,
+    title: 'Generate study material fast',
+    description: 'Turn notes and PDFs into flashcards, quizzes, and review sheets without extra cleanup.',
+  },
+  {
+    icon: Brain,
+    title: 'Stay focused in one flow',
+    description: 'Move between reading, recall, and review without jumping through cluttered screens.',
+  },
+  {
+    icon: Target,
+    title: 'See what matters next',
+    description: 'Track streaks, progress, and saved sessions in a way that feels clear and useful.',
+  },
+];
+
+const steps = [
+  { label: 'Upload', detail: 'Add a PDF or text file.' },
+  { label: 'Generate', detail: 'Pick flashcards, quiz, or review.' },
+  { label: 'Review', detail: 'Keep learning from the same workspace.' },
+];
 
 const Landing = () => {
   const { user, loading } = useAuth();
@@ -11,338 +36,180 @@ const Landing = () => {
     return <Navigate to="/dashboard" replace />;
   }
 
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 24 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.4, 0, 0.2, 1] } },
-  };
-
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.12 } },
-  };
-
   return (
-    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] relative overflow-hidden grain-overlay">
-      {/* Gradient orbs */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-[var(--accent)]/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 right-0 w-[400px] h-[300px] bg-[var(--accent)]/5 rounded-full blur-[100px] pointer-events-none" />
-
-      {/* Nav */}
-      <nav className="relative z-10 border-b border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex justify-between items-center">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <span className="text-[var(--accent)] text-xl font-bold">✦</span>
-            <span className="font-heading font-bold text-lg tracking-tight">MindFlow</span>
+    <div className="app-shell">
+      <div className="page-shell pb-16 pt-6 sm:pb-20">
+        <nav className="flex items-center justify-between gap-4 py-2">
+          <Link to="/" className="flex items-center gap-3">
+            <BrandMark />
+            <div>
+              <div className="font-heading text-lg font-bold tracking-tight">MindFlow</div>
+              <div className="text-sm text-[var(--text-muted)]">Simple AI study workspace</div>
+            </div>
           </Link>
-          <div className="flex items-center gap-4">
-            <Link
-              to="/login"
-              className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-mindflow hidden sm:block"
-            >
-              Log In
+
+          <div className="flex items-center gap-3">
+            <Link to="/login" className="ghost-button hidden text-sm font-medium sm:inline-flex">
+              Sign in
             </Link>
-            <Link
-              to="/register"
-              className="py-2 px-5 bg-[var(--accent)] text-white text-sm font-semibold rounded-lg hover:bg-[var(--accent-light)] transition-mindflow glow-shadow"
-            >
-              Get Started Free
+            <Link to="/register" className="primary-button px-5 py-3 text-sm">
+              Get started
             </Link>
           </div>
-        </div>
-      </nav>
+        </nav>
 
-      {/* Hero */}
-      <section className="relative pt-20 pb-12 lg:pt-28 lg:pb-16 px-6 max-w-5xl mx-auto z-10">
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={staggerContainer}
-          className="text-center max-w-3xl mx-auto"
-        >
+        <section className="grid items-center gap-8 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
           <motion.div
-            variants={fadeInUp}
-            className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[var(--accent)]/15 border border-[var(--border-accent)] text-[var(--accent-light)] text-xs font-semibold mb-8 uppercase tracking-widest"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="space-y-6"
           >
-            <Sparkles size={13} />
-            AI-Powered Study Tools
-          </motion.div>
+            <div className="pill-badge">
+              <Sparkles size={14} className="text-[var(--accent)]" />
+              Minimal by design
+            </div>
 
-          <motion.h1
-            variants={fadeInUp}
-            className="font-heading text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.08] mb-6"
-          >
-            Study smarter,
-            <br className="hidden sm:block" />
-            <span className="text-[var(--accent-light)]">not harder.</span>
-          </motion.h1>
+            <div className="space-y-4">
+              <h1 className="font-heading max-w-3xl text-5xl font-bold leading-tight tracking-tight sm:text-6xl">
+                Study in a cleaner workspace that stays out of your way.
+              </h1>
+              <p className="max-w-2xl text-lg leading-8 text-[var(--text-secondary)]">
+                MindFlow helps you upload notes, generate study material, and review everything from one calm, simple
+                interface.
+              </p>
+            </div>
 
-          <motion.p
-            variants={fadeInUp}
-            className="text-lg md:text-xl text-[var(--text-secondary)] mb-10 max-w-2xl mx-auto font-medium leading-relaxed"
-          >
-            Transform any PDF, notes, or lecture into flashcards, quizzes, and spaced-repetition schedules — powered by AI.
-          </motion.p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link to="/register" className="primary-button justify-center px-6 text-base">
+                Create account
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/login" className="secondary-button justify-center px-6 text-base">
+                Open workspace
+              </Link>
+            </div>
 
-          <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              to="/register"
-              className="w-full sm:w-auto px-8 py-3.5 bg-[var(--accent)] text-white rounded-xl font-semibold hover:bg-[var(--accent-light)] transition-mindflow glow-shadow flex items-center justify-center gap-2"
-            >
-              Start Learning Free <ArrowRight size={18} />
-            </Link>
-            <span className="text-[var(--text-muted)] text-xs font-medium">No credit card required</span>
-          </motion.div>
-        </motion.div>
-
-        {/* Hero mockup */}
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          className="w-full max-w-4xl mx-auto mt-16"
-        >
-          <div className="glass-card rounded-2xl overflow-hidden border-[var(--border)]">
-            <div className="h-11 bg-[var(--bg-elevated)] border-b border-[var(--border)] flex items-center px-4 gap-2">
-              <div className="flex gap-1.5">
-                <div className="w-3 h-3 rounded-full bg-[var(--text-muted)]/30" />
-                <div className="w-3 h-3 rounded-full bg-[var(--text-muted)]/30" />
-                <div className="w-3 h-3 rounded-full bg-[var(--text-muted)]/30" />
-              </div>
-              <div className="flex-1 flex justify-center">
-                <div className="bg-[var(--bg-surface)] border border-[var(--border)] rounded-lg px-4 py-1 text-xs text-[var(--text-muted)] w-56 text-center font-mono">
-                  mindflow.app/study
+            <div className="grid gap-3 sm:grid-cols-3">
+              {[
+                { label: 'Formats', value: 'PDF + TXT' },
+                { label: 'Outputs', value: 'Cards, quiz, review' },
+                { label: 'Setup', value: 'Under a minute' },
+              ].map((item) => (
+                <div key={item.label} className="glass-card p-5">
+                  <div className="text-sm font-medium text-[var(--text-muted)]">{item.label}</div>
+                  <div className="mt-2 text-lg font-semibold text-[var(--text-primary)]">{item.value}</div>
                 </div>
+              ))}
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.08 }}
+            className="section-shell p-6 sm:p-7"
+          >
+            <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] pb-4">
+              <div>
+                <div className="text-base font-semibold">Today&apos;s study flow</div>
+                <div className="mt-1 text-sm text-[var(--text-muted)]">A simpler view of the product</div>
+              </div>
+              <div className="info-chip">
+                <Clock3 size={14} className="text-[var(--accent)]" />
+                18 min
               </div>
             </div>
-            <div className="p-6 grid grid-cols-3 gap-4 bg-[var(--bg-surface)]/50">
-              <div className="col-span-2 glass-card rounded-xl p-6">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="w-7 h-7 bg-[var(--accent)]/20 rounded-lg flex items-center justify-center">
-                    <Layers size={14} className="text-[var(--accent-light)]" />
+
+            <div className="mt-5 space-y-4">
+              <div className="glass-card p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-medium text-[var(--text-muted)]">Current deck</div>
+                    <div className="mt-1 text-lg font-semibold">Binary search essentials</div>
                   </div>
-                  <span className="text-sm font-semibold">Flashcard Study</span>
-                  <span className="ml-auto font-mono text-xs text-[var(--text-muted)]">3 / 12</span>
+                  <div className="rounded-full bg-[var(--bg-strong)] px-3 py-1 text-sm font-medium text-[var(--accent)]">
+                    Ready
+                  </div>
                 </div>
-                <div className="bg-[var(--bg-elevated)] rounded-lg p-5 border border-[var(--border)] mb-3">
-                  <p className="text-[10px] font-mono text-[var(--text-muted)] uppercase tracking-wider mb-2">Question</p>
-                  <p className="text-[var(--text-primary)] font-medium">What is the time complexity of binary search?</p>
+
+                <div className="mt-5 rounded-2xl bg-[var(--bg-elevated)] p-5">
+                  <div className="text-sm font-medium text-[var(--text-muted)]">Flashcard prompt</div>
+                  <p className="mt-3 text-lg font-semibold leading-8">
+                    What is the time complexity of binary search on a sorted array?
+                  </p>
                 </div>
-                <div className="flex gap-2">
-                  {['Hard', 'Okay', 'Good', 'Easy'].map((label, i) => (
-                    <div
-                      key={i}
-                      className="flex-1 py-2 text-center rounded-lg text-xs font-semibold border border-[var(--border)]"
-                      style={{
-                        background: i === 2 ? 'rgba(16, 185, 129, 0.1)' : 'var(--bg-elevated)',
-                        color: i === 2 ? 'var(--success)' : 'var(--text-secondary)',
-                      }}
-                    >
-                      {label}
+
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {['Again', 'Hard', 'Good', 'Easy'].map((item) => (
+                    <div key={item} className="rounded-full border border-[var(--border)] px-3 py-2 text-center text-sm font-medium">
+                      {item}
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="space-y-4">
+
+              <div className="grid gap-3 sm:grid-cols-3">
                 {[
-                  { label: 'Progress', value: '87%', sub: '↑ 12% this week', color: 'var(--accent)' },
-                  { label: 'Streak', value: '7 Days', sub: '🔥', color: 'var(--warm)' },
-                  { label: 'XP Today', value: '+120', sub: 'XP', color: 'var(--accent-light)' },
-                ].map((stat, i) => (
-                  <div key={i} className="glass-card rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BarChart3 size={12} className="text-[var(--text-muted)]" />
-                      <span className="text-[10px] font-mono text-[var(--text-muted)] uppercase">{stat.label}</span>
+                  { icon: BookOpen, label: 'Source', value: 'Lecture notes' },
+                  { icon: CheckCircle, label: 'Cards', value: '15 generated' },
+                  { icon: Target, label: 'Goal', value: 'Quiz after review' },
+                ].map((item) => (
+                  <div key={item.label} className="glass-card p-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--bg-elevated)] text-[var(--accent)]">
+                      <item.icon size={18} />
                     </div>
-                    <div className="font-mono text-xl font-bold" style={{ color: stat.color }}>
-                      {stat.value}
-                    </div>
-                    {stat.sub && <div className="text-xs text-[var(--success)] font-medium mt-0.5">{stat.sub}</div>}
+                    <div className="mt-4 text-sm font-medium text-[var(--text-muted)]">{item.label}</div>
+                    <div className="mt-1 font-semibold">{item.value}</div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-        </motion.div>
-      </section>
+          </motion.div>
+        </section>
 
-      {/* Social proof */}
-      <section className="py-12 border-y border-[var(--border)]">
-        <div className="max-w-4xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-            <div className="flex items-center gap-2">
-              <div className="flex -space-x-2">
-                {['A', 'K', 'S', 'R'].map((l, i) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full border-2 border-[var(--bg-base)] flex items-center justify-center text-xs font-bold"
-                    style={{
-                      background: ['var(--accent)', 'var(--accent-light)', '#A78BFA', 'var(--warm)'][i],
-                      color: 'white',
-                    }}
-                  >
-                    {l}
+        <section className="grid gap-4 md:grid-cols-3">
+          {features.map((feature) => (
+            <div key={feature.title} className="glass-card p-6">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                <feature.icon size={20} />
+              </div>
+              <h2 className="mt-5 text-xl font-semibold">{feature.title}</h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{feature.description}</p>
+            </div>
+          ))}
+        </section>
+
+        <section className="section-shell mt-10 p-8 sm:p-10">
+          <div className="grid gap-6 lg:grid-cols-[1fr_auto] lg:items-center">
+            <div>
+              <div className="kicker">How it works</div>
+              <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                One simple loop for study sessions.
+              </h2>
+              <div className="mt-6 grid gap-3 sm:grid-cols-3">
+                {steps.map((step, index) => (
+                  <div key={step.label} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-5">
+                    <div className="text-sm font-medium text-[var(--text-muted)]">Step {index + 1}</div>
+                    <div className="mt-2 text-lg font-semibold">{step.label}</div>
+                    <div className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{step.detail}</div>
                   </div>
                 ))}
               </div>
-              <span className="text-sm font-medium text-[var(--text-secondary)]">1,200+ students</span>
             </div>
-            <div className="flex items-center gap-1.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={16} className="text-[var(--warm)] fill-[var(--warm)]" />
-              ))}
-              <span className="text-sm font-medium text-[var(--text-secondary)]">4.9/5 rating</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle size={16} className="text-[var(--success)]" />
-              <span className="text-sm font-medium text-[var(--text-secondary)]">100% Free to start</span>
+
+            <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
+              <Link to="/register" className="primary-button min-w-[200px] justify-center px-6">
+                Start now
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/login" className="secondary-button min-w-[200px] justify-center px-6">
+                Sign in
+              </Link>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="py-24">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16 max-w-2xl mx-auto">
-            <p className="text-[var(--accent)] font-semibold text-sm uppercase tracking-widest mb-3">How it works</p>
-            <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight mb-4">
-              Everything you need to ace your exams
-            </h2>
-            <p className="text-[var(--text-secondary)] text-lg font-medium">Three powerful tools, one seamless workflow.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-5">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="md:col-span-2 glass-card p-8 rounded-2xl hover:border-[var(--border-accent)]"
-            >
-              <div className="flex items-start gap-5">
-                <div className="w-14 h-14 bg-[var(--accent)]/20 rounded-2xl flex items-center justify-center flex-shrink-0 border border-[var(--border-accent)]">
-                  <Zap size={28} className="text-[var(--accent-light)]" />
-                </div>
-                <div>
-                  <div className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest mb-2">Step 01</div>
-                  <h3 className="font-heading text-2xl font-bold mb-2">Instant Generation</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    Upload any PDF or paste your notes. Our AI transforms them into structured flashcards and quizzes in under 10 seconds.
-                  </p>
-                </div>
-              </div>
-              <div className="mt-6 grid grid-cols-3 gap-3">
-                {[
-                  { icon: FileText, label: 'PDF Upload' },
-                  { icon: Layers, label: 'Flashcards' },
-                  { icon: BookOpen, label: 'Quiz' },
-                ].map((item, i) => (
-                  <div key={i} className="glass-card rounded-xl p-3 text-center">
-                    <item.icon size={20} className="mx-auto text-[var(--text-muted)] mb-1" />
-                    <span className="text-xs font-medium text-[var(--text-secondary)]">{item.label}</span>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="glass-card p-8 rounded-2xl hover:border-[var(--border-accent)] flex flex-col"
-            >
-              <div className="w-14 h-14 bg-[var(--accent)]/20 rounded-2xl flex items-center justify-center mb-5 border border-[var(--border-accent)]">
-                <Brain size={28} className="text-[var(--accent-light)]" />
-              </div>
-              <div className="text-xs font-mono text-[var(--accent)] uppercase tracking-widest mb-2">Step 02</div>
-              <h3 className="font-heading text-xl font-bold mb-2">Spaced Repetition</h3>
-              <p className="text-[var(--text-secondary)] text-sm flex-1">
-                Our SRS algorithm schedules reviews at the optimal time for long-term retention.
-              </p>
-              <div className="flex items-center gap-2 mt-5">
-                <Clock size={14} className="text-[var(--accent)]" />
-                <span className="text-xs font-semibold text-[var(--accent-light)]">Scientifically proven</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-              className="glass-card p-8 rounded-2xl hover:border-[var(--border-accent)] flex flex-col"
-            >
-              <div className="w-14 h-14 bg-[var(--warm)]/20 rounded-2xl flex items-center justify-center mb-5 border border-[var(--warm)]/30">
-                <Trophy size={28} className="text-[var(--warm)]" />
-              </div>
-              <div className="text-xs font-mono text-[var(--warm)] uppercase tracking-widest mb-2">Step 03</div>
-              <h3 className="font-heading text-xl font-bold mb-2">Gamified Progress</h3>
-              <p className="text-[var(--text-secondary)] text-sm flex-1">
-                Earn XP, level up, and maintain study streaks. Learning feels rewarding.
-              </p>
-              <div className="flex items-center gap-2 mt-5">
-                <Star size={14} className="text-[var(--warm)]" />
-                <span className="text-xs font-semibold text-[var(--warm)]">Level up system</span>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="md:col-span-2 glass-card p-8 rounded-2xl hover:border-[var(--border-accent)]"
-            >
-              <div className="flex items-start gap-5">
-                <div className="w-14 h-14 bg-[var(--success)]/20 rounded-2xl flex items-center justify-center flex-shrink-0 border border-[var(--success)]/30">
-                  <ShieldCheck size={28} className="text-[var(--success)]" />
-                </div>
-                <div>
-                  <div className="text-xs font-mono text-[var(--success)] uppercase tracking-widest mb-2">Built for you</div>
-                  <h3 className="font-heading text-2xl font-bold mb-2">AI Tutor & Review Sheets</h3>
-                  <p className="text-[var(--text-secondary)] leading-relaxed">
-                    Chat with an AI tutor that knows your material. Generate cheat sheets. Everything saved to your library.
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="py-24 bg-[var(--bg-surface)] border-y border-[var(--border)]">
-        <div className="max-w-3xl mx-auto text-center px-6">
-          <h2 className="font-heading text-3xl md:text-5xl font-bold tracking-tight mb-6">
-            Ready to ace your next exam?
-          </h2>
-          <p className="text-lg text-[var(--text-secondary)] mb-10 font-medium max-w-xl mx-auto">
-            Join thousands of students learning faster with MindFlow.
-          </p>
-          <Link
-            to="/register"
-            className="inline-flex items-center gap-2.5 px-8 py-4 bg-[var(--accent)] text-white rounded-xl font-bold text-lg hover:bg-[var(--accent-light)] transition-mindflow glow-shadow"
-          >
-            Create Your Free Account <ArrowRight size={20} />
-          </Link>
-          <p className="text-[var(--text-muted)] text-sm font-medium mt-6">Setup takes less than 30 seconds</p>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="py-12 border-t border-[var(--border)]">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span className="text-[var(--accent)] font-bold">✦</span>
-              <span className="font-heading font-bold">MindFlow</span>
-            </div>
-            <p className="text-sm text-[var(--text-muted)] font-medium">
-              © {new Date().getFullYear()} MindFlow. Built for optimal learning.
-            </p>
-          </div>
-        </div>
-      </footer>
+        </section>
+      </div>
     </div>
   );
 };
