@@ -91,7 +91,7 @@ export const StudyProvider = ({ children }) => {
             const safeText = text.substring(0, 25000);
             const prompt = `Generate 15 flashcards based on the following text. 
 Return the result as a strictly formatted JSON array of objects. 
-Each object must have "question" and "answer" keys.
+Each object must have "question", "answer", "explanation", and "topics" (an array of 1-3 short topic tags that describe what subject area this card covers, e.g. ["photosynthesis", "plant biology"]).
 Do not output any markdown formatting (like \`\`\`json), just the raw JSON.
 
 Text Content:

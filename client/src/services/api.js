@@ -214,3 +214,43 @@ export const updateUserStats = async (statsData) => {
     }
 };
 
+/**
+ * Generate an Adaptive Quiz from all user decks
+ * @param {number} questionCount - Number of questions to generate (default 10, max 20)
+ */
+export const generateAdaptiveQuiz = async (questionCount = 10) => {
+    try {
+        const response = await api.post('/adaptive/generate', { questionCount });
+        return response.data;
+    } catch (error) {
+        console.error('Adaptive Quiz Generation Error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Submit Adaptive Quiz results for topic score updates
+ * @param {Array} results - Array of { topic: string, correct: boolean }
+ */
+export const submitAdaptiveResults = async (results) => {
+    try {
+        const response = await api.post('/adaptive/submit', { results });
+        return response.data;
+    } catch (error) {
+        console.error('Adaptive Quiz Submit Error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch user's topic mastery scores
+ */
+export const fetchTopicScores = async () => {
+    try {
+        const response = await api.get('/adaptive/topics');
+        return response.data;
+    } catch (error) {
+        console.error('Fetch Topic Scores Error:', error);
+        throw error;
+    }
+};

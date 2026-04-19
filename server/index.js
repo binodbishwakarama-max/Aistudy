@@ -53,6 +53,7 @@ app.use('/api/chat', aiLimiter, require('./routes/chat'));
 app.use('/api/stats', require('./routes/stats'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/search', aiLimiter, require('./routes/search'));
+app.use('/api/adaptive', aiLimiter, require('./routes/adaptive'));
 
 app.get('/api/health', (_req, res) => {
     res.json({

@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   BarChart3,
   BookOpen,
+  Brain,
   CheckCircle,
   FileText,
   HelpCircle,
@@ -18,6 +19,7 @@ import ChatInterface from '../components/ChatInterface';
 import Flashcard from '../components/Flashcard';
 import Quiz from '../components/Quiz';
 import ReviewSheet from '../components/ReviewSheet';
+import AdaptiveQuiz from '../components/AdaptiveQuiz';
 import SRSDashboard from '../components/SRSDashboard';
 import StudyLibrary from '../components/StudyLibrary';
 import { useAuth } from '../context/AuthContext';
@@ -42,6 +44,10 @@ const modeDetails = {
     title: 'Library',
     description: 'Open a saved session and continue where you left off.',
   },
+  adaptive: {
+    title: 'Adaptive',
+    description: 'AI-powered quiz that targets your weak topics and adjusts difficulty in real-time.',
+  },
 };
 
 const buildSessionKey = (items) => items.map((item) => JSON.stringify(item)).join('|');
@@ -55,6 +61,7 @@ const getModeFromLocation = (pathname, search, hasText) => {
 
   if (queryMode === 'review') return 'review';
   if (queryMode === 'library') return 'library';
+  if (queryMode === 'adaptive') return 'adaptive';
 
   return hasText ? 'flashcards' : 'library';
 };
@@ -78,6 +85,7 @@ const Study = () => {
     { id: 'flashcards', label: 'Flashcards', icon: Layers, to: '/flashcards' },
     { id: 'quiz', label: 'Quizzes', icon: HelpCircle, to: '/quizzes' },
     { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
+    { id: 'adaptive', label: 'Adaptive', icon: Brain, to: '/study?mode=adaptive' },
     { id: 'library', label: 'Library', icon: BookOpen, to: '/study' },
     { id: 'analytics', label: 'Analytics', icon: BarChart3, to: '/analytics' },
   ];
@@ -268,6 +276,8 @@ const Study = () => {
               )}
 
               {mode === 'review' && <ReviewSheet flashcards={flashcards} />}
+
+              {mode === 'adaptive' && <AdaptiveQuiz />}
 
               {mode === 'library' && <StudyLibrary onSelect={() => navigate('/flashcards')} />}
             </Card>

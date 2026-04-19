@@ -124,6 +124,7 @@ router.post('/save', async (req, res) => {
                 front: card.front,
                 back: card.back,
                 explanation: card.explanation,
+                topics: card.topics || [],
                 embedding 
             };
         }));

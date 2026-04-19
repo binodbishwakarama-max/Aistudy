@@ -25,6 +25,7 @@ test('parseStructuredGeneration validates flashcards', () => {
         question: 'Q',
         answer: 'A',
         explanation: 'Because',
+        topics: [],
         next_review_at: null,
         srs_interval: 0,
         srs_ease_factor: 2.5,

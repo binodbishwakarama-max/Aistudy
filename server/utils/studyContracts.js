@@ -7,10 +7,16 @@ const coerceInteger = (value) => {
     return Number.isInteger(parsed) ? parsed : null;
 };
 
+const normalizeTopics = (topics) => {
+    if (!Array.isArray(topics)) return [];
+    return topics.map((t) => normalizeText(t)).filter(Boolean);
+};
+
 const normalizeFlashcardForStorage = (card = {}) => ({
     front: normalizeText(card.front) || normalizeText(card.question),
     back: normalizeText(card.back) || normalizeText(card.answer),
-    explanation: normalizeText(card.explanation)
+    explanation: normalizeText(card.explanation),
+    topics: normalizeTopics(card.topics)
 });
 
 const normalizeFlashcardForClient = (card = {}) => ({
@@ -18,6 +24,7 @@ const normalizeFlashcardForClient = (card = {}) => ({
     question: normalizeText(card.question) || normalizeText(card.front),
     answer: normalizeText(card.answer) || normalizeText(card.back),
     explanation: normalizeText(card.explanation),
+    topics: normalizeTopics(card.topics),
     next_review_at: card.next_review_at || null,
     srs_interval: card.srs_interval ?? 0,
     srs_ease_factor: card.srs_ease_factor ?? 2.5,
