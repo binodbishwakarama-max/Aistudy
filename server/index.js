@@ -4,8 +4,12 @@ const rateLimit = require('express-rate-limit');
 const { serverConfig } = require('./config');
 const { logger } = require('./utils/logger');
 const { getAIStatus, probePrimaryProvider } = require('./services/aiService');
+const { initializeWorker } = require('./queue/worker');
 
 const app = express();
+
+// Start Background Worker
+initializeWorker();
 
 process.on('uncaughtException', (error) => {
     logger.error('Uncaught exception', { reason: error.message });
@@ -47,6 +51,7 @@ app.use('/api/generate', aiLimiter, require('./routes/generate'));
 app.use('/api/study', require('./routes/study'));
 app.use('/api/chat', aiLimiter, require('./routes/chat'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/jobs', require('./routes/jobs'));
 
 app.get('/api/health', (_req, res) => {
     res.json({

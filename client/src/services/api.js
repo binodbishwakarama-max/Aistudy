@@ -56,7 +56,33 @@ api.interceptors.request.use(async (config) => {
 export const generateContent = async (prompt, system, contentType = 'text') => {
     try {
         const response = await api.post('/generate', { prompt, system, contentType });
-        return response.data;
+        
+        // Output from the synchronous fallback (No Redis configured) or direct return
+        if (!response.data.jobId) {
+            return response.data;
+        }
+
+        // BullMQ Pipeline: Start polling for job completion
+        const { jobId } = response.data;
+        let jobState = 'queued';
+        let result = null;
+
+        while (jobState !== 'completed' && jobState !== 'failed') {
+            // Wait 1.5 seconds before asking the server again
+            await new Promise((resolve) => setTimeout(resolve, 1500));
+            
+            const jobStatusRes = await api.get(`/jobs/${jobId}`);
+            
+            jobState = jobStatusRes.data.state;
+            
+            if (jobState === 'completed') {
+                result = jobStatusRes.data.result;
+            } else if (jobState === 'failed') {
+                throw new Error(jobStatusRes.data.error || 'AI generation job failed in the background.');
+            }
+        }
+
+        return result;
     } catch (error) {
         console.error("AI Generation Error:", error);
         throw error; // Re-throw for UI handling
