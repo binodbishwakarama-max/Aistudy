@@ -191,22 +191,14 @@ router.post('/generate', async (req, res) => {
 
         const generation = await generateText({ prompt, systemInstruction });
 
-        // 6. Parse the response
+        // 6. Parse the response using the shared robust parser
+        const { extractStructuredJson, unwrapArray } = require('../utils/aiPayloads');
         let questions;
         try {
-            const cleaned = generation.text
-                .replace(/^```(?:json)?\s*/i, '')
-                .replace(/\s*```$/i, '')
-                .trim();
-            questions = JSON.parse(cleaned);
+            const parsed = extractStructuredJson(generation.text);
+            questions = unwrapArray(parsed);
         } catch (parseError) {
-            // Try to extract JSON array from the response
-            const arrayMatch = generation.text.match(/\[[\s\S]*\]/);
-            if (arrayMatch) {
-                questions = JSON.parse(arrayMatch[0]);
-            } else {
-                throw new Error('AI returned malformed quiz data.');
-            }
+            throw new Error('AI returned malformed quiz data: ' + parseError.message);
         }
 
         if (!Array.isArray(questions) || questions.length === 0) {

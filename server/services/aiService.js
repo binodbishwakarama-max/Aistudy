@@ -44,7 +44,15 @@ const recordFailure = (provider, error) => {
 
     if (shouldDisableProvider(error)) {
         providerState[provider].available = false;
-        logger.warn(`${provider} disabled after provider error`, { reason: message });
+        logger.warn(`${provider} disabled after provider error. Will attempt auto-recovery in 5 minutes.`, { reason: message });
+        
+        // Auto-recovery cooldown (5 minutes)
+        setTimeout(() => {
+            if (!providerState[provider].available && providerState[provider].configured) {
+                providerState[provider].available = true;
+                logger.info(`Auto-recovery: ${provider} re-enabled after cooldown.`);
+            }
+        }, 5 * 60 * 1000);
     }
 };
 

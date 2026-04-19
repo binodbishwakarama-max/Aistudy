@@ -86,5 +86,6 @@ const parseStructuredGeneration = ({ rawText, contentType }) => {
 
 module.exports = {
     extractStructuredJson,
-    parseStructuredGeneration
+    parseStructuredGeneration,
+    unwrapArray
 };

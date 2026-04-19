@@ -37,12 +37,32 @@ export const StudyProvider = ({ children }) => {
         setError(null);
 
         try {
+            // Validate file before processing
+            const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB
+            const ALLOWED_TYPES = ['application/pdf', 'text/plain', 'text/markdown'];
+
+            if (!file) {
+                throw new Error('No file selected.');
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                throw new Error(`File is too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum is 20MB.`);
+            }
+
+            if (!ALLOWED_TYPES.includes(file.type) && !file.name.endsWith('.txt') && !file.name.endsWith('.md')) {
+                throw new Error('Unsupported file type. Please upload a PDF or text file.');
+            }
+
             const extractedText = file.type === 'application/pdf'
                 ? await (async () => {
                     const { extractTextFromPDF } = await import('../services/pdfProcessor');
                     return extractTextFromPDF(file);
                 })()
                 : await file.text();
+
+            if (!extractedText || !extractedText.trim()) {
+                throw new Error('No readable text found in the file. The PDF may be image-based or empty.');
+            }
 
             setText(extractedText);
             setFlashcards([]);
@@ -117,7 +137,7 @@ ${safeText}`;
             );
 
             if (saveResult.ok) {
-                toast.success(`Flashcards generated and saved with ${response.provider}.`);
+                toast.success(`Flashcards generated and saved with ${response?.provider || 'AI'}.`);
                 saveResult.warnings.forEach((warning) => toast(warning));
             } else {
                 toast.error(saveResult.error || 'Generated, but auto-save failed.');
@@ -172,7 +192,7 @@ ${safeText}`;
             );
 
             if (saveResult.ok) {
-                toast.success(`Quiz generated and saved with ${response.provider}.`);
+                toast.success(`Quiz generated and saved with ${response?.provider || 'AI'}.`);
                 saveResult.warnings.forEach((warning) => toast(warning));
             } else {
                 toast.error(saveResult.error || 'Generated quiz, but auto-save failed.');
