@@ -171,7 +171,7 @@ const Quiz = ({ questions }) => {
 
         <div className="mt-6 space-y-3">
           {currentQuestion?.options?.map((option, index) => {
-            let stateStyles = 'border-[var(--border)] bg-white text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]';
+            let stateStyles = 'border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:bg-[var(--bg-elevated)]';
 
             if (isAnswered) {
               if (index === currentQuestion.correctIndex) {
@@ -179,7 +179,7 @@ const Quiz = ({ questions }) => {
               } else if (index === selectedOption) {
                 stateStyles = 'border-[rgba(217,48,37,0.3)] bg-[rgba(217,48,37,0.08)] text-[var(--danger)]';
               } else {
-                stateStyles = 'border-[var(--border)] bg-white text-[var(--text-muted)] opacity-60';
+                stateStyles = 'border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-muted)] opacity-60';
               }
             }
 

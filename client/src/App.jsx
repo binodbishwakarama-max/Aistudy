@@ -16,6 +16,7 @@ const Upload = lazy(() => import('./pages/Upload'));
 const Study = lazy(() => import('./pages/Study'));
 const Settings = lazy(() => import('./pages/Settings'));
 const StatsDashboard = lazy(() => import('./components/StatsDashboard'));
+const NotFound = lazy(() => import('./pages/NotFound'));
 
 const RouteFallback = () => (
   <div className="flex min-h-[60vh] items-center justify-center px-6">
@@ -65,6 +66,7 @@ function App() {
                     <Route path="/analytics" element={<ProtectedRoute><StatsDashboard /></ProtectedRoute>} />
                     <Route path="/stats" element={<ProtectedRoute><StatsDashboard /></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
               </ErrorBoundary>

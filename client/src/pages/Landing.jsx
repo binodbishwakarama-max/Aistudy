@@ -174,13 +174,13 @@ const Landing = () => {
                             What is the time complexity of binary search on a sorted array?
                           </div>
                         </div>
-                        <div className="rounded-2xl bg-white px-3 py-2 text-xs font-semibold text-[var(--accent)] shadow-[var(--shadow-soft)]">
+                        <div className="rounded-2xl bg-[var(--bg-card)] px-3 py-2 text-xs font-semibold text-[var(--accent)] shadow-[var(--shadow-soft)]">
                           Card 04 / 15
                         </div>
                       </div>
                       <div className="mt-5 grid grid-cols-2 gap-3">
                         {['Again', 'Hard', 'Good', 'Easy'].map((rating) => (
-                          <div key={rating} className="rounded-2xl border border-[var(--border)] bg-white px-3 py-3 text-center text-sm font-medium">
+                          <div key={rating} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3 text-center text-sm font-medium">
                             {rating}
                           </div>
                         ))}

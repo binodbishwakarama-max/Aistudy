@@ -194,7 +194,7 @@ const Study = () => {
                   className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-mindflow ${
                     isActive
                       ? 'border border-[var(--border-accent)] bg-[var(--bg-strong)] text-[var(--accent)]'
-                      : 'border border-[var(--border)] bg-white text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]'
+                      : 'border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]'
                   }`}
                 >
                   <tab.icon size={16} />

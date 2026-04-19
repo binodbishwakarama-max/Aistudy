@@ -136,7 +136,7 @@ const FileUpload = () => {
                   className="flex min-h-[220px] flex-col justify-between"
                 >
                   <div>
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-[var(--accent)] shadow-[var(--shadow-soft)]">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-card)] text-[var(--accent)] shadow-[var(--shadow-soft)]">
                       <Upload size={22} />
                     </div>
 

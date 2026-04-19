@@ -148,3 +148,30 @@ export const deleteDeck = async (id) => {
 };
 
 export default api;
+
+/**
+ * Fetch Gamification Stats
+ */
+export const fetchUserStats = async () => {
+    try {
+        const response = await api.get('/stats');
+        return response.data;
+    } catch (error) {
+        console.error('Fetch Stats Error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update Gamification Stats
+ */
+export const updateUserStats = async (statsData) => {
+    try {
+        const response = await api.patch('/stats', statsData);
+        return response.data;
+    } catch (error) {
+        console.error('Update Stats Error:', error);
+        throw error;
+    }
+};
+

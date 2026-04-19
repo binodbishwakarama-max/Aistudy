@@ -271,7 +271,7 @@ const Dashboard = () => {
 
             <Card variant="accent" className="p-6 sm:p-8">
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[var(--accent)] shadow-[var(--shadow-soft)]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-card)] text-[var(--accent)] shadow-[var(--shadow-soft)]">
                   <Clock3 size={20} />
                 </div>
                 <div>

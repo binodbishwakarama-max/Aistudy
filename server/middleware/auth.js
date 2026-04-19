@@ -1,4 +1,5 @@
 const supabase = require('../utils/db');
+const { logger } = require('../utils/logger');
 
 /**
  * Middleware to verify Supabase JWT token
@@ -16,7 +17,7 @@ const authMiddleware = async (req, res, next) => {
         const { data: { user }, error } = await supabase.auth.getUser(token);
 
         if (error || !user) {
-            console.error('Auth Error:', error?.message);
+            logger.error('Auth token verification failed', { reason: error?.message });
             return res.status(401).json({ error: 'Invalid token' });
         }
 
@@ -24,9 +25,10 @@ const authMiddleware = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.error('Auth Middleware Error:', error);
+        logger.error('Auth middleware error', { reason: error.message });
         res.status(500).json({ error: 'Internal server error during authentication' });
     }
 };
 
 module.exports = authMiddleware;
+

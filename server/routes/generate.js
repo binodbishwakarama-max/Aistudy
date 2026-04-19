@@ -1,9 +1,12 @@
 const express = require('express');
 const { generateText } = require('../services/aiService');
 const { parseStructuredGeneration } = require('../utils/aiPayloads');
+const authMiddleware = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 router.post('/', async (req, res) => {
     try {

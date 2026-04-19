@@ -1,8 +1,11 @@
 const express = require('express');
 const { generateChatReply } = require('../services/aiService');
+const authMiddleware = require('../middleware/auth');
 const { logger } = require('../utils/logger');
 
 const router = express.Router();
+
+router.use(authMiddleware);
 
 router.post('/', async (req, res) => {
     try {

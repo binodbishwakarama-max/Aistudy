@@ -92,3 +92,30 @@ create policy "Users can update their own quiz questions"
 create policy "Users can delete their own quiz questions"
   on public.quiz_questions for delete
   using ( exists ( select 1 from public.decks where decks.id = deck_id and decks.user_id = auth.uid() ) );
+
+-- 8. Create 'user_stats' table (Gamification)
+create table if not exists public.user_stats (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references auth.users not null unique,
+  xp integer default 0,
+  level integer default 1,
+  streak integer default 0,
+  last_active date,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- 9. Enable RLS for user_stats
+alter table public.user_stats enable row level security;
+
+-- 10. Create Policies for user_stats
+create policy "Users can view their own stats"
+  on public.user_stats for select
+  using ( auth.uid() = user_id );
+
+create policy "Users can insert their own stats"
+  on public.user_stats for insert
+  with check ( auth.uid() = user_id );
+
+create policy "Users can update their own stats"
+  on public.user_stats for update
+  using ( auth.uid() = user_id );

@@ -44,7 +44,7 @@ const ChartTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
 
   return (
-    <div className="rounded-2xl border border-[var(--border)] bg-white px-3 py-2 text-xs shadow-[var(--shadow-soft)]">
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-2 text-xs shadow-[var(--shadow-soft)]">
       <div className="mb-1 text-[var(--text-muted)]">{label}</div>
       {payload.map((point, index) => (
         <div key={index} className="flex items-center gap-1.5">
@@ -58,7 +58,7 @@ const ChartTooltip = ({ active, payload, label }) => {
 
 const StatCard = ({ icon: Icon, label, value, subtitle, accent = false }) => (
   <div className={`glass-card p-5 ${accent ? 'border-[var(--border-accent)] bg-[var(--bg-strong)]' : ''}`}>
-    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${accent ? 'bg-white text-[var(--accent)]' : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)]'}`}>
+    <div className={`flex h-11 w-11 items-center justify-center rounded-2xl ${accent ? 'bg-[var(--bg-elevated)] text-[var(--accent)]' : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)]'}`}>
       <Icon size={18} />
     </div>
     <div className={`mt-5 text-3xl font-semibold ${accent ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>

@@ -132,11 +132,11 @@ const Layout = ({ children }) => {
                   </div>
                 </div>
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-[var(--border)] bg-white px-3 py-3">
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
                     <div className="text-xs text-[var(--text-muted)]">Level</div>
                     <div className="mt-1 text-lg font-semibold">{gameState.level}</div>
                   </div>
-                  <div className="rounded-2xl border border-[var(--border)] bg-white px-3 py-3">
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
                     <div className="text-xs text-[var(--text-muted)]">Streak</div>
                     <div className="mt-1 text-lg font-semibold">{gameState.streak}d</div>
                   </div>

@@ -133,7 +133,7 @@ const Flashcard = ({ cards }) => {
             transition={{ duration: 0.45 }}
             style={{ transformStyle: 'preserve-3d' }}
           >
-            <div className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-white p-5 shadow-[var(--shadow-soft)] backface-hidden sm:p-8">
+            <div className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[var(--shadow-soft)] backface-hidden sm:p-8">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-medium text-[var(--text-muted)]">Question</div>
                 <button

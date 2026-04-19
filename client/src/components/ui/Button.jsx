@@ -6,7 +6,7 @@ const variantClasses = {
   primary:
     'border-transparent bg-[var(--accent)] text-white shadow-[0_12px_30px_rgba(26,115,232,0.18)] hover:bg-[var(--accent-light)]',
   secondary:
-    'border-[var(--border)] bg-white text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[rgba(255,255,255,0.95)]',
+    'border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-elevated)]',
   ghost: 'border-transparent bg-transparent text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]',
   subtle:
     'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:border-[var(--border-strong)] hover:bg-[var(--bg-card)]',
