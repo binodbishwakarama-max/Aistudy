@@ -18,7 +18,7 @@ const authMiddleware = async (req, res, next) => {
 
         if (error || !user) {
             logger.error('Auth token verification failed', { reason: error?.message });
-            return res.status(401).json({ error: 'Invalid token' });
+            return res.status(401).json({ error: `Invalid token: ${error?.message || 'Verification failed'}` });
         }
 
         // Attach user to request
