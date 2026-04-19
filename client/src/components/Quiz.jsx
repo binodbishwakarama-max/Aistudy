@@ -184,10 +184,12 @@ const Quiz = ({ questions }) => {
             }
 
             return (
-              <button
+              <Motion.button
                 key={index}
                 onClick={() => handleOptionClick(index)}
                 disabled={isAnswered}
+                whileHover={!isAnswered ? { scale: 1.02 } : {}}
+                whileTap={!isAnswered ? { scale: 0.98 } : {}}
                 className={`w-full rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
               >
                 <div className="flex items-center justify-between gap-3">
@@ -197,7 +199,7 @@ const Quiz = ({ questions }) => {
                     <X className="text-[var(--danger)]" size={18} />
                   )}
                 </div>
-              </button>
+              </Motion.button>
             );
           })}
         </div>
@@ -213,10 +215,15 @@ const Quiz = ({ questions }) => {
 
       {isAnswered && (
         <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-          <button onClick={nextQuestion} className="primary-button w-full justify-center px-6 sm:w-auto">
+          <Motion.button 
+            onClick={nextQuestion} 
+            className="primary-button w-full justify-center px-6 sm:w-auto"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
             {currentIndex < shuffledQuestions.length - 1 ? 'Next question' : 'See results'}
             <ArrowRight size={18} />
-          </button>
+          </Motion.button>
         </Motion.div>
       )}
     </div>

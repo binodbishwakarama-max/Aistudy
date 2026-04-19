@@ -115,10 +115,15 @@ const Flashcard = ({ cards }) => {
   return (
     <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <button onClick={isShuffled ? resetOrder : shuffleCards} className="secondary-button px-4 py-2 text-sm">
+        <Motion.button 
+          onClick={isShuffled ? resetOrder : shuffleCards} 
+          className="secondary-button px-4 py-2 text-sm"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <Shuffle size={16} />
           {isShuffled ? 'Reset order' : 'Shuffle'}
-        </button>
+        </Motion.button>
         <div className="info-chip font-mono">
           {currentIndex + 1} / {shuffledCards.length}
         </div>
@@ -130,7 +135,7 @@ const Flashcard = ({ cards }) => {
             className="relative h-full w-full"
             initial={false}
             animate={{ rotateY: isFlipped ? 180 : 0 }}
-            transition={{ duration: 0.45 }}
+            transition={{ type: "spring", stiffness: 260, damping: 20 }}
             style={{ transformStyle: 'preserve-3d' }}
           >
             <div className="absolute flex h-full w-full flex-col justify-between rounded-[28px] border border-[var(--border)] bg-[var(--bg-card)] p-5 shadow-[var(--shadow-soft)] backface-hidden sm:p-8">
@@ -173,35 +178,49 @@ const Flashcard = ({ cards }) => {
       {isFlipped && (
         <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {ratingButtons.map(({ rating, icon: Icon, label, color }) => (
-            <button
+            <Motion.button
               key={rating}
               onClick={() => handleReview(rating)}
               className="glass-card flex flex-col items-center justify-center gap-2 px-3 py-4"
               style={{ borderColor: `${color}30` }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               <Icon size={20} style={{ color }} />
               <span className="text-sm font-medium" style={{ color }}>
                 {label}
               </span>
-            </button>
+            </Motion.button>
           ))}
         </Motion.div>
       )}
 
       <div className="flex flex-wrap justify-center gap-3">
-        <button
+        <Motion.button
           onClick={prevCard}
           disabled={currentIndex === 0}
           className="secondary-button h-12 w-12 p-0 disabled:cursor-not-allowed disabled:opacity-50"
+          whileHover={currentIndex !== 0 ? { scale: 1.05 } : {}}
+          whileTap={currentIndex !== 0 ? { scale: 0.95 } : {}}
         >
           <ChevronLeft size={20} />
-        </button>
-        <button onClick={() => setIsFlipped(!isFlipped)} className="primary-button h-12 w-12 p-0">
+        </Motion.button>
+        <Motion.button 
+          onClick={() => setIsFlipped(!isFlipped)} 
+          className="primary-button h-12 w-12 p-0"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <RotateCw size={20} />
-        </button>
-        <button onClick={nextCard} className="secondary-button h-12 w-12 p-0">
+        </Motion.button>
+        <Motion.button 
+          onClick={nextCard} 
+          className="secondary-button h-12 w-12 p-0"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
           <ChevronRight size={20} />
-        </button>
+        </Motion.button>
       </div>
     </div>
   );
