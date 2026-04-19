@@ -43,9 +43,6 @@ const AdaptiveQuiz = () => {
   const [currentDifficulty, setCurrentDifficulty] = useState('balanced');
 
   // Metadata
-  const [topicBreakdown, setTopicBreakdown] = useState(null);
-  const [provider, setProvider] = useState('');
-  const [totalCards, setTotalCards] = useState(0);
   const [submissionResult, setSubmissionResult] = useState(null);
 
   // Timer
@@ -73,9 +70,6 @@ const AdaptiveQuiz = () => {
     try {
       const data = await generateAdaptiveQuiz(10);
       setQuestions(data.questions);
-      setTopicBreakdown(data.topicBreakdown);
-      setProvider(data.provider);
-      setTotalCards(data.totalFlashcardsUsed);
       setCurrentIndex(0);
       setScore(0);
       setAnswers([]);
@@ -150,7 +144,7 @@ const AdaptiveQuiz = () => {
       if (result.accuracy >= 70) {
         confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to save quiz results, but your answers were recorded locally.');
       setSubmissionResult({
         accuracy: Math.round((score / questions.length) * 100),

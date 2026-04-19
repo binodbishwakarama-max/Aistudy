@@ -6,14 +6,9 @@ const InstallPrompt = () => {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showAndroidInstall, setShowAndroidInstall] = useState(false);
   const [showIosInstall, setShowIosInstall] = useState(false);
-  const [hasDismissed, setHasDismissed] = useState(false);
+  const [hasDismissed, setHasDismissed] = useState(() => !!sessionStorage.getItem('pwa-prompt-dismissed'));
 
   useEffect(() => {
-    // Check if user has already dismissed the prompt in this session
-    if (sessionStorage.getItem('pwa-prompt-dismissed')) {
-      setHasDismissed(true);
-      return;
-    }
 
     // Android / Chrome mechanism
     const handleBeforeInstallPrompt = (e) => {

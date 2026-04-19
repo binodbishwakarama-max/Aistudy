@@ -33,6 +33,40 @@ const isPathActive = (pathname, path) => {
   return pathname === path;
 };
 
+const MobileBottomNav = ({ onOpenSearch, onOpenMenu }) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  return (
+    <nav
+      className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-40 xl:hidden flex justify-around items-center px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]"
+      style={{ height: 'var(--bottom-nav-h)', paddingBottom: 'var(--safe-area-bottom)' }}
+    >
+      <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+        <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
+        <span className="text-[10px] mt-1">Home</span>
+      </button>
+      <button onClick={() => navigate('/study')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+        <BookOpen size={22} className={['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'fill-[var(--accent-glow)]' : ''} />
+        <span className="text-[10px] mt-1">Study</span>
+      </button>
+      <button onClick={onOpenSearch} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
+        <Search size={22} />
+        <span className="text-[10px] mt-1">Search</span>
+      </button>
+      <button onClick={() => navigate('/settings')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/settings' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+        <User size={22} className={location.pathname === '/settings' ? 'fill-[var(--accent-glow)]' : ''} />
+        <span className="text-[10px] mt-1">Profile</span>
+      </button>
+      <button onClick={onOpenMenu} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
+        <Menu size={22} />
+        <span className="text-[10px] mt-1">More</span>
+      </button>
+    </nav>
+  );
+};
+
+
 const Layout = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -89,36 +123,6 @@ const Layout = ({ children }) => {
       setWorkspaceQuery('');
       setMobileSearchOpen(false);
     }
-  };
-
-  const MobileBottomNav = () => {
-    return (
-      <nav
-        className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-40 xl:hidden flex justify-around items-center px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]"
-        style={{ height: 'var(--bottom-nav-h)', paddingBottom: 'var(--safe-area-bottom)' }}
-      >
-        <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-          <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
-          <span className="text-[10px] mt-1">Home</span>
-        </button>
-        <button onClick={() => navigate('/study')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-          <BookOpen size={22} className={['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'fill-[var(--accent-glow)]' : ''} />
-          <span className="text-[10px] mt-1">Study</span>
-        </button>
-        <button onClick={() => { window.scrollTo(0, 0); setMobileSearchOpen(true); }} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
-          <Search size={22} />
-          <span className="text-[10px] mt-1">Search</span>
-        </button>
-        <button onClick={() => navigate('/settings')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/settings' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-          <User size={22} className={location.pathname === '/settings' ? 'fill-[var(--accent-glow)]' : ''} />
-          <span className="text-[10px] mt-1">Profile</span>
-        </button>
-        <button onClick={() => setMobileOpen(true)} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
-          <Menu size={22} />
-          <span className="text-[10px] mt-1">More</span>
-        </button>
-      </nav>
-    );
   };
 
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -447,7 +451,10 @@ const Layout = ({ children }) => {
                 {children}
               </div>
             </main>
-            <MobileBottomNav />
+            <MobileBottomNav 
+              onOpenSearch={() => { window.scrollTo(0, 0); setMobileSearchOpen(true); }} 
+              onOpenMenu={() => setMobileOpen(true)} 
+            />
             <InstallPrompt />
           </div>
         </>

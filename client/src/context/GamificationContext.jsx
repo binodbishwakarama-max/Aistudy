@@ -24,8 +24,10 @@ export const GamificationProvider = ({ children }) => {
     // Load stats from server when user logs in
     useEffect(() => {
         if (!user) {
-            setGameState(DEFAULT_GAME_STATE);
-            setIsStatsLoaded(false);
+            setTimeout(() => {
+                setGameState(DEFAULT_GAME_STATE);
+                setIsStatsLoaded(false);
+            }, 0);
             return;
         }
 
