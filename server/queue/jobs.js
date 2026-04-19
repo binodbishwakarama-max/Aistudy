@@ -15,7 +15,10 @@ if (connection) {
                 type: 'exponential',
                 delay: 2000
             },
-            removeOnComplete: true, // Auto-cleanup
+            removeOnComplete: {
+                age: 300,   // Keep completed jobs for 5 minutes so the client can poll for the result
+                count: 200  // Also cap at 200 completed jobs max to prevent unbounded memory growth
+            },
             removeOnFail: false
         }
     });

@@ -66,12 +66,30 @@ export const generateContent = async (prompt, system, contentType = 'text') => {
         const { jobId } = response.data;
         let jobState = 'queued';
         let result = null;
+        let attempts = 0;
+        const MAX_POLL_ATTEMPTS = 120; // ~3 minutes at 1.5s intervals
 
         while (jobState !== 'completed' && jobState !== 'failed') {
+            attempts++;
+            if (attempts > MAX_POLL_ATTEMPTS) {
+                throw new Error('Generation timed out. Please try again.');
+            }
+
             // Wait 1.5 seconds before asking the server again
             await new Promise((resolve) => setTimeout(resolve, 1500));
             
-            const jobStatusRes = await api.get(`/jobs/${jobId}`);
+            let jobStatusRes;
+            try {
+                jobStatusRes = await api.get(`/jobs/${jobId}`);
+            } catch (pollError) {
+                // If the job was already cleaned up (404), or a transient network error
+                if (pollError.response?.status === 404) {
+                    // Retry a few times — the job may still be completing
+                    if (attempts < 5) continue;
+                    throw new Error('Generation job could not be found. It may have completed too fast or been cleaned up. Please try again.');
+                }
+                throw pollError;
+            }
             
             jobState = jobStatusRes.data.state;
             
