@@ -21,6 +21,7 @@ import { workspaceHighlights, workspaceNavigation } from '../config/workspace';
 import BrandMark from './BrandMark';
 import Button from './ui/Button';
 import Card from './ui/Card';
+import InstallPrompt from './InstallPrompt';
 
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
@@ -441,6 +442,7 @@ const Layout = ({ children }) => {
               </div>
             </main>
             <MobileBottomNav />
+            <InstallPrompt />
           </div>
         </>
       )}
