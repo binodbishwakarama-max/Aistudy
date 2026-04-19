@@ -14,15 +14,6 @@ const router = express.Router();
 
 router.use(authMiddleware);
 
-const isMissingQuizPersistenceError = (error) => {
-    const details = `${error?.message || ''} ${error?.details || ''} ${error?.hint || ''}`.toLowerCase();
-    return (
-        error?.code === '42P01'
-        || details.includes('quiz_questions')
-        || details.includes('question_count')
-    );
-};
-
 const createAuthedSupabaseClient = (token) => createClient(
     serverConfig.supabase.url,
     serverConfig.supabase.serviceRoleKey,
@@ -30,29 +21,15 @@ const createAuthedSupabaseClient = (token) => createClient(
 );
 
 const insertDeckRecord = async (userSupabase, deckPayload) => {
-    let warning = null;
-    let response = await userSupabase
+    const response = await userSupabase
         .from('decks')
         .insert(deckPayload)
         .select()
         .single();
 
-    if (response.error && isMissingQuizPersistenceError(response.error)) {
-        warning = 'Quiz persistence migration is not fully applied yet. Quiz counts may not appear in history until you run the latest SQL.';
-        const fallbackPayload = { ...deckPayload };
-        delete fallbackPayload.question_count;
-
-        response = await userSupabase
-            .from('decks')
-            .insert(fallbackPayload)
-            .select()
-            .single();
-    }
-
     return {
         deck: response.data,
-        error: response.error,
-        warning
+        error: response.error
     };
 };
 
@@ -70,14 +47,6 @@ const fetchQuizRowsForDeck = async (deckId) => {
         .eq('deck_id', deckId)
         .order('created_at', { ascending: true });
 
-    if (error && isMissingQuizPersistenceError(error)) {
-        logger.warn('Quiz persistence schema not available while loading deck', {
-            deckId,
-            reason: error.message
-        });
-        return [];
-    }
-
     if (error) throw error;
     return data || [];
 };
@@ -92,7 +61,7 @@ router.post('/save', async (req, res) => {
         const preparedStudySet = prepareStudySetForSave({ flashcards, quiz });
         userSupabase = createAuthedSupabaseClient(token);
 
-        const { deck, error: deckError, warning } = await insertDeckRecord(userSupabase, {
+        const { deck, error: deckError } = await insertDeckRecord(userSupabase, {
                 user_id: req.user.id,
                 title: typeof title === 'string' && title.trim() ? title.trim() : 'Untitled Study Set',
                 description: typeof originalText === 'string' && originalText.trim()
@@ -150,21 +119,13 @@ router.post('/save', async (req, res) => {
                 .from('quiz_questions')
                 .insert(quizToInsert);
 
-            if (quizError) {
-                if (isMissingQuizPersistenceError(quizError)) {
-                    throw new Error(
-                        'Quiz persistence schema is missing. Run the latest SQL migration before saving quizzes.'
-                    );
-                }
-                throw quizError;
-            }
+            if (quizError) throw quizError;
         }
 
         res.json({
             success: true,
             deckId: deck.id,
-            message: 'Saved to Cloud!',
-            warnings: warning ? [warning] : []
+            message: 'Saved to Cloud!'
         });
     } catch (error) {
         if (createdDeckId && userSupabase) {
