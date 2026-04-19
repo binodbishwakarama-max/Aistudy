@@ -1,81 +1,95 @@
 # Deployment Guide 🚀
 
-This guide will help you deploy your **MindFlow** application to the web so anyone can use it.
+This guide will help you deploy your **MindFlow 2.0** application to the web so anyone can use it. With the MindFlow 2.0 architecture, the app relies on robust cloud infrastructure.
 
-## 🏗️ Architecture
-- **Frontend**: React (Vite) -> Deployed on **Vercel**
-- **Backend**: Node.js (Express) -> Deployed on **Render** (or Railway/Fly.io)
-- **Database**: NeDB (File-based) -> *Note: On free cloud hosting, data may reset when the server restarts. For permanent data, consider switching to MongoDB Atlas.*
+## 🏗️ Architecture Stack
+- **Frontend**: React (Vite) -> Deploy on **Vercel**
+- **Backend**: Node.js (Express) -> Deploy on **Render** (or Railway/Fly.io)
+- **Database / Auth / Vector Store**: **Supabase** (PostgreSQL + pgvector)
+- **Background Queue / Cache**: **Upstash** (Serverless Redis)
+- **AI Providers**: **Gemini** (Primary) & **Groq** (Fallback)
 
 ---
 
-## Part 1: Backend Deployment (Render)
+## Part 1: Infrastructure Setup
+
+### 1. Supabase (Database & Auth)
+1. Go to [Supabase](https://supabase.com) and create a new project.
+2. Under **Project Settings -> Database**, get your `Connection String` (URI).
+3. Under **Project Settings -> API**, get your `Project URL` and `anon public` key.
+4. Go to **SQL Editor** in Supabase and run the migration scripts in order:
+    - `setup.sql` 
+    - `supabase_schema.sql`
+    - `setup_adaptive.sql`
+5. Ensure Email Auth is enabled under **Authentication -> Providers**.
+
+### 2. Upstash (Redis Queue)
+1. Go to [Upstash](https://upstash.com) and create a new Redis database.
+2. Select a region close to your backend Server (e.g., if Render is in US East, pick US East).
+3. Copy the URL that starts with `rediss://...`.
+
+---
+
+## Part 2: Backend Deployment (Render)
 
 1. **Push to GitHub**
    - Make sure your project is pushed to a GitHub repository.
 
 2. **Create Web Service on Render**
    - Go to [render.com](https://render.com) and Sign Up/Login.
-   - Click **"New +"** -> **"Web Service"**.
+   - Click **"New +" -> "Web Service"**.
    - Connect your GitHub repository.
 
 3. **Configure Service**
-   - **Name**: `mindflow-api` (or similar)
-   - **Root Directory**: `server` (Important!)
+   - **Name**: `mindflow-api`
+   - **Root Directory**: `server`
    - **Runtime**: `Node`
    - **Build Command**: `npm install`
    - **Start Command**: `node index.js`
 
 4. **Environment Variables**
-   - Scroll down to "Environment Variables" and add:
+   - Add the following variables:
      - `GROQ_API_KEY`: *(Your Groq API Key)*
-     - `JWT_SECRET`: *(A long random string, e.g., 'super-secret-key-123')*
-     - `MONGODB_URI`: *(Your MongoDB connection string from Atlas, e.g. mongodb+srv://...)*
-     - `PORT`: `3000` (Render might override this, which is fine)
+     - `GEMINI_API_KEY`: *(Your Google/Gemini API Key)*
+     - `SUPABASE_URL`: *(Your Supabase Project URL)*
+     - `SUPABASE_ANON_KEY`: *(Your Supabase Anon Public Key)*
+     - `SUPABASE_SERVICE_ROLE_KEY`: *(Essential for admin auth/DB write actions in the backend)*
+     - `REDIS_URL`: *(Your Upstash rediss:// URL)*
+     - `JWT_SECRET`: *(A long random string)*
+     - `PORT`: `3000` 
 
 5. **Deploy**
    - Click **"Create Web Service"**.
-   - Wait for it to finish. You will get a URL like `https://mindflow-api.onrender.com`.
-   - **Copy this URL**, you need it for the frontend.
+   - Once it's live, copy the URL (e.g., `https://mindflow-api.onrender.com`).
 
 ---
 
-## Part 2: Frontend Deployment (Vercel)
+## Part 3: Frontend Deployment (Vercel)
 
-1. **Configure API URL**
-   - You need to tell the frontend where the backend lives.
-   - In your local code, open `client/src/services/api.js`.
-   - Change `const API_URL = 'http://localhost:3000/api';` to:
-     ```javascript
-     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-     ```
-     *(I will do this code change for you in the next step!)*
-
-2. **Deploy on Vercel**
-   - Go to [vercel.com](https://vercel.com) and Sign Up/Login.
-   - Click **"Add New..."** -> **"Project"**.
+1. **Deploy on Vercel**
+   - Go to [vercel.com](https://vercel.com) and click **"Add New..." -> "Project"**.
    - Import your GitHub repository.
 
-3. **Configure Project**
+2. **Configure Project**
    - **Framework Preset**: Vite (Should detect automatically)
    - **Root Directory**: Click "Edit" and select `client`.
 
-4. **Environment Variables**
-   - Add a new variable:
-     - **Name**: `VITE_API_URL`
-     - **Value**: `https://mindflow-api.onrender.com/api` (The URL from Part 1 + `/api`)
+3. **Environment Variables**
+   - Add the following variables:
+     - `VITE_API_URL`: **(IMPORTANT: Use the Render Backend URL from Part 2 + `/api`. Example: `https://mindflow-api.onrender.com/api`)**
+     - `VITE_SUPABASE_URL`: *(Your Supabase Project URL)*
+     - `VITE_SUPABASE_ANON_KEY`: *(Your Supabase Anon Public Key)*
 
-5. **Deploy**
+4. **Deploy**
    - Click **"Deploy"**.
-   - Once done, you will get your live website URL! 🎉
+   - Once done, Vercel will give you a live URL for your frontend! 🎉
 
 ---
 
-## Part 3: Database Strategy (Important)
-- **Automatic Switching**: Your app is now smart! 🧠
-  - If you provide `MONGODB_URI` on Render, it uses **MongoDB Atlas** (Persistent data).
-  - If you DON'T provide it, it falls back to **NeDB** (Local files), which is fine for testing but data might wipe on restart.
-- **Recommendation**: For a real deployed app, definitely set up the `MONGODB_URI`.
+## Part 4: Final Configurations
+
+- **Rate Limiting**: The backend has built-in rate limiters (`express-rate-limit`) which expect requests coming through proxies. Render sets `X-Forwarded-For` headers, which Express handles safely.
+- **CORS**: Ensure your frontend URL is whitelisted in your CORS settings in `client` or `server` if you hardcode it or use Strict CORS logic. Currently `cors()` accepts all origins by default in dev mode but you may want to restrict this later.
 
 ## 🎉 You're Done!
 Your AI Study Assistant is ready for the world.
