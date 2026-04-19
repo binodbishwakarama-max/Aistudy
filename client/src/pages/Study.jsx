@@ -230,7 +230,7 @@ const Study = () => {
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.22 }}
           >
-            <Card className={`p-5 sm:p-8 ${contentShellClass}`}>
+            <Card className={`overflow-hidden sm:p-8 ${['flashcards', 'quiz', 'adaptive'].includes(mode) ? 'p-0 pt-4' : 'p-5'} ${contentShellClass}`}>
               {mode === 'flashcards' && (
                 <>
                   {flashcards.length === 0 ? (
@@ -248,7 +248,9 @@ const Study = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Flashcard key={flashcardSessionKey} cards={flashcards} />
+                    <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col">
+                      <Flashcard key={flashcardSessionKey} cards={flashcards} />
+                    </div>
                   )}
                 </>
               )}
@@ -270,14 +272,16 @@ const Study = () => {
                       </Button>
                     </div>
                   ) : (
-                    <Quiz key={quizSessionKey} questions={quiz} />
+                    <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col">
+                      <Quiz key={quizSessionKey} questions={quiz} />
+                    </div>
                   )}
                 </>
               )}
 
               {mode === 'review' && <ReviewSheet flashcards={flashcards} />}
 
-              {mode === 'adaptive' && <AdaptiveQuiz />}
+              {mode === 'adaptive' && <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col"><AdaptiveQuiz /></div>}
 
               {mode === 'library' && <StudyLibrary onSelect={() => navigate('/flashcards')} />}
             </Card>

@@ -113,7 +113,7 @@ const Flashcard = ({ cards }) => {
   ];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
+    <div className="mx-auto w-full max-w-3xl flex-1 flex flex-col justify-center space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Motion.button 
           onClick={isShuffled ? resetOrder : shuffleCards} 
@@ -129,7 +129,7 @@ const Flashcard = ({ cards }) => {
         </div>
       </div>
 
-      <div className="relative h-[22rem] sm:h-[26rem] lg:h-[28rem]">
+      <div className="relative flex-1 min-h-[22rem] sm:h-[26rem] md:flex-none lg:h-[28rem]">
         <Motion.div className="h-full w-full cursor-pointer perspective-1000" onClick={() => setIsFlipped(!isFlipped)}>
           <Motion.div
             className="relative h-full w-full"
@@ -146,7 +146,7 @@ const Flashcard = ({ cards }) => {
                     event.stopPropagation();
                     toggleFavorite();
                   }}
-                  className="rounded-full p-2 text-[var(--text-muted)] transition-mindflow hover:bg-[var(--bg-elevated)]"
+                  className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-full text-[var(--text-muted)] transition-mindflow hover:bg-[var(--bg-elevated)]"
                 >
                   <Star size={18} className={favorites.has(currentCard?.question) ? 'fill-[var(--warm)] text-[var(--warm)]' : ''} />
                 </button>
@@ -181,7 +181,7 @@ const Flashcard = ({ cards }) => {
             <Motion.button
               key={rating}
               onClick={() => handleReview(rating)}
-              className="glass-card flex flex-col items-center justify-center gap-2 px-3 py-4"
+              className="glass-card flex flex-col items-center justify-center gap-2 px-3 py-4 min-h-[64px]"
               style={{ borderColor: `${color}30` }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}

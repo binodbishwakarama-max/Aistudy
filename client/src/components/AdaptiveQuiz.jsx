@@ -321,10 +321,10 @@ const AdaptiveQuiz = () => {
   const diffStyle = DIFFICULTY_COLORS[currentQuestion.difficulty] || DIFFICULTY_COLORS.balanced;
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="mx-auto w-full max-w-3xl space-y-4 sm:space-y-5 flex-1 flex flex-col justify-center">
       {/* Top bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
             style={{ background: diffStyle.bg, border: `1px solid ${diffStyle.border}`, color: diffStyle.text }}
@@ -396,7 +396,7 @@ const AdaptiveQuiz = () => {
                   disabled={isAnswered}
                   whileHover={!isAnswered ? { scale: 1.02 } : {}}
                   whileTap={!isAnswered ? { scale: 0.98 } : {}}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
+                  className={`w-full min-h-[44px] rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-medium">{option}</span>

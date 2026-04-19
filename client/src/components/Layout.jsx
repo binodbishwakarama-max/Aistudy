@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -7,7 +7,11 @@ import {
   Menu,
   Search,
   Sparkles,
+  Target,
   Trophy,
+  User,
+  LayoutDashboard,
+  BookOpen,
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
@@ -36,6 +40,8 @@ const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [workspaceQuery, setWorkspaceQuery] = useState('');
+
+  const searchInputRef = useRef(null);
 
   const isMarketing = marketingRoutes.has(location.pathname);
 
@@ -80,8 +86,43 @@ const Layout = ({ children }) => {
     if (target) {
       handleNavigation(target.path);
       setWorkspaceQuery('');
+      setMobileSearchOpen(false);
     }
   };
+
+  const MobileBottomNav = () => {
+    return (
+      <nav className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-[100] pb-safe xl:hidden flex justify-around items-center h-16 px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]">
+        <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+          <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
+          <span className="text-[10px] mt-1">Home</span>
+        </button>
+        <button onClick={() => navigate('/study')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+          <BookOpen size={22} className={['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'fill-[var(--accent-glow)]' : ''} />
+          <span className="text-[10px] mt-1">Study</span>
+        </button>
+        <button onClick={() => { window.scrollTo(0, 0); setMobileSearchOpen(true); }} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
+          <Search size={22} />
+          <span className="text-[10px] mt-1">Search</span>
+        </button>
+        <button onClick={() => navigate('/settings')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/settings' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
+          <User size={22} className={location.pathname === '/settings' ? 'fill-[var(--accent-glow)]' : ''} />
+          <span className="text-[10px] mt-1">Profile</span>
+        </button>
+        <button onClick={() => setMobileOpen(true)} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
+          <Menu size={22} />
+          <span className="text-[10px] mt-1">More</span>
+        </button>
+      </nav>
+    );
+  };
+
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  useEffect(() => {
+    if (mobileSearchOpen && searchInputRef.current) {
+      setTimeout(() => searchInputRef.current.focus(), 100);
+    }
+  }, [mobileSearchOpen]);
 
   return (
     <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)]' : 'workspace-shell text-[var(--text-primary)]'}>
@@ -189,13 +230,9 @@ const Layout = ({ children }) => {
           </aside>
 
           <div className="workspace-content">
-            <header className="workspace-topbar">
+            <header className="workspace-topbar hidden xl:flex">
               <div className="workspace-topbar-inner">
                 <div className="workspace-topbar-search-row">
-                  <Button variant="secondary" size="icon" className="xl:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
-                    <Menu size={18} />
-                  </Button>
-
                   <form onSubmit={handleSearchSubmit} className="workspace-search">
                     <Search size={16} className="text-[var(--text-muted)]" />
                     <input
@@ -265,6 +302,61 @@ const Layout = ({ children }) => {
                 </div>
               </div>
             </header>
+
+            <AnimatePresence>
+              {mobileSearchOpen && (
+                <Motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="fixed inset-0 z-[120] bg-[var(--bg-base)] xl:hidden flex flex-col"
+                >
+                  <div className="flex items-center gap-2 p-4 border-b border-[var(--border)] bg-[var(--bg-card)] pb-safe-top pt-safe-top">
+                    <form onSubmit={handleSearchSubmit} className="workspace-search flex-1 m-0 shadow-none border-[var(--border-strong)]">
+                      <Search size={18} className="text-[var(--text-muted)]" />
+                      <input
+                        ref={searchInputRef}
+                        value={workspaceQuery}
+                        onChange={(event) => setWorkspaceQuery(event.target.value)}
+                        className="workspace-search-input text-base h-8"
+                        placeholder="Jump to upload, flashcards, analytics..."
+                      />
+                    </form>
+                    <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => setMobileSearchOpen(false)}>
+                      <X size={24} />
+                    </Button>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4 bg-[var(--bg-base)]">
+                    <div className="kicker mb-3">Quick Navigation Navigation</div>
+                    <div className="grid gap-2">
+                       {workspaceNavigation.filter(item => 
+                          workspaceQuery ? 
+                            [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase().includes(workspaceQuery.toLowerCase()) 
+                            : true
+                        ).map((item) => (
+                           <button
+                             key={item.path}
+                             onClick={() => {
+                               handleNavigation(item.path);
+                               setMobileSearchOpen(false);
+                               setWorkspaceQuery('');
+                             }}
+                             className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-[20px] transition-mindflow hover:border-[var(--accent)]"
+                           >
+                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                               <item.icon size={20} />
+                             </div>
+                             <div className="text-left flex-1 min-w-0">
+                               <div className="text-base font-semibold text-[var(--text-primary)]">{item.label}</div>
+                               <div className="text-sm text-[var(--text-secondary)] truncate">{item.description}</div>
+                             </div>
+                           </button>
+                       ))}
+                    </div>
+                  </div>
+                </Motion.div>
+              )}
+            </AnimatePresence>
 
             <AnimatePresence>
               {mobileOpen && (
@@ -348,6 +440,7 @@ const Layout = ({ children }) => {
                 {children}
               </div>
             </main>
+            <MobileBottomNav />
           </div>
         </>
       )}

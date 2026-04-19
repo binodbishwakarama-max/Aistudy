@@ -145,7 +145,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       {/* Semantic Search Bar Overlay */}
       <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full mb-8">
-        <div className="relative">
+        <div className="relative z-[105]">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)]">
             <Search size={20} />
           </div>
@@ -163,35 +163,44 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Search Results Dropdown */}
+        {/* Search Results Dropdown / Modal */}
         {searchResults !== null && searchQuery.trim() !== '' && (
-          <Card className="absolute top-full mt-2 w-full overflow-hidden shadow-[var(--shadow-raised)] p-0 z-50">
-            {searchResults.length > 0 ? (
-              <div className="max-h-[60vh] overflow-y-auto divide-y divide-[var(--border)]">
-                {searchResults.map((card) => (
-                  <div key={card.id} className="p-4 hover:bg-[var(--bg-elevated)] transition-colors">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="text-sm font-semibold px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-lg inline-block">
-                        {Math.round(card.similarity * 100)}% Match
+          <>
+            <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-[100] md:hidden" />
+            <Card className="fixed inset-0 top-[calc(env(safe-area-inset-top)+4rem)] z-[110] md:absolute md:inset-auto md:top-full mt-2 w-full overflow-hidden shadow-[var(--shadow-raised)] p-0 flex flex-col md:block rounded-none md:rounded-2xl border-x-0 md:border-x">
+              <div className="flex items-center justify-between p-4 border-b border-[var(--border)] md:hidden">
+                <span className="font-semibold text-[var(--text-primary)]">Search Results</span>
+                <Button variant="ghost" size="sm" onClick={() => { setSearchQuery(''); setSearchResults(null); }} className="min-w-[44px] min-h-[44px]">
+                  Close
+                </Button>
+              </div>
+              {searchResults.length > 0 ? (
+                <div className="flex-1 overflow-y-auto max-h-full md:max-h-[60vh] divide-y divide-[var(--border)] pb-safe">
+                  {searchResults.map((card) => (
+                    <div key={card.id} className="p-4 hover:bg-[var(--bg-elevated)] transition-colors">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="text-sm font-semibold px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-lg inline-block">
+                          {Math.round(card.similarity * 100)}% Match
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={() => openSession(card.deck_id)} className="min-w-[44px] min-h-[44px]">
+                          Go to Deck
+                        </Button>
                       </div>
-                      <Button variant="ghost" size="sm" onClick={() => openSession(card.deck_id)}>
-                        Go to Deck
-                      </Button>
+                      <div className="font-semibold text-[var(--text-primary)] mb-1">Q: {card.front}</div>
+                      <div className="text-[var(--text-secondary)] mb-2">A: {card.back}</div>
+                      {card.explanation && (
+                        <div className="text-xs text-[var(--text-muted)] italic">{card.explanation}</div>
+                      )}
                     </div>
-                    <div className="font-semibold text-[var(--text-primary)] mb-1">Q: {card.front}</div>
-                    <div className="text-[var(--text-secondary)] mb-2">A: {card.back}</div>
-                    {card.explanation && (
-                      <div className="text-xs text-[var(--text-muted)] italic">{card.explanation}</div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="p-8 text-center text-[var(--text-muted)]">
-                No semantic matches found for "{searchQuery}"
-              </div>
-            )}
-          </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-8 text-center text-[var(--text-muted)]">
+                  No matches found for "{searchQuery}"
+                </div>
+              )}
+            </Card>
+          </>
         )}
       </Motion.div>
 
@@ -212,16 +221,16 @@ const Dashboard = () => {
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')}>
+                <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')} className="w-full sm:w-auto min-h-[44px]">
                   Upload Notes
                 </Button>
-                <Button size="lg" variant="secondary" rightIcon={ArrowRight} onClick={() => navigate('/flashcards')}>
+                <Button size="lg" variant="secondary" rightIcon={ArrowRight} onClick={() => navigate('/flashcards')} className="w-full sm:w-auto min-h-[44px]">
                   Open Flashcards
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 mt-6 lg:mt-0">
               <Card className="p-5">
                 <div className="text-sm font-medium text-[var(--text-muted)]">Current XP</div>
                 <div className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">{gameState.xp}</div>
@@ -371,9 +380,9 @@ const Dashboard = () => {
         </Motion.section>
       </div>
       
-      {/* Dim overlay background when searching */}
+      {/* Dim overlay background when searching (Desktop only since mobile handles overlay directly above) */}
       {searchResults !== null && searchQuery.trim() !== '' && (
-        <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-0 pointer-events-none transition-all duration-300" />
+        <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-0 pointer-events-none transition-all duration-300 hidden md:block" />
       )}
     </div>
   );

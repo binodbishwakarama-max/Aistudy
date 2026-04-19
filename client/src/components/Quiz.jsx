@@ -142,7 +142,7 @@ const Quiz = ({ questions }) => {
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
+    <div className="mx-auto w-full max-w-3xl flex-1 flex flex-col justify-center space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
@@ -190,7 +190,7 @@ const Quiz = ({ questions }) => {
                 disabled={isAnswered}
                 whileHover={!isAnswered ? { scale: 1.02 } : {}}
                 whileTap={!isAnswered ? { scale: 0.98 } : {}}
-                className={`w-full rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
+                className={`w-full min-h-[44px] rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-medium">{option}</span>
