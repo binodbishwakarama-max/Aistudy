@@ -49,6 +49,7 @@ const ChatInterface = () => {
     }
   };
 
+  // ── FAB (closed state) ──
   if (!isOpen) {
     return (
       <Motion.button
@@ -57,7 +58,8 @@ const ChatInterface = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-lg transition-mindflow hover:bg-[var(--accent-light)] sm:bottom-6 sm:right-6 glow-shadow"
+        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-lg transition-mindflow hover:bg-[var(--accent-light)] xl:bottom-6 xl:right-6 glow-shadow"
+        style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
         title="Ask AI Tutor"
       >
         <MessageSquare size={24} />
@@ -66,9 +68,13 @@ const ChatInterface = () => {
     );
   }
 
+  // ── Minimized bar ──
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 left-2 right-2 z-50 w-auto max-w-64 overflow-hidden rounded-xl border-[var(--border-accent)] glass-card sm:bottom-6 sm:left-auto sm:right-6 sm:w-64">
+      <div
+        className="fixed left-2 right-2 z-50 w-auto max-w-64 overflow-hidden rounded-xl border-[var(--border-accent)] glass-card xl:left-auto xl:right-6 xl:w-64"
+        style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
+      >
         <div
           className="flex cursor-pointer items-center justify-between px-4 py-3 transition-mindflow hover:bg-[var(--bg-elevated)]"
           onClick={() => setIsMinimized(false)}
@@ -93,13 +99,15 @@ const ChatInterface = () => {
     );
   }
 
+  // ── Expanded chat panel ──
   return (
     <Motion.div
       initial={{ opacity: 0, y: 20, scale: 0.97 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="fixed bottom-3 left-3 right-3 z-50 flex h-[min(72vh,34rem)] flex-col overflow-hidden rounded-2xl border-[var(--border-accent)] glass-card glow-shadow sm:bottom-6 sm:left-auto sm:right-6 sm:h-[500px] sm:w-[380px]"
+      className="fixed left-3 right-3 z-50 flex h-[min(72vh,34rem)] flex-col overflow-hidden rounded-2xl border-[var(--border-accent)] glass-card glow-shadow xl:left-auto xl:right-6 xl:h-[500px] xl:w-[380px]"
+      style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 12px)' }}
     >
       <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 sm:px-4 sm:py-3.5">
         <div className="flex items-center gap-2.5">

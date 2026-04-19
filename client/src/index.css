@@ -2,6 +2,10 @@
 @import "tailwindcss";
 
 :root {
+  /* ── Layout constants (single source of truth) ── */
+  --bottom-nav-h: 72px;
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+
   --bg-base: #f5f7fb;
   --bg-surface: #ffffff;
   --bg-elevated: #eef2f8;
@@ -412,7 +416,7 @@ button {
 
 .workspace-main {
   flex: 1;
-  padding: 1rem 0 5.5rem; /* Additional padding on mobile for bottom nav */
+  padding: 1rem 0 calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 1rem);
 }
 
 .workspace-search {
@@ -611,7 +615,7 @@ button {
   }
 
   .workspace-main {
-    padding: 1.5rem 0 2rem; /* Override mobile bottom padding on desktop */
+    padding: 1.5rem 0 2rem; /* No bottom nav on desktop */
   }
 }
 
@@ -654,3 +658,11 @@ button {
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+/* ── Z-Index Scale ──
+ *  Bottom Nav:    z-40
+ *  FAB / Chat:    z-50
+ *  Drawer:        z-[110]
+ *  Search Modal:  z-[120]
+ *  Level-up:      z-[120]
+ */

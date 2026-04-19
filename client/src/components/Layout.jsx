@@ -93,7 +93,10 @@ const Layout = ({ children }) => {
 
   const MobileBottomNav = () => {
     return (
-      <nav className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-[100] pb-safe xl:hidden flex justify-around items-center h-16 px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]">
+      <nav
+        className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-40 xl:hidden flex justify-around items-center px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]"
+        style={{ height: 'var(--bottom-nav-h)', paddingBottom: 'var(--safe-area-bottom)' }}
+      >
         <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
           <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
           <span className="text-[10px] mt-1">Home</span>
@@ -375,7 +378,10 @@ const Layout = ({ children }) => {
                     className="flex h-full w-full max-w-[min(22rem,calc(100vw-0.75rem))] flex-col"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <Card className="flex h-full flex-col rounded-none border-y-0 border-l-0 p-6 sm:rounded-r-[32px] sm:border sm:border-l-0">
+                    <Card
+                      className="flex h-full flex-col rounded-none border-y-0 border-l-0 p-6 sm:rounded-r-[32px] sm:border sm:border-l-0 overflow-y-auto"
+                      style={{ paddingBottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 1.5rem)' }}
+                    >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
                           <BrandMark />
