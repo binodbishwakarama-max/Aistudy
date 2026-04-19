@@ -141,6 +141,58 @@ const Dashboard = () => {
     );
   }
 
+  // --- Zero-State Onboarding UX ---
+  if (history.length === 0 && !searchQuery.trim()) {
+    return (
+      <Motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="space-y-6">
+        <Card className="relative overflow-hidden p-8 sm:p-12 border-0 bg-[linear-gradient(135deg,var(--bg-card),var(--bg-elevated))] shadow-[var(--shadow-raised)]">
+          <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full bg-[rgba(26,115,232,0.12)] blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-32 -right-32 h-80 w-80 rounded-full bg-[rgba(242,153,0,0.1)] blur-3xl" />
+          
+          <div className="relative mx-auto max-w-3xl text-center">
+            <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-[24px] bg-[var(--bg-card)] shadow-[var(--shadow-soft)] border border-[var(--border)] mb-8">
+              <Sparkles size={36} className="text-[var(--accent)]" />
+            </div>
+            
+            <h1 className="font-heading text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl text-[var(--text-primary)]">
+              Welcome to MindFlow, {userName}!
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-[var(--text-secondary)] max-w-2xl mx-auto">
+              Your AI-powered workspace is ready. To begin, upload your first piece of raw material—like a lecture PDF or course notes—and we'll instantly generate smart flashcards and quizzes for you.
+            </p>
+            
+            <div className="mt-10 flex flex-col justify-center sm:flex-row gap-4">
+              <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')} className="w-full sm:w-auto h-14 px-8 text-base shadow-[var(--shadow-raised)]">
+                Upload your first PDF
+              </Button>
+            </div>
+          </div>
+        </Card>
+
+        <div className="grid gap-6 md:grid-cols-3">
+          {[
+            { step: '01', title: 'Import Material', desc: 'Securely upload your PDFs or paste text notes. We handle the formatting.', icon: FileStack },
+            { step: '02', title: 'Generate Assets', desc: 'MindFlow extracts the key concepts into active recall flashcards instantly.', icon: BookOpen },
+            { step: '03', title: 'Master Topics', desc: 'Jump into focused quiz sessions to verify your knowledge and track XP.', icon: Target }
+          ].map((item, i) => (
+            <Motion.div key={item.step} initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + (i * 0.1) }}>
+              <Card className="h-full p-6 transition-mindflow hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                    <item.icon size={22} />
+                  </div>
+                  <div className="text-xs font-bold tracking-widest text-[var(--text-muted)]">STEP {item.step}</div>
+                </div>
+                <h3 className="text-lg font-semibold text-[var(--text-primary)]">{item.title}</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--text-secondary)]">{item.desc}</p>
+              </Card>
+            </Motion.div>
+          ))}
+        </div>
+      </Motion.div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Semantic Search Bar Overlay */}
