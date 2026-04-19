@@ -18,6 +18,25 @@ const parseJsonCandidate = (candidate) => {
     }
 };
 
+/**
+ * Unwrap common AI wrapper shapes into a plain array.
+ * AI models frequently return {flashcards: [...]} or {cards: [...]} instead of bare [...].
+ */
+const unwrapArray = (data) => {
+    if (Array.isArray(data)) return data;
+    if (data && typeof data === 'object') {
+        const keys = ['flashcards', 'cards', 'questions', 'quiz', 'data', 'results', 'items'];
+        for (const key of keys) {
+            if (Array.isArray(data[key])) return data[key];
+        }
+        const objKeys = Object.keys(data);
+        if (objKeys.length === 1 && Array.isArray(data[objKeys[0]])) {
+            return data[objKeys[0]];
+        }
+    }
+    return data; // Return as-is, let validators handle the error
+};
+
 const extractStructuredJson = (rawText) => {
     const text = typeof rawText === 'string' ? rawText.trim() : '';
 
@@ -51,12 +70,15 @@ const extractStructuredJson = (rawText) => {
 };
 
 const parseStructuredGeneration = ({ rawText, contentType }) => {
+    const parsed = extractStructuredJson(rawText);
+    const unwrapped = unwrapArray(parsed);
+
     if (contentType === 'flashcards') {
-        return validateFlashcards(extractStructuredJson(rawText));
+        return validateFlashcards(unwrapped);
     }
 
     if (contentType === 'quiz') {
-        return validateQuizQuestions(extractStructuredJson(rawText));
+        return validateQuizQuestions(unwrapped);
     }
 
     return null;

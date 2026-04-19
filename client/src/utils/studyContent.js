@@ -44,31 +44,56 @@ const extractStructuredJson = (rawText) => {
   return null;
 };
 
-export const normalizeFlashcards = (cards) => {
-  if (!Array.isArray(cards)) return [];
+/**
+ * Unwrap common AI wrapper shapes into a plain array.
+ * Handles: [...], {flashcards:[...]}, {cards:[...]}, {questions:[...]}, {data:[...]}, {quiz:[...]}, {results:[...]}
+ */
+const unwrapArray = (data) => {
+  if (Array.isArray(data)) return data;
+  if (data && typeof data === 'object') {
+    // Try common wrapper keys
+    const keys = ['flashcards', 'cards', 'questions', 'quiz', 'data', 'results', 'items'];
+    for (const key of keys) {
+      if (Array.isArray(data[key])) return data[key];
+    }
+    // Last resort: if the object has exactly one key and it's an array, use it
+    const objKeys = Object.keys(data);
+    if (objKeys.length === 1 && Array.isArray(data[objKeys[0]])) {
+      return data[objKeys[0]];
+    }
+  }
+  return [];
+};
 
-  return cards
+export const normalizeFlashcards = (cards) => {
+  const arr = unwrapArray(cards);
+  if (!Array.isArray(arr)) return [];
+
+  return arr
     .map((card) => ({
       id: card?.id,
-      question: normalizeText(card?.question) || normalizeText(card?.front),
-      answer: normalizeText(card?.answer) || normalizeText(card?.back),
-      explanation: normalizeText(card?.explanation),
+      question: normalizeText(card?.question) || normalizeText(card?.front) || normalizeText(card?.q),
+      answer: normalizeText(card?.answer) || normalizeText(card?.back) || normalizeText(card?.a),
+      explanation: normalizeText(card?.explanation) || normalizeText(card?.hint),
     }))
     .filter((card) => card.question && card.answer);
 };
 
 export const normalizeQuizQuestions = (questions) => {
-  if (!Array.isArray(questions)) return [];
+  const arr = unwrapArray(questions);
+  if (!Array.isArray(arr)) return [];
 
-  return questions
+  return arr
     .map((question) => ({
-      question: normalizeText(question?.question),
+      question: normalizeText(question?.question) || normalizeText(question?.prompt),
       options: Array.isArray(question?.options)
         ? question.options.map((option) => normalizeText(option)).filter(Boolean)
         : [],
       correctIndex: Number.isInteger(question?.correctIndex)
         ? question.correctIndex
-        : Number.parseInt(question?.correctIndex, 10),
+        : Number.isInteger(question?.correct_index)
+          ? question.correct_index
+          : Number.parseInt(question?.correctIndex ?? question?.correct_index, 10),
       explanation: normalizeText(question?.explanation),
     }))
     .filter((question) => (
@@ -81,17 +106,60 @@ export const normalizeQuizQuestions = (questions) => {
 };
 
 export const getStructuredDataFromGeneration = (response, contentType) => {
+  if (!response) {
+    console.warn('[StudyContent] getStructuredDataFromGeneration received null/undefined response');
+    return contentType === 'flashcards' ? [] : contentType === 'quiz' ? [] : null;
+  }
+
+  // Debug: log the shape so we can diagnose issues
+  console.log('[StudyContent] Response shape:', {
+    hasData: !!response?.data,
+    dataType: typeof response?.data,
+    dataIsArray: Array.isArray(response?.data),
+    dataLength: Array.isArray(response?.data) ? response.data.length : 'N/A',
+    hasContent: !!response?.content,
+    contentType
+  });
+
   if (contentType === 'flashcards') {
+    // Strategy 1: Pre-validated data from server
     const directData = normalizeFlashcards(response?.data);
     if (directData.length > 0) return directData;
-    return normalizeFlashcards(extractStructuredJson(response?.content?.[0]?.text));
+
+    // Strategy 2: Parse raw AI text from content field
+    const rawText = response?.content?.[0]?.text;
+    if (rawText) {
+      const parsed = extractStructuredJson(rawText);
+      const fromRaw = normalizeFlashcards(parsed);
+      if (fromRaw.length > 0) return fromRaw;
+    }
+
+    // Strategy 3: Maybe the response itself IS the array (edge case)
+    const fromRoot = normalizeFlashcards(response);
+    if (fromRoot.length > 0) return fromRoot;
+
+    console.warn('[StudyContent] All flashcard parsing strategies failed. Response:', JSON.stringify(response).slice(0, 500));
+    return [];
   }
 
   if (contentType === 'quiz') {
     const directData = normalizeQuizQuestions(response?.data);
     if (directData.length > 0) return directData;
-    return normalizeQuizQuestions(extractStructuredJson(response?.content?.[0]?.text));
+
+    const rawText = response?.content?.[0]?.text;
+    if (rawText) {
+      const parsed = extractStructuredJson(rawText);
+      const fromRaw = normalizeQuizQuestions(parsed);
+      if (fromRaw.length > 0) return fromRaw;
+    }
+
+    const fromRoot = normalizeQuizQuestions(response);
+    if (fromRoot.length > 0) return fromRoot;
+
+    console.warn('[StudyContent] All quiz parsing strategies failed. Response:', JSON.stringify(response).slice(0, 500));
+    return [];
   }
 
   return response?.data ?? null;
 };
+
