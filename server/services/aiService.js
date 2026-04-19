@@ -229,10 +229,25 @@ const getAIStatus = () => ({
     groq: { ...providerState.groq }
 });
 
+const embedText = async (text) => {
+    if (!geminiClient) {
+        throw new Error('Gemini client not configured. Cannot generate embeddings.');
+    }
+    try {
+        const model = geminiClient.getGenerativeModel({ model: 'text-embedding-004' });
+        const result = await model.embedContent(text);
+        return result.embedding.values; // Returns an array of 768 floats
+    } catch (error) {
+        logger.error('Failed to generate embedding', { reason: getErrorMessage(error) });
+        throw error;
+    }
+};
+
 module.exports = {
     generateChatReply,
     generateText,
     getAIStatus,
     probePrimaryProvider,
-    sanitizeHistory
+    sanitizeHistory,
+    embedText
 };

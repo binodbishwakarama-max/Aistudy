@@ -119,3 +119,49 @@ create policy "Users can insert their own stats"
 create policy "Users can update their own stats"
   on public.user_stats for update
   using ( auth.uid() = user_id );
+
+-- ==============================================================================
+-- PHASE 4: SEMANTIC SEARCH (PGVECTOR)
+-- Run this section to enable semantic search across your flashcards.
+-- ==============================================================================
+
+-- 11. Enable the pgvector extension natively in Supabase
+create extension if not exists vector;
+
+-- 12. Add the 768-dimensional embedding column (matches Gemini text-embedding-004)
+alter table public.flashcards 
+add column if not exists embedding vector(768);
+
+-- 13. Create a Postgres function to search flashcards by Cosine Distance
+-- Note: This function respects RLS! It will only return decks owned by the query_user_id.
+create or replace function match_flashcards (
+  query_embedding vector(768),
+  match_threshold float,
+  match_count int,
+  query_user_id uuid
+)
+returns table (
+  id uuid,
+  deck_id uuid,
+  front text,
+  back text,
+  explanation text,
+  similarity float
+)
+language sql stable
+as $$
+  select
+    flashcards.id,
+    flashcards.deck_id,
+    flashcards.front,
+    flashcards.back,
+    flashcards.explanation,
+    1 - (flashcards.embedding <=> query_embedding) as similarity
+  from public.flashcards
+  join public.decks on decks.id = flashcards.deck_id
+  where decks.user_id = query_user_id
+    and flashcards.embedding is not null
+    and 1 - (flashcards.embedding <=> query_embedding) > match_threshold
+  order by flashcards.embedding <=> query_embedding
+  limit match_count;
+$$;

@@ -11,8 +11,10 @@ import {
   Target,
   TrendingUp,
   Upload,
+  Search,
+  Loader2
 } from 'lucide-react';
-import { getStudyHistory } from '../services/api';
+import { getStudyHistory, searchFlashcards } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
 import { useStudy } from '../context/StudyContext';
@@ -41,6 +43,34 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Semantic Search State
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // Debounced Search Effect
+  useEffect(() => {
+    const handler = setTimeout(async () => {
+      if (!searchQuery.trim()) {
+        setSearchResults(null);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const res = await searchFlashcards(searchQuery);
+        // Extract results array from { results: [...] }
+        setSearchResults(res.results || []);
+      } catch (err) {
+        console.error("Semantic search failed", err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 600); // 600ms debounce
+
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
 
   useEffect(() => {
     let active = true;
@@ -113,7 +143,59 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+      {/* Semantic Search Bar Overlay */}
+      <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full mb-8">
+        <div className="relative">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)]">
+            <Search size={20} />
+          </div>
+          <input
+            type="text"
+            className="h-14 w-full rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] pl-12 pr-12 text-base text-[var(--text-primary)] shadow-[var(--shadow-soft)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/10"
+            placeholder="Search all decks by concept..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+          {isSearching && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-4 text-[var(--accent)]">
+              <Loader2 size={20} className="animate-spin" />
+            </div>
+          )}
+        </div>
+
+        {/* Search Results Dropdown */}
+        {searchResults !== null && searchQuery.trim() !== '' && (
+          <Card className="absolute top-full mt-2 w-full overflow-hidden shadow-[var(--shadow-raised)] p-0 z-50">
+            {searchResults.length > 0 ? (
+              <div className="max-h-[60vh] overflow-y-auto divide-y divide-[var(--border)]">
+                {searchResults.map((card) => (
+                  <div key={card.id} className="p-4 hover:bg-[var(--bg-elevated)] transition-colors">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="text-sm font-semibold px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-lg inline-block">
+                        {Math.round(card.similarity * 100)}% Match
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => openSession(card.deck_id)}>
+                        Go to Deck
+                      </Button>
+                    </div>
+                    <div className="font-semibold text-[var(--text-primary)] mb-1">Q: {card.front}</div>
+                    <div className="text-[var(--text-secondary)] mb-2">A: {card.back}</div>
+                    {card.explanation && (
+                      <div className="text-xs text-[var(--text-muted)] italic">{card.explanation}</div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-8 text-center text-[var(--text-muted)]">
+                No semantic matches found for "{searchQuery}"
+              </div>
+            )}
+          </Card>
+        )}
+      </Motion.div>
+
+      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={searchResults ? "opacity-30 pointer-events-none transition-opacity" : "transition-opacity"}>
         <Card variant="accent" className="overflow-hidden p-6 sm:p-10">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div className="max-w-3xl">
@@ -288,6 +370,11 @@ const Dashboard = () => {
           </div>
         </Motion.section>
       </div>
+      
+      {/* Dim overlay background when searching */}
+      {searchResults !== null && searchQuery.trim() !== '' && (
+        <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-0 pointer-events-none transition-all duration-300" />
+      )}
     </div>
   );
 };

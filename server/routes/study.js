@@ -8,6 +8,7 @@ const {
     prepareStudySetForSave
 } = require('../utils/studyContracts');
 const { logger } = require('../utils/logger');
+const { embedText } = require('../services/aiService');
 
 const router = express.Router();
 
@@ -104,11 +105,27 @@ router.post('/save', async (req, res) => {
         if (deckError) throw deckError;
         createdDeckId = deck.id;
 
-        const cardsToInsert = preparedStudySet.flashcards.map((card) => ({
-            deck_id: deck.id,
-            front: card.front,
-            back: card.back,
-            explanation: card.explanation
+        const cardsToInsert = await Promise.all(preparedStudySet.flashcards.map(async (card) => {
+            let embedding = null;
+            try {
+                // Combine text for a rich semantic representation
+                const contentText = `${card.front || ''} ${card.back || ''} ${card.explanation || ''}`.trim();
+                if (contentText) {
+                    // embedText returns a 768-dimensional array, which Supabase/pgvector natively accepts
+                    embedding = `[${(await embedText(contentText)).join(',')}]`;
+                }
+            } catch (err) {
+                logger.warn('Failed to generate embedding for flashcard, skipping vector injection', { reason: err.message });
+                // We proceed without embedding so the flashcard itself doesn't fail to save
+            }
+
+            return {
+                deck_id: deck.id,
+                front: card.front,
+                back: card.back,
+                explanation: card.explanation,
+                embedding 
+            };
         }));
 
         if (cardsToInsert.length > 0) {

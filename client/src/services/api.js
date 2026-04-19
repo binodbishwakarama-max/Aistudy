@@ -173,6 +173,19 @@ export const deleteDeck = async (id) => {
     }
 };
 
+/**
+ * Semantic vector search for flashcards
+ */
+export const searchFlashcards = async (query) => {
+    try {
+        const response = await api.get(`/search?q=${encodeURIComponent(query)}`);
+        return response.data;
+    } catch (error) {
+        console.error("Search Error:", error);
+        throw error;
+    }
+};
+
 export default api;
 
 /**
