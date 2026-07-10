@@ -70,15 +70,23 @@ const extractStructuredJson = (rawText) => {
 };
 
 const parseStructuredGeneration = ({ rawText, contentType }) => {
-    const parsed = extractStructuredJson(rawText);
-    const unwrapped = unwrapArray(parsed);
-
-    if (contentType === 'flashcards') {
-        return validateFlashcards(unwrapped);
+    if (contentType !== 'flashcards' && contentType !== 'quiz') {
+        return null;
     }
 
-    if (contentType === 'quiz') {
-        return validateQuizQuestions(unwrapped);
+    try {
+        const parsed = extractStructuredJson(rawText);
+        const unwrapped = unwrapArray(parsed);
+
+        if (contentType === 'flashcards') {
+            return validateFlashcards(unwrapped);
+        }
+
+        if (contentType === 'quiz') {
+            return validateQuizQuestions(unwrapped);
+        }
+    } catch (error) {
+        return null;
     }
 
     return null;

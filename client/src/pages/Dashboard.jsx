@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion as Motion } from 'framer-motion';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
@@ -12,7 +12,8 @@ import {
   TrendingUp,
   Upload,
   Search,
-  Loader2
+  Loader2,
+  Trophy,
 } from 'lucide-react';
 import { getStudyHistory, searchFlashcards } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -60,14 +61,13 @@ const Dashboard = () => {
       setIsSearching(true);
       try {
         const res = await searchFlashcards(searchQuery);
-        // Extract results array from { results: [...] }
         setSearchResults(res.results || []);
       } catch (err) {
         console.error("Semantic search failed", err);
       } finally {
         setIsSearching(false);
       }
-    }, 600); // 600ms debounce
+    }, 500); // 500ms debounce
 
     return () => clearTimeout(handler);
   }, [searchQuery]);
@@ -96,7 +96,7 @@ const Dashboard = () => {
     };
   }, []);
 
-  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'there';
+  const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Student';
   const totalCards = useMemo(
     () => history.reduce((sum, session) => sum + (session.flashcards?.length || session.card_count || 0), 0),
     [history],
@@ -105,6 +105,7 @@ const Dashboard = () => {
     () => history.reduce((sum, session) => sum + (session.question_count || session.quiz?.length || 0), 0),
     [history],
   );
+
   const statCards = [
     { label: 'Notes uploaded', value: history.length, icon: FileStack },
     { label: 'Flashcards created', value: totalCards, icon: BookOpen },
@@ -195,16 +196,16 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      {/* Semantic Search Bar Overlay */}
-      <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative z-10 w-full mb-8">
-        <div className="relative z-[105]">
+      {/* Spotlight Semantic Search Bar Section */}
+      <Motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="relative w-full mb-8">
+        <div className="relative z-[110]">
           <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 text-[var(--text-muted)]">
             <Search size={20} />
           </div>
           <input
             type="text"
-            className="h-14 w-full rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] pl-12 pr-12 text-base text-[var(--text-primary)] shadow-[var(--shadow-soft)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/10"
-            placeholder="Search all decks by concept..."
+            className="h-14 w-full rounded-2xl border border-[var(--border)] bg-[rgba(16,18,27,0.7)] backdrop-blur-xl pl-12 pr-12 text-base text-[var(--text-primary)] shadow-[var(--shadow-soft)] transition-all focus:border-[var(--accent)] focus:outline-none focus:ring-4 focus:ring-[var(--accent)]/10"
+            placeholder="Spotlight Search: find concepts, decks, or definitions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -215,86 +216,113 @@ const Dashboard = () => {
           )}
         </div>
 
-        {/* Search Results Dropdown / Modal */}
-        {searchResults !== null && searchQuery.trim() !== '' && (
-          <>
-            <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-[100] md:hidden" />
-            <Card className="fixed inset-0 top-[calc(env(safe-area-inset-top)+4rem)] z-[110] md:absolute md:inset-auto md:top-full mt-2 w-full overflow-hidden shadow-[var(--shadow-raised)] p-0 flex flex-col md:block rounded-none md:rounded-2xl border-x-0 md:border-x">
-              <div className="flex items-center justify-between p-4 border-b border-[var(--border)] md:hidden">
-                <span className="font-semibold text-[var(--text-primary)]">Search Results</span>
-                <Button variant="ghost" size="sm" onClick={() => { setSearchQuery(''); setSearchResults(null); }} className="min-w-[44px] min-h-[44px]">
-                  Close
-                </Button>
-              </div>
-              {searchResults.length > 0 ? (
-                <div className="flex-1 overflow-y-auto max-h-full md:max-h-[60vh] divide-y divide-[var(--border)] pb-safe">
-                  {searchResults.map((card) => (
-                    <div key={card.id} className="p-4 hover:bg-[var(--bg-elevated)] transition-colors">
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="text-sm font-semibold px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-lg inline-block">
-                          {Math.round(card.similarity * 100)}% Match
+        {/* Search Results Dropdown Overlay */}
+        <AnimatePresence>
+          {searchResults !== null && searchQuery.trim() !== '' && (
+            <>
+              <Motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-[rgba(5,6,9,0.8)] backdrop-blur-sm z-[100]"
+                onClick={() => { setSearchQuery(''); setSearchResults(null); }}
+              />
+              <Motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.99 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.99 }}
+                transition={{ type: 'spring', stiffness: 350, damping: 25 }}
+                className="absolute left-0 right-0 top-full mt-3 z-[110] w-full"
+              >
+                <Card className="overflow-hidden shadow-2xl p-0 border border-[rgba(255,255,255,0.08)] rounded-2xl bg-[rgba(16,18,27,0.95)] backdrop-blur-2xl">
+                  <div className="flex items-center justify-between px-6 py-4 border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.01)]">
+                    <span className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">Concept Matches</span>
+                    <button
+                      type="button"
+                      onClick={() => { setSearchQuery(''); setSearchResults(null); }}
+                      className="text-xs text-[var(--text-muted)] hover:text-white transition-colors"
+                    >
+                      Clear Search
+                    </button>
+                  </div>
+
+                  {searchResults.length > 0 ? (
+                    <div className="overflow-y-auto max-h-[50vh] divide-y divide-[rgba(255,255,255,0.05)]">
+                      {searchResults.map((card) => (
+                        <div key={card.id} className="p-5 hover:bg-[rgba(255,255,255,0.02)] transition-colors flex justify-between items-start gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-[10px] font-bold px-2 py-0.5 bg-[rgba(99,102,241,0.15)] text-[var(--accent-light)] border border-[rgba(99,102,241,0.2)] rounded-full">
+                                {Math.round(card.similarity * 100)}% Match
+                              </span>
+                            </div>
+                            <div className="font-semibold text-white text-sm">Q: {card.front}</div>
+                            <div className="text-[var(--text-secondary)] text-xs mt-1">A: {card.back}</div>
+                            {card.explanation && (
+                              <div className="text-[11px] text-[var(--text-muted)] italic mt-1.5">{card.explanation}</div>
+                            )}
+                          </div>
+                          <Button variant="secondary" size="sm" onClick={() => openSession(card.deck_id)} className="flex-shrink-0">
+                            Go to Deck
+                          </Button>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={() => openSession(card.deck_id)} className="min-w-[44px] min-h-[44px]">
-                          Go to Deck
-                        </Button>
-                      </div>
-                      <div className="font-semibold text-[var(--text-primary)] mb-1">Q: {card.front}</div>
-                      <div className="text-[var(--text-secondary)] mb-2">A: {card.back}</div>
-                      {card.explanation && (
-                        <div className="text-xs text-[var(--text-muted)] italic">{card.explanation}</div>
-                      )}
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-[var(--text-muted)]">
-                  No matches found for "{searchQuery}"
-                </div>
-              )}
-            </Card>
-          </>
-        )}
+                  ) : (
+                    <div className="p-8 text-center text-sm text-[var(--text-muted)] font-medium">
+                      No matching concepts found for "{searchQuery}"
+                    </div>
+                  )}
+                </Card>
+              </Motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </Motion.div>
 
-      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className={searchResults ? "opacity-30 pointer-events-none transition-opacity" : "transition-opacity"}>
+      {/* Main Grid Header Area */}
+      <Motion.section
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
         <Card variant="accent" className="overflow-hidden p-6 sm:p-10">
-          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
+          <div className="grid gap-8 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
             <div className="max-w-3xl">
-              <div className="pill-badge">
-                <Sparkles size={14} className="text-[var(--accent)]" />
-                Overview
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-[var(--border-accent)] bg-[rgba(99,102,241,0.07)] text-xs text-[var(--accent-light)] font-medium">
+                <Sparkles size={12} className="text-[var(--accent)]" />
+                <span>AI Study Workspace</span>
               </div>
-              <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
+              <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-5xl text-white">
                 {getGreeting()}, {userName}
               </h1>
-              <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">
-                Your study workspace is ready. Upload new material, jump into flashcards, or check how your quiz
-                accuracy is trending.
+              <p className="mt-4 text-sm leading-relaxed text-[var(--text-secondary)]">
+                Ready to level up your understanding? Drop in new lecture files, run an active recall review block, or analyze your streak statistics.
               </p>
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')} className="w-full sm:w-auto min-h-[44px]">
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button size="lg" leftIcon={Upload} onClick={() => navigate('/upload')} className="shadow-[0_0_20px_rgba(99,102,241,0.2)]">
                   Upload Notes
                 </Button>
-                <Button size="lg" variant="secondary" rightIcon={ArrowRight} onClick={() => navigate('/flashcards')} className="w-full sm:w-auto min-h-[44px]">
+                <Button size="lg" variant="secondary" rightIcon={ArrowRight} onClick={() => navigate('/flashcards')}>
                   Open Flashcards
                 </Button>
               </div>
             </div>
 
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 mt-6 lg:mt-0">
-              <Card className="p-5">
-                <div className="text-sm font-medium text-[var(--text-muted)]">Current XP</div>
-                <div className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">{gameState.xp}</div>
+            <div className="grid gap-3 grid-cols-3 lg:grid-cols-1 mt-6 lg:mt-0">
+              <Card className="p-4 bg-[rgba(255,255,255,0.01)] border-[rgba(255,255,255,0.03)]">
+                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Accumulated XP</div>
+                <div className="mt-2 text-2xl font-bold text-white">{gameState.xp}</div>
               </Card>
-              <Card className="p-5">
-                <div className="text-sm font-medium text-[var(--text-muted)]">Level</div>
-                <div className="mt-3 text-3xl font-semibold text-[var(--text-primary)]">{gameState.level}</div>
+              <Card className="p-4 bg-[rgba(255,255,255,0.01)] border-[rgba(255,255,255,0.03)]">
+                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Level Progress</div>
+                <div className="mt-2 text-2xl font-bold text-[var(--accent-light)]">Lv. {gameState.level}</div>
               </Card>
-              <Card className="p-5">
-                <div className="text-sm font-medium text-[var(--text-muted)]">Most recent session</div>
-                <div className="mt-3 text-sm font-semibold text-[var(--text-primary)]">
-                  {history[0]?.created_at ? formatDate(history[0].created_at) : 'No activity yet'}
+              <Card className="p-4 bg-[rgba(255,255,255,0.01)] border-[rgba(255,255,255,0.03)]">
+                <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider">Last Revision</div>
+                <div className="mt-2 text-xs font-semibold text-[var(--text-secondary)] truncate">
+                  {history[0]?.created_at ? formatDate(history[0].created_at) : 'No sessions yet'}
                 </div>
               </Card>
             </div>
@@ -302,63 +330,77 @@ const Dashboard = () => {
         </Card>
       </Motion.section>
 
-      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }}>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          {statCards.map((stat) => (
+      {/* Stats Counter Row */}
+      <Motion.section
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {statCards.map((stat, i) => (
             <Card key={stat.label} className="p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                <stat.icon size={20} />
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                <stat.icon size={18} />
               </div>
-              <div className="mt-5 text-3xl font-semibold text-[var(--text-primary)]">{stat.value}</div>
-              <div className="mt-2 text-sm text-[var(--text-secondary)]">{stat.label}</div>
+              <div className="mt-4 text-2xl font-bold text-white">{stat.value}</div>
+              <div className="mt-1 text-xs text-[var(--text-muted)] font-medium">{stat.label}</div>
             </Card>
           ))}
         </div>
       </Motion.section>
 
-      <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-        <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+      {/* Main Grid: Split Layout */}
+      <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
+        {/* Left Side: Recent Activity */}
+        <Motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
           <Card className="p-6 sm:p-8">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
               <div>
-                <div className="kicker">Recent activity</div>
-                <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Continue where you left off</h2>
+                <div className="text-[10px] font-bold text-[var(--accent)] uppercase tracking-wider">Recent Activity</div>
+                <h2 className="font-heading text-2xl font-bold text-white mt-1">Continue Revision</h2>
               </div>
-              <Button variant="ghost" onClick={() => navigate('/study')}>
-                Open library
+              <Button variant="ghost" size="sm" onClick={() => navigate('/study')}>
+                Open Library
               </Button>
             </div>
 
-            <div className="mt-6 space-y-3">
+            <div className="space-y-3">
               {history.length > 0 ? (
-                history.slice(0, 5).map((session) => (
-                  <button
+                history.slice(0, 4).map((session) => (
+                  <Motion.button
                     key={session.id}
                     type="button"
                     onClick={() => openSession(session.id)}
-                    className="w-full rounded-[24px] border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-mindflow hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]"
+                    className="w-full rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-all hover:border-[var(--border-strong)]"
+                    whileHover={{ scale: 1.015, x: 4 }}
+                    whileTap={{ scale: 0.99 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 22 }}
                   >
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="min-w-0">
-                        <div className="truncate text-base font-semibold text-[var(--text-primary)]">{session.title}</div>
-                        <div className="mt-3 flex flex-wrap gap-2 text-xs text-[var(--text-muted)]">
-                          <span className="info-chip">{formatDate(session.created_at)}</span>
-                          <span className="info-chip">{session.card_count ?? session.flashcards?.length ?? 0} cards</span>
-                          <span className="info-chip">{session.question_count ?? session.quiz?.length ?? 0} questions</span>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="truncate text-base font-bold text-white">{session.title}</div>
+                        <div className="mt-2.5 flex flex-wrap gap-2 text-[10px] text-[var(--text-muted)] font-medium">
+                          <span className="px-2 py-0.5 rounded-full bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)]">{formatDate(session.created_at)}</span>
+                          <span className="px-2 py-0.5 rounded-full bg-[rgba(99,102,241,0.08)] text-[var(--accent-light)] border border-[rgba(99,102,241,0.15)]">{session.card_count ?? session.flashcards?.length ?? 0} cards</span>
+                          <span className="px-2 py-0.5 rounded-full bg-[rgba(245,158,11,0.08)] text-[var(--warm)] border border-[rgba(245,158,11,0.15)]">{session.question_count ?? session.quiz?.length ?? 0} questions</span>
                         </div>
                       </div>
-                      <ArrowRight size={18} className="mt-1 flex-shrink-0 text-[var(--text-muted)]" />
+                      <ArrowRight size={16} className="text-[var(--text-muted)] flex-shrink-0" />
                     </div>
-                  </button>
+                  </Motion.button>
                 ))
               ) : (
-                <Card variant="muted" className="p-8 text-center">
-                  <h3 className="text-xl font-semibold">No study sessions yet</h3>
-                  <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-                    Upload your first PDF or note set to start generating flashcards and quizzes.
+                <Card variant="muted" className="p-8 text-center border-dashed border-[var(--border)]">
+                  <h3 className="text-lg font-bold text-white">No study sessions yet</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[var(--text-secondary)]">
+                    Upload your first course document or lecture PDF to start.
                   </p>
-                  <Button className="mt-6" leftIcon={Upload} onClick={() => navigate('/upload')}>
-                    Upload your first source
+                  <Button className="mt-5" leftIcon={Upload} onClick={() => navigate('/upload')}>
+                    Upload Document
                   </Button>
                 </Card>
               )}
@@ -366,76 +408,82 @@ const Dashboard = () => {
           </Card>
         </Motion.section>
 
-        <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }}>
-          <div className="grid gap-6">
-            <Card className="p-6 sm:p-8">
-              <div className="kicker">Quick actions</div>
-              <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight">Move into the next study block fast.</h2>
-              <div className="mt-6 grid gap-4">
-                {[
-                  {
-                    title: 'Upload new notes',
-                    description: 'Import a new source and generate fresh material.',
-                    icon: Upload,
-                    action: () => navigate('/upload'),
-                  },
-                  {
-                    title: 'Run flashcards',
-                    description: 'Jump into active recall from your current session.',
-                    icon: BookOpen,
-                    action: () => navigate('/flashcards'),
-                  },
-                  {
-                    title: 'Check quiz accuracy',
-                    description: 'See your performance and weekly momentum.',
-                    icon: Target,
-                    action: () => navigate('/analytics'),
-                  },
-                ].map((item) => (
-                  <button
-                    key={item.title}
-                    type="button"
-                    onClick={item.action}
-                    className="rounded-[24px] border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-mindflow hover:border-[var(--border-strong)] hover:shadow-[var(--shadow-raised)]"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                        <item.icon size={20} />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-base font-semibold text-[var(--text-primary)]">{item.title}</div>
-                        <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{item.description}</p>
-                      </div>
+        {/* Right Side: Quick Actions & Gamification Badge */}
+        <Motion.section
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          className="space-y-6"
+        >
+          {/* Quick Actions Panel */}
+          <Card className="p-6 sm:p-8">
+            <div className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-wider mb-1">Quick Links</div>
+            <h2 className="font-heading text-2xl font-bold text-white mb-6">Study Operations</h2>
+            
+            <div className="grid gap-3">
+              {[
+                {
+                  title: 'Upload fresh materials',
+                  desc: 'Import course files or slides.',
+                  icon: Upload,
+                  action: () => navigate('/upload'),
+                },
+                {
+                  title: 'Run active recall cards',
+                  desc: 'Study prompt decks with spaced recall.',
+                  icon: BookOpen,
+                  action: () => navigate('/flashcards'),
+                },
+                {
+                  title: 'Check stats & trend indicators',
+                  desc: 'View weekly progress charts.',
+                  icon: Target,
+                  action: () => navigate('/analytics'),
+                },
+              ].map((item) => (
+                <Motion.button
+                  key={item.title}
+                  type="button"
+                  onClick={item.action}
+                  className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-5 py-4 text-left transition-all hover:border-[var(--border-strong)]"
+                  whileHover={{ scale: 1.02, x: 4 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ type: 'spring', stiffness: 350, damping: 22 }}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--bg-strong)] text-[var(--accent)] border border-[rgba(99,102,241,0.15)]">
+                      <item.icon size={18} />
                     </div>
-                  </button>
-                ))}
-              </div>
-            </Card>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-white">{item.title}</div>
+                      <p className="mt-0.5 text-xs text-[var(--text-muted)]">{item.desc}</p>
+                    </div>
+                  </div>
+                </Motion.button>
+              ))}
+            </div>
+          </Card>
 
-            <Card variant="accent" className="p-6 sm:p-8">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-card)] text-[var(--accent)] shadow-[var(--shadow-soft)]">
-                  <Clock3 size={20} />
-                </div>
-                <div>
-                  <div className="text-base font-semibold text-[var(--text-primary)]">Need a quick progress check?</div>
-                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-                    Open analytics to review accuracy, total study time, and how often you are showing up.
-                  </p>
-                  <Button variant="secondary" className="mt-5" onClick={() => navigate('/analytics')}>
-                    View analytics
-                  </Button>
-                </div>
+          {/* Gamification Streak Callout */}
+          <Card variant="accent" className="p-6 sm:p-8 relative overflow-hidden">
+            <div className="pointer-events-none absolute -right-16 -top-16 w-32 h-32 rounded-full bg-[rgba(245,158,11,0.12)] blur-2xl" />
+            <div className="flex gap-4 items-start relative z-10">
+              <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(245,158,11,0.12)] text-[var(--warm)] border border-[rgba(245,158,11,0.2)] shadow-sm">
+                <Clock3 size={18} />
               </div>
-            </Card>
-          </div>
+              <div className="min-w-0">
+                <h3 className="text-sm font-bold text-white">Daily Streak Active</h3>
+                <p className="mt-1 text-xs text-[var(--text-secondary)] leading-relaxed">
+                  Keep showing up daily to secure your study multiplier and gain extra XP on every reviewed card.
+                </p>
+                <Button variant="secondary" size="sm" className="mt-4" onClick={() => navigate('/analytics')}>
+                  View Progress Log
+                </Button>
+              </div>
+            </div>
+          </Card>
         </Motion.section>
       </div>
-      
-      {/* Dim overlay background when searching (Desktop only since mobile handles overlay directly above) */}
-      {searchResults !== null && searchQuery.trim() !== '' && (
-        <div className="fixed inset-0 bg-[var(--bg-default)]/60 backdrop-blur-sm z-0 pointer-events-none transition-all duration-300 hidden md:block" />
-      )}
     </div>
   );
 };

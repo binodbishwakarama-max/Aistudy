@@ -24,9 +24,9 @@ const generateHeatmapData = () => {
 
 const getHeatColor = (count) => {
   if (count === 0) return 'bg-[var(--bg-elevated)]';
-  if (count <= 1) return 'bg-[rgba(26,115,232,0.18)]';
-  if (count <= 3) return 'bg-[rgba(26,115,232,0.35)]';
-  if (count <= 5) return 'bg-[rgba(26,115,232,0.55)]';
+  if (count <= 1) return 'bg-[rgba(99,102,241,0.18)]';
+  if (count <= 3) return 'bg-[rgba(99,102,241,0.38)]';
+  if (count <= 5) return 'bg-[rgba(99,102,241,0.58)]';
   return 'bg-[var(--accent)]';
 };
 
@@ -234,37 +234,37 @@ const StatsDashboard = () => {
             <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
               <defs>
                 <linearGradient id="cardsFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#1A73E8" stopOpacity={0.24} />
-                  <stop offset="95%" stopColor="#1A73E8" stopOpacity={0.02} />
+                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.24} />
+                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.02} />
                 </linearGradient>
                 <linearGradient id="quizFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#669DF6" stopOpacity={0.24} />
-                  <stop offset="95%" stopColor="#669DF6" stopOpacity={0.02} />
+                  <stop offset="5%" stopColor="var(--accent-light)" stopOpacity={0.24} />
+                  <stop offset="95%" stopColor="var(--accent-light)" stopOpacity={0.02} />
                 </linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(95,99,104,0.14)" vertical={false} />
-              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#5F6368', fontWeight: 500 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#5F6368' }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
+              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)', fontWeight: 500 }} />
+              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
               <Tooltip content={<ChartTooltip />} />
               <Area
                 type="monotone"
                 dataKey="cards"
                 name="Cards"
-                stroke="#1A73E8"
+                stroke="var(--accent)"
                 strokeWidth={2.5}
                 fill="url(#cardsFill)"
                 dot={false}
-                activeDot={{ r: 4, fill: '#1A73E8', strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: 'var(--accent)', strokeWidth: 0 }}
               />
               <Area
                 type="monotone"
                 dataKey="quizzes"
                 name="Quizzes"
-                stroke="#669DF6"
+                stroke="var(--accent-light)"
                 strokeWidth={2}
                 fill="url(#quizFill)"
                 dot={false}
-                activeDot={{ r: 4, fill: '#669DF6', strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: 'var(--accent-light)', strokeWidth: 0 }}
               />
             </AreaChart>
           </ResponsiveContainer>
@@ -326,9 +326,9 @@ const StatsDashboard = () => {
           </div>
 
           <div className="mt-6 space-y-4">
-            <DifficultyBar label="Mastered" value={stats.difficulty.easy} total={stats.cardsReviewed} color="#188038" />
-            <DifficultyBar label="Learning" value={stats.difficulty.medium} total={stats.cardsReviewed} color="#F29900" />
-            <DifficultyBar label="Needs review" value={stats.difficulty.hard} total={stats.cardsReviewed} color="#D93025" />
+            <DifficultyBar label="Mastered" value={stats.difficulty.easy} total={stats.cardsReviewed} color="var(--success)" />
+            <DifficultyBar label="Learning" value={stats.difficulty.medium} total={stats.cardsReviewed} color="var(--warm)" />
+            <DifficultyBar label="Needs review" value={stats.difficulty.hard} total={stats.cardsReviewed} color="var(--danger)" />
           </div>
         </Motion.section>
       )}

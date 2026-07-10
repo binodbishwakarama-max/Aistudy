@@ -23,6 +23,65 @@ import Button from './ui/Button';
 import Card from './ui/Card';
 import InstallPrompt from './InstallPrompt';
 
+const CustomCursor = () => {
+  const [position, setPosition] = useState({ x: -100, y: -100 });
+  const [isHovered, setIsHovered] = useState(false);
+  const [hidden, setHidden] = useState(true);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setPosition({ x: e.clientX, y: e.clientY });
+      setHidden(false);
+
+      const target = e.target;
+      if (target && typeof target.closest === 'function') {
+        const isClickable = target.closest('button, a, .ui-card, input, select, textarea, [role="button"]');
+        setIsHovered(!!isClickable);
+      }
+    };
+
+    const handleMouseLeave = () => setHidden(true);
+    const handleMouseEnter = () => setHidden(false);
+
+    window.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseleave', handleMouseLeave);
+    document.addEventListener('mouseenter', handleMouseEnter);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseleave', handleMouseLeave);
+      document.removeEventListener('mouseenter', handleMouseEnter);
+    };
+  }, []);
+
+  if (hidden) return null;
+
+  return (
+    <>
+      <Motion.div
+        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[var(--accent)] rounded-full pointer-events-none z-[99999] hidden lg:block -translate-x-1/2 -translate-y-1/2"
+        animate={{
+          x: position.x,
+          y: position.y,
+        }}
+        transition={{ type: 'tween', ease: 'backOut', duration: 0.05 }}
+      />
+      <Motion.div
+        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99998] hidden lg:block -translate-x-1/2 -translate-y-1/2 border"
+        animate={{
+          x: position.x,
+          y: position.y,
+          width: isHovered ? 48 : 28,
+          height: isHovered ? 48 : 28,
+          borderColor: isHovered ? 'rgba(99, 102, 241, 0.6)' : 'rgba(99, 102, 241, 0.25)',
+          backgroundColor: isHovered ? 'rgba(99, 102, 241, 0.08)' : 'rgba(99, 102, 241, 0.01)',
+        }}
+        transition={{ type: 'spring', stiffness: 450, damping: 28, mass: 0.2 }}
+      />
+    </>
+  );
+};
+
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
 const isPathActive = (pathname, path) => {
@@ -39,8 +98,8 @@ const MobileBottomNav = ({ onOpenSearch, onOpenMenu }) => {
 
   return (
     <nav
-      className="fixed bottom-0 inset-x-0 bg-[rgba(249,251,255,0.95)] backdrop-blur-md border-t border-[var(--border)] z-40 xl:hidden flex justify-around items-center px-2 shadow-[0_-4px_24px_rgba(15,23,42,0.04)]"
-      style={{ height: 'var(--bottom-nav-h)', paddingBottom: 'var(--safe-area-bottom)' }}
+      className="fixed bottom-4 inset-x-4 bg-[rgba(16,18,27,0.75)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] z-40 xl:hidden flex justify-around items-center px-2 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
     >
       <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
         <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
@@ -133,7 +192,17 @@ const Layout = ({ children }) => {
   }, [mobileSearchOpen]);
 
   return (
-    <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)]' : 'workspace-shell text-[var(--text-primary)]'}>
+    <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)] relative overflow-hidden' : 'workspace-shell text-[var(--text-primary)] relative overflow-hidden'}>
+      {/* Custom Magnetic Cursor */}
+      <CustomCursor />
+
+      {/* Film Grain Noise Overlay */}
+      <div className="noise-overlay" />
+
+      {/* Floating Ambient Auroras */}
+      <div className="ambient-aurora-1" />
+      <div className="ambient-aurora-2" />
+
       <AnimatePresence>
         {showLevelUp && (
           <Motion.div
@@ -197,11 +266,14 @@ const Layout = ({ children }) => {
                   const active = isPathActive(location.pathname, item.path);
 
                   return (
-                    <button
+                    <Motion.button
                       key={item.path}
                       type="button"
                       onClick={() => handleNavigation(item.path)}
                       className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 24 }}
                     >
                       <span className="workspace-nav-icon">
                         <item.icon size={18} />
@@ -210,7 +282,7 @@ const Layout = ({ children }) => {
                         <span className="block text-sm font-semibold">{item.label}</span>
                         <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
                       </span>
-                    </button>
+                    </Motion.button>
                   );
                 })}
               </nav>
@@ -404,11 +476,14 @@ const Layout = ({ children }) => {
                           const active = isPathActive(location.pathname, item.path);
 
                           return (
-                            <button
+                            <Motion.button
                               key={item.path}
                               type="button"
                               onClick={() => handleNavigation(item.path)}
                               className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
+                              whileHover={{ scale: 1.02, x: 4 }}
+                              whileTap={{ scale: 0.98 }}
+                              transition={{ type: 'spring', stiffness: 400, damping: 24 }}
                             >
                               <span className="workspace-nav-icon">
                                 <item.icon size={18} />
@@ -417,7 +492,7 @@ const Layout = ({ children }) => {
                                 <span className="block text-sm font-semibold">{item.label}</span>
                                 <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
                               </span>
-                            </button>
+                            </Motion.button>
                           );
                         })}
                       </div>
