@@ -1,20 +1,20 @@
-import React, { useMemo, useState, useEffect, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   ChevronDown,
+  Command,
+  LayoutDashboard,
   LogOut,
   Menu,
   Search,
+  Settings2,
   Sparkles,
-  Target,
   Trophy,
   User,
-  LayoutDashboard,
-  BookOpen,
   X,
 } from 'lucide-react';
-import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
 import { workspaceHighlights, workspaceNavigation } from '../config/workspace';
@@ -23,108 +23,47 @@ import Button from './ui/Button';
 import Card from './ui/Card';
 import InstallPrompt from './InstallPrompt';
 
-const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [hidden, setHidden] = useState(true);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      setHidden(false);
-
-      const target = e.target;
-      if (target && typeof target.closest === 'function') {
-        const isClickable = target.closest('button, a, .ui-card, input, select, textarea, [role="button"]');
-        setIsHovered(!!isClickable);
-      }
-    };
-
-    const handleMouseLeave = () => setHidden(true);
-    const handleMouseEnter = () => setHidden(false);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-    };
-  }, []);
-
-  if (hidden) return null;
-
-  return (
-    <>
-      <Motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[var(--accent)] rounded-full pointer-events-none z-[99999] hidden lg:block -translate-x-1/2 -translate-y-1/2"
-        animate={{
-          x: position.x,
-          y: position.y,
-        }}
-        transition={{ type: 'tween', ease: 'backOut', duration: 0.05 }}
-      />
-      <Motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99998] hidden lg:block -translate-x-1/2 -translate-y-1/2 border"
-        animate={{
-          x: position.x,
-          y: position.y,
-          width: isHovered ? 48 : 28,
-          height: isHovered ? 48 : 28,
-          borderColor: isHovered ? 'rgba(99, 102, 241, 0.6)' : 'rgba(99, 102, 241, 0.25)',
-          backgroundColor: isHovered ? 'rgba(99, 102, 241, 0.08)' : 'rgba(99, 102, 241, 0.01)',
-        }}
-        transition={{ type: 'spring', stiffness: 450, damping: 28, mass: 0.2 }}
-      />
-    </>
-  );
-};
-
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
 const isPathActive = (pathname, path) => {
-  if (path === '/analytics') {
-    return pathname === '/analytics' || pathname === '/stats';
-  }
-
+  if (path === '/analytics') return pathname === '/analytics' || pathname === '/stats';
   return pathname === path;
 };
 
+const getPageLabel = (pathname) => {
+  if (pathname === '/dashboard') return 'Overview';
+  if (pathname === '/upload') return 'Upload notes';
+  if (pathname === '/flashcards') return 'Flashcards';
+  if (pathname === '/quizzes') return 'Quizzes';
+  if (pathname === '/analytics' || pathname === '/stats') return 'Analytics';
+  if (pathname === '/settings') return 'Settings';
+  return 'Workspace';
+};
+
 const MobileBottomNav = ({ onOpenSearch, onOpenMenu }) => {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
+  const studyActive = ['/study', '/flashcards', '/quizzes'].includes(location.pathname);
+
+  const items = [
+    { label: 'Home', icon: LayoutDashboard, active: location.pathname === '/dashboard', action: () => navigate('/dashboard') },
+    { label: 'Study', icon: Sparkles, active: studyActive, action: () => navigate('/study') },
+    { label: 'Search', icon: Search, active: false, action: onOpenSearch },
+    { label: 'Profile', icon: User, active: location.pathname === '/settings', action: () => navigate('/settings') },
+    { label: 'More', icon: Menu, active: false, action: onOpenMenu },
+  ];
 
   return (
-    <nav
-      className="fixed bottom-4 inset-x-4 bg-[rgba(16,18,27,0.75)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] z-40 xl:hidden flex justify-around items-center px-2 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
-      style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
-    >
-      <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Home</span>
-      </button>
-      <button onClick={() => navigate('/study')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <BookOpen size={22} className={['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Study</span>
-      </button>
-      <button onClick={onOpenSearch} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
-        <Search size={22} />
-        <span className="text-[10px] mt-1">Search</span>
-      </button>
-      <button onClick={() => navigate('/settings')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/settings' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <User size={22} className={location.pathname === '/settings' ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Profile</span>
-      </button>
-      <button onClick={onOpenMenu} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
-        <Menu size={22} />
-        <span className="text-[10px] mt-1">More</span>
-      </button>
+    <nav className="fixed inset-x-3 bottom-3 z-40 flex items-center justify-around rounded-2xl border border-[var(--border)] bg-[rgba(13,18,32,0.9)] px-1.5 py-1.5 shadow-[0_18px_48px_rgba(2,6,23,0.45)] backdrop-blur-xl xl:hidden" style={{ paddingBottom: 'calc(0.375rem + var(--safe-area-bottom))' }} aria-label="Mobile workspace navigation">
+      {items.map(({ label, icon: Icon, active, action }) => (
+        <button key={label} type="button" onClick={action} className={`flex min-h-12 min-w-12 flex-col items-center justify-center gap-0.5 rounded-xl px-2 text-[10px] font-medium transition-colors ${active ? 'bg-[var(--bg-strong)] text-[var(--accent-light)]' : 'text-[var(--text-muted)] hover:bg-white/[0.05] hover:text-white'}`}>
+          <Icon size={18} strokeWidth={active ? 2.4 : 1.8} />
+          <span>{label}</span>
+        </button>
+      ))}
     </nav>
   );
 };
-
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -132,27 +71,31 @@ const Layout = ({ children }) => {
   const { user, logout, authError } = useAuth();
   const { gameState, showLevelUp } = useGamification();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [workspaceQuery, setWorkspaceQuery] = useState('');
-
   const searchInputRef = useRef(null);
-
   const isMarketing = marketingRoutes.has(location.pathname);
 
   const userName = useMemo(() => {
     const fullName = user?.user_metadata?.full_name?.trim();
-    if (fullName) return fullName;
-    if (user?.email) return user.email.split('@')[0];
-    return 'Student';
+    return fullName || user?.email?.split('@')[0] || 'Student';
   }, [user]);
 
   const userInitials = useMemo(() => {
-    const words = userName.split(' ').filter(Boolean);
-    return words.slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'MF';
+    const initials = userName.split(' ').filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('');
+    return initials || 'MF';
   }, [userName]);
+
+  useEffect(() => {
+    if (!mobileSearchOpen) return undefined;
+    const focusId = window.setTimeout(() => searchInputRef.current?.focus(), 80);
+    return () => window.clearTimeout(focusId);
+  }, [mobileSearchOpen]);
 
   const closeOverlays = () => {
     setMobileOpen(false);
+    setMobileSearchOpen(false);
     setProfileOpen(false);
   };
 
@@ -168,368 +111,128 @@ const Layout = ({ children }) => {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-
     const query = workspaceQuery.trim().toLowerCase();
     if (!query) return;
 
-    const target = workspaceNavigation.find((item) => {
-      const haystack = [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase();
-      return haystack.includes(query);
-    });
-
+    const target = workspaceNavigation.find((item) => [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase().includes(query));
     if (target) {
       handleNavigation(target.path);
       setWorkspaceQuery('');
-      setMobileSearchOpen(false);
     }
   };
 
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
-  useEffect(() => {
-    if (mobileSearchOpen && searchInputRef.current) {
-      setTimeout(() => searchInputRef.current.focus(), 100);
-    }
-  }, [mobileSearchOpen]);
-
   return (
-    <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)] relative overflow-hidden' : 'workspace-shell text-[var(--text-primary)] relative overflow-hidden'}>
-      {/* Custom Magnetic Cursor */}
-      <CustomCursor />
-
-      {/* Film Grain Noise Overlay */}
+    <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)]' : 'workspace-shell text-[var(--text-primary)]'}>
       <div className="noise-overlay" />
-
-      {/* Floating Ambient Auroras */}
       <div className="ambient-aurora-1" />
       <div className="ambient-aurora-2" />
 
       <AnimatePresence>
         {showLevelUp && (
-          <Motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-md"
-          >
+          <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[120] flex items-center justify-center bg-slate-950/60 px-4 backdrop-blur-md">
             <Motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}>
               <Card className="w-full max-w-sm p-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
-                  <Trophy className="h-8 w-8" />
-                </div>
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--warm-soft)] text-[var(--warm)]"><Trophy size={26} /></div>
                 <p className="kicker mt-5">Level up</p>
-                <h2 className="font-heading mt-2 text-3xl font-bold">You reached Level {gameState.level}</h2>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-                  Nice work. Your study habit is turning into a repeatable system.
-                </p>
+                <h2 className="font-heading mt-2 text-3xl font-bold">Level {gameState.level}</h2>
+                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">Your study habit is becoming a repeatable system.</p>
               </Card>
             </Motion.div>
           </Motion.div>
         )}
       </AnimatePresence>
 
-      {isMarketing ? (
-        children
-      ) : (
+      {isMarketing ? children : (
         <>
           <aside className="workspace-sidebar hidden xl:flex">
-            <div className="flex h-full flex-col gap-6">
-              <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-full flex-col">
+              <Link to="/dashboard" className="flex items-center gap-3" aria-label="MindFlow dashboard">
                 <BrandMark />
                 <div>
-                  <div className="font-heading text-lg font-bold tracking-tight">MindFlow</div>
-                  <div className="text-sm text-[var(--text-muted)]">AI study workspace</div>
+                  <div className="font-heading text-base font-bold tracking-tight">MindFlow</div>
+                  <div className="text-[11px] text-[var(--text-muted)]">AI study workspace</div>
                 </div>
               </Link>
 
-              <Card variant="accent" className="p-5">
+              <Card variant="accent" className="mt-8 p-4">
                 <div className="flex items-center gap-3">
-                  <div className="workspace-avatar">{userInitials}</div>
+                  <span className="workspace-avatar">{userInitials}</span>
                   <div className="min-w-0">
-                    <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{userName}</div>
-                    <div className="truncate text-xs text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
+                    <div className="truncate text-sm font-semibold">{userName}</div>
+                    <div className="truncate text-[11px] text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
                   </div>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
-                    <div className="text-xs text-[var(--text-muted)]">Level</div>
-                    <div className="mt-1 text-lg font-semibold">{gameState.level}</div>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
-                    <div className="text-xs text-[var(--text-muted)]">Streak</div>
-                    <div className="mt-1 text-lg font-semibold">{gameState.streak}d</div>
-                  </div>
+                <div className="mt-4 flex items-center justify-between border-t border-white/[0.08] pt-3 text-xs">
+                  <span className="text-[var(--text-muted)]">Current streak</span>
+                  <span className="font-semibold text-[var(--warm)]">{gameState.streak} days</span>
                 </div>
               </Card>
 
-              <nav className="space-y-2">
+              <div className="mt-8 px-2 text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--text-faint)]">Workspace</div>
+              <nav className="mt-3 space-y-1.5" aria-label="Workspace navigation">
                 {workspaceNavigation.map((item) => {
                   const active = isPathActive(location.pathname, item.path);
-
                   return (
-                    <Motion.button
-                      key={item.path}
-                      type="button"
-                      onClick={() => handleNavigation(item.path)}
-                      className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
-                      whileHover={{ scale: 1.02, x: 4 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-                    >
-                      <span className="workspace-nav-icon">
-                        <item.icon size={18} />
-                      </span>
-                      <span className="min-w-0 text-left">
-                        <span className="block text-sm font-semibold">{item.label}</span>
-                        <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
-                      </span>
-                    </Motion.button>
+                    <button key={item.path} type="button" onClick={() => handleNavigation(item.path)} className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}>
+                      <span className="workspace-nav-icon"><item.icon size={16} /></span>
+                      <span className="min-w-0"><span className="block text-sm font-semibold">{item.label}</span><span className="block truncate text-[10px] text-[var(--text-faint)]">{item.description}</span></span>
+                    </button>
                   );
                 })}
               </nav>
 
-              <div className="mt-auto space-y-3">
+              <div className="mt-auto space-y-3 pt-8">
                 {workspaceHighlights.map((highlight) => (
-                  <Card key={highlight.label} className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                        <highlight.icon size={18} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold">{highlight.label}</div>
-                        <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{highlight.value}</p>
-                      </div>
-                    </div>
-                  </Card>
+                  <div key={highlight.label} className="rounded-xl border border-[var(--border)] bg-white/[0.025] p-3">
+                    <div className="flex items-start gap-2.5"><highlight.icon size={15} className="mt-0.5 text-[var(--accent-light)]" /><div><div className="text-xs font-semibold">{highlight.label}</div><p className="mt-1 text-[10px] leading-5 text-[var(--text-muted)]">{highlight.value}</p></div></div>
+                  </div>
                 ))}
-
-                <Button variant="secondary" className="w-full justify-center" leftIcon={LogOut} onClick={handleLogout}>
-                  Log out
-                </Button>
+                <Button variant="ghost" className="w-full justify-start" leftIcon={LogOut} onClick={handleLogout}>Log out</Button>
               </div>
             </div>
           </aside>
 
           <div className="workspace-content">
-            <header className="workspace-topbar hidden xl:flex">
+            <header className="workspace-topbar">
               <div className="workspace-topbar-inner">
-                <div className="workspace-topbar-search-row">
-                  <form onSubmit={handleSearchSubmit} className="workspace-search">
-                    <Search size={16} className="text-[var(--text-muted)]" />
-                    <input
-                      value={workspaceQuery}
-                      onChange={(event) => setWorkspaceQuery(event.target.value)}
-                      className="workspace-search-input"
-                      placeholder="Jump to upload, flashcards, analytics..."
-                    />
-                  </form>
+                <div className="flex items-center gap-3 xl:hidden">
+                  <Link to="/dashboard" aria-label="MindFlow dashboard"><BrandMark className="h-9 w-9 rounded-xl" /></Link>
+                  <div><div className="text-sm font-bold">{getPageLabel(location.pathname)}</div><div className="text-[10px] text-[var(--text-faint)]">MindFlow workspace</div></div>
+                </div>
+                <div className="hidden min-w-0 flex-1 items-center gap-4 xl:flex">
+                  <div><div className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--accent-light)]">{getPageLabel(location.pathname)}</div><div className="mt-1 text-sm text-[var(--text-muted)]">Keep your next study step visible.</div></div>
+                  <form onSubmit={handleSearchSubmit} className="workspace-search ml-6"><Search size={15} className="text-[var(--text-faint)]" /><input value={workspaceQuery} onChange={(event) => setWorkspaceQuery(event.target.value)} className="workspace-search-input" placeholder="Jump to a workspace area..." aria-label="Search workspace" /><span className="hidden items-center gap-1 rounded-md border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--text-faint)] 2xl:flex"><Command size={10} /> K</span></form>
                 </div>
 
                 <div className="workspace-topbar-actions">
-                  <div className="hidden items-center gap-2 lg:flex">
-                    <span className="info-chip">
-                      <Sparkles size={14} className="text-[var(--accent)]" />
-                      <span>XP {gameState.xp}</span>
-                    </span>
-                    <span className="info-chip">
-                      <Trophy size={14} className="text-[var(--warm)]" />
-                      <span>Level {gameState.level}</span>
-                    </span>
-                  </div>
-
-                  <div className="relative">
-                    <button
-                      type="button"
-                      onClick={() => setProfileOpen((prev) => !prev)}
-                      className="workspace-profile-trigger"
-                    >
-                      <span className="workspace-avatar workspace-avatar--small">{userInitials}</span>
-                      <span className="hidden min-w-0 text-left md:block">
-                        <span className="block truncate text-sm font-semibold">{userName}</span>
-                        <span className="block truncate text-xs text-[var(--text-muted)]">{user?.email || 'Workspace member'}</span>
-                      </span>
-                      <ChevronDown size={16} className="text-[var(--text-muted)]" />
-                    </button>
-
-                    <AnimatePresence>
-                      {profileOpen && (
-                        <Motion.div
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: 8 }}
-                          className="absolute right-0 top-[calc(100%+0.75rem)] z-50 w-[min(18rem,calc(100vw-1rem))]"
-                        >
-                          <Card className="p-4">
-                            <div className="flex items-center gap-3">
-                              <span className="workspace-avatar">{userInitials}</span>
-                              <div className="min-w-0">
-                                <div className="truncate text-sm font-semibold">{userName}</div>
-                                <div className="truncate text-xs text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
-                              </div>
-                            </div>
-                            <div className="mt-4 space-y-2">
-                              <button type="button" onClick={() => handleNavigation('/settings')} className="workspace-dropdown-item">
-                                Open settings
-                              </button>
-                              <button type="button" onClick={handleLogout} className="workspace-dropdown-item text-[var(--danger)]">
-                                Log out
-                              </button>
-                            </div>
-                          </Card>
-                        </Motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
+                  <div className="hidden items-center gap-2 lg:flex"><span className="info-chip"><Sparkles size={13} className="text-[var(--accent-light)]" /> XP {gameState.xp}</span><span className="info-chip"><Trophy size={13} className="text-[var(--warm)]" /> Level {gameState.level}</span></div>
+                  <button type="button" onClick={() => setProfileOpen((prev) => !prev)} className="workspace-profile-trigger" aria-expanded={profileOpen} aria-label="Open profile menu">
+                    <span className="workspace-avatar workspace-avatar--small">{userInitials}</span>
+                    <span className="hidden max-w-28 text-left md:block"><span className="block truncate text-xs font-semibold">{userName}</span><span className="block truncate text-[10px] text-[var(--text-faint)]">{user?.email || 'Workspace member'}</span></span>
+                    <ChevronDown size={14} className="text-[var(--text-muted)]" />
+                  </button>
+                  <AnimatePresence>
+                    {profileOpen && <Motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 5 }} className="absolute right-4 top-[calc(100%+0.75rem)] z-50 w-64"><Card className="p-3"><div className="flex items-center gap-3 border-b border-[var(--border)] pb-3"><span className="workspace-avatar">{userInitials}</span><div className="min-w-0"><div className="truncate text-sm font-semibold">{userName}</div><div className="truncate text-[11px] text-[var(--text-muted)]">{user?.email || 'Signed in'}</div></div></div><div className="mt-2 space-y-1"><button type="button" onClick={() => handleNavigation('/settings')} className="workspace-dropdown-item"><Settings2 size={14} className="mr-2 inline" /> Settings</button><button type="button" onClick={handleLogout} className="workspace-dropdown-item text-[var(--danger)]"><LogOut size={14} className="mr-2 inline" /> Log out</button></div></Card></Motion.div>}
+                  </AnimatePresence>
                 </div>
               </div>
             </header>
 
             <AnimatePresence>
-              {mobileSearchOpen && (
-                <Motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="fixed inset-0 z-[120] bg-[var(--bg-base)] xl:hidden flex flex-col"
-                >
-                  <div className="flex items-center gap-2 p-4 border-b border-[var(--border)] bg-[var(--bg-card)] pb-safe-top pt-safe-top">
-                    <form onSubmit={handleSearchSubmit} className="workspace-search flex-1 m-0 shadow-none border-[var(--border-strong)]">
-                      <Search size={18} className="text-[var(--text-muted)]" />
-                      <input
-                        ref={searchInputRef}
-                        value={workspaceQuery}
-                        onChange={(event) => setWorkspaceQuery(event.target.value)}
-                        className="workspace-search-input text-base h-8"
-                        placeholder="Jump to upload, flashcards, analytics..."
-                      />
-                    </form>
-                    <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => setMobileSearchOpen(false)}>
-                      <X size={24} />
-                    </Button>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-4 bg-[var(--bg-base)]">
-                    <div className="kicker mb-3">Quick Navigation Navigation</div>
-                    <div className="grid gap-2">
-                       {workspaceNavigation.filter(item => 
-                          workspaceQuery ? 
-                            [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase().includes(workspaceQuery.toLowerCase()) 
-                            : true
-                        ).map((item) => (
-                           <button
-                             key={item.path}
-                             onClick={() => {
-                               handleNavigation(item.path);
-                               setMobileSearchOpen(false);
-                               setWorkspaceQuery('');
-                             }}
-                             className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-[20px] transition-mindflow hover:border-[var(--accent)]"
-                           >
-                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                               <item.icon size={20} />
-                             </div>
-                             <div className="text-left flex-1 min-w-0">
-                               <div className="text-base font-semibold text-[var(--text-primary)]">{item.label}</div>
-                               <div className="text-sm text-[var(--text-secondary)] truncate">{item.description}</div>
-                             </div>
-                           </button>
-                       ))}
-                    </div>
-                  </div>
-                </Motion.div>
-              )}
+              {mobileSearchOpen && <Motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }} className="fixed inset-0 z-[120] flex flex-col bg-[var(--bg-base)] xl:hidden"><div className="flex items-center gap-2 border-b border-[var(--border)] p-3"><form onSubmit={handleSearchSubmit} className="workspace-search flex-1"><Search size={16} className="text-[var(--text-faint)]" /><input ref={searchInputRef} value={workspaceQuery} onChange={(event) => setWorkspaceQuery(event.target.value)} className="workspace-search-input" placeholder="Search workspace..." aria-label="Search workspace" /></form><Button variant="ghost" size="icon" onClick={closeOverlays} aria-label="Close search"><X size={18} /></Button></div><div className="flex-1 overflow-y-auto p-4"><div className="kicker mb-3">Quick navigation</div><div className="grid gap-2">{workspaceNavigation.filter((item) => !workspaceQuery || [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase().includes(workspaceQuery.toLowerCase())).map((item) => <button key={item.path} type="button" onClick={() => handleNavigation(item.path)} className="flex items-center gap-3 rounded-xl border border-[var(--border)] bg-white/[0.025] p-3 text-left hover:border-[var(--border-accent)]"><span className="workspace-nav-icon"><item.icon size={16} /></span><span><span className="block text-sm font-semibold">{item.label}</span><span className="text-xs text-[var(--text-muted)]">{item.description}</span></span></button>)}</div></div></Motion.div>}
             </AnimatePresence>
 
             <AnimatePresence>
-              {mobileOpen && (
-                <Motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-[110] bg-[rgba(15,23,42,0.38)] backdrop-blur-sm xl:hidden"
-                  onClick={closeOverlays}
-                >
-                  <Motion.div
-                    initial={{ x: -24, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: -24, opacity: 0 }}
-                    className="flex h-full w-full max-w-[min(22rem,calc(100vw-0.75rem))] flex-col"
-                    onClick={(event) => event.stopPropagation()}
-                  >
-                    <Card
-                      className="flex h-full flex-col rounded-none border-y-0 border-l-0 p-6 sm:rounded-r-[32px] sm:border sm:border-l-0 overflow-y-auto"
-                      style={{ paddingBottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 1.5rem)' }}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <BrandMark />
-                          <div>
-                            <div className="font-heading text-lg font-bold">MindFlow</div>
-                            <div className="text-sm text-[var(--text-muted)]">AI study workspace</div>
-                          </div>
-                        </div>
-                        <Button variant="ghost" size="icon" onClick={closeOverlays} aria-label="Close menu">
-                          <X size={18} />
-                        </Button>
-                      </div>
-
-                      <div className="mt-6 space-y-2">
-                        {workspaceNavigation.map((item) => {
-                          const active = isPathActive(location.pathname, item.path);
-
-                          return (
-                            <Motion.button
-                              key={item.path}
-                              type="button"
-                              onClick={() => handleNavigation(item.path)}
-                              className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
-                              whileHover={{ scale: 1.02, x: 4 }}
-                              whileTap={{ scale: 0.98 }}
-                              transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-                            >
-                              <span className="workspace-nav-icon">
-                                <item.icon size={18} />
-                              </span>
-                              <span className="min-w-0 text-left">
-                                <span className="block text-sm font-semibold">{item.label}</span>
-                                <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
-                              </span>
-                            </Motion.button>
-                          );
-                        })}
-                      </div>
-
-                      <Card variant="accent" className="mt-auto p-5">
-                        <div className="flex items-center gap-3">
-                          <span className="workspace-avatar">{userInitials}</span>
-                          <div className="min-w-0">
-                            <div className="truncate text-sm font-semibold">{userName}</div>
-                            <div className="truncate text-xs text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
-                          </div>
-                        </div>
-                        <Button variant="secondary" className="mt-4 w-full justify-center" leftIcon={LogOut} onClick={handleLogout}>
-                          Log out
-                        </Button>
-                      </Card>
-                    </Card>
-                  </Motion.div>
-                </Motion.div>
-              )}
+              {mobileOpen && <Motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[110] bg-slate-950/65 backdrop-blur-sm xl:hidden" onClick={closeOverlays}><Motion.div initial={{ x: -18, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -18, opacity: 0 }} className="h-full w-[min(21rem,calc(100vw-1rem))] border-r border-[var(--border)] bg-[var(--bg-surface)] p-5" onClick={(event) => event.stopPropagation()}><div className="flex items-center justify-between"><Link to="/dashboard" className="flex items-center gap-3"><BrandMark className="h-9 w-9 rounded-xl" /><div><div className="text-sm font-bold">MindFlow</div><div className="text-[10px] text-[var(--text-faint)]">AI study workspace</div></div></Link><Button variant="ghost" size="icon" onClick={closeOverlays} aria-label="Close menu"><X size={18} /></Button></div><nav className="mt-8 space-y-1.5">{workspaceNavigation.map((item) => <button key={item.path} type="button" onClick={() => handleNavigation(item.path)} className={`workspace-nav-item ${isPathActive(location.pathname, item.path) ? 'workspace-nav-item--active' : ''}`}><span className="workspace-nav-icon"><item.icon size={16} /></span><span><span className="block text-sm font-semibold">{item.label}</span><span className="text-[10px] text-[var(--text-faint)]">{item.description}</span></span></button>)}</nav><Card variant="accent" className="mt-8 p-4"><div className="flex items-center gap-3"><span className="workspace-avatar">{userInitials}</span><div className="min-w-0"><div className="truncate text-sm font-semibold">{userName}</div><div className="truncate text-[11px] text-[var(--text-muted)]">{user?.email || 'Signed in'}</div></div></div><Button variant="secondary" className="mt-4 w-full justify-center" leftIcon={LogOut} onClick={handleLogout}>Log out</Button></Card></Motion.div></Motion.div>}
             </AnimatePresence>
 
             <main className="workspace-main">
               <div className="workspace-main-inner">
-                {authError && (
-                  <div className="mb-5 flex items-start gap-3 rounded-2xl border border-[rgba(217,48,37,0.22)] bg-[rgba(217,48,37,0.06)] px-4 py-3 text-sm">
-                    <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
-                    <span>{authError}</span>
-                  </div>
-                )}
+                {authError && <div className="mb-5 flex items-start gap-3 rounded-xl border border-rose-300/20 bg-rose-400/[0.07] px-4 py-3 text-sm text-[var(--text-secondary)]"><AlertTriangle size={17} className="mt-0.5 shrink-0 text-[var(--danger)]" /><span>{authError}</span></div>}
                 {children}
               </div>
             </main>
-            <MobileBottomNav 
-              onOpenSearch={() => { window.scrollTo(0, 0); setMobileSearchOpen(true); }} 
-              onOpenMenu={() => setMobileOpen(true)} 
-            />
+            <MobileBottomNav onOpenSearch={() => setMobileSearchOpen(true)} onOpenMenu={() => setMobileOpen(true)} />
             <InstallPrompt />
           </div>
         </>
