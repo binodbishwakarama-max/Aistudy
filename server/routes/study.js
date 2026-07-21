@@ -214,6 +214,10 @@ router.post('/review', async (req, res) => {
     try {
         const { cardId, rating } = req.body;
 
+        if (typeof cardId !== 'string' || !cardId.trim() || ![1, 2, 3, 4].includes(rating)) {
+            return res.status(400).json({ error: 'A valid cardId and rating from 1 to 4 are required.' });
+        }
+
         const { data: card, error: fetchError } = await supabase
             .from('flashcards')
             .select('*')
@@ -274,7 +278,7 @@ router.post('/review', async (req, res) => {
         res.json({ success: true, nextReview: nextReviewDate, interval });
     } catch (error) {
         logger.error('Review flashcard failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to update flashcard review.' });
     }
 });
 
@@ -304,7 +308,7 @@ router.delete('/deck/:id', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         logger.error('Delete deck failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to delete study deck.' });
     }
 });
 

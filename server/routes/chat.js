@@ -15,6 +15,18 @@ router.post('/', async (req, res) => {
             return res.status(400).json({ error: 'Message is required.' });
         }
 
+        if (message.trim().length > 10_000) {
+            return res.status(413).json({ error: 'Message is too large.' });
+        }
+
+        if (context !== undefined && typeof context !== 'string') {
+            return res.status(400).json({ error: 'Context must be a string.' });
+        }
+
+        if (history !== undefined && !Array.isArray(history)) {
+            return res.status(400).json({ error: 'History must be an array.' });
+        }
+
         const systemPrompt = `You are a helpful and encouraging AI Study Tutor called "MindFlow AI".
 
 CONTEXT:

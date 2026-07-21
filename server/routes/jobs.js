@@ -20,6 +20,12 @@ router.get('/:id', async (req, res) => {
             return res.status(404).json({ error: 'Job not found' });
         }
 
+        // Job IDs are not a sufficient authorization boundary. Never expose
+        // another user's generated study material if an ID is guessed.
+        if (job.data?.userId && job.data.userId !== req.user.id) {
+            return res.status(404).json({ error: 'Job not found' });
+        }
+
         const state = await job.getState();
         const progress = job.progress;
         

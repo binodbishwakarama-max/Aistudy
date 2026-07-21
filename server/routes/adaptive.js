@@ -116,6 +116,10 @@ router.post('/generate', async (req, res) => {
         const userId = req.user.id;
         const { questionCount = 10 } = req.body;
 
+        if (!Number.isInteger(questionCount) || questionCount < 1 || questionCount > 20) {
+            return res.status(400).json({ error: 'questionCount must be an integer between 1 and 20.' });
+        }
+
         // 1. Fetch all flashcards across all user decks
         const { data: flashcards, error: fcError } = await supabase
             .from('flashcards')
@@ -186,7 +190,7 @@ router.post('/generate', async (req, res) => {
             neutral,
             strong,
             flashcardContext,
-            questionCount: Math.min(questionCount, 20)
+            questionCount
         });
 
         const generation = await generateText({ prompt, systemInstruction });
@@ -253,14 +257,18 @@ router.post('/submit', async (req, res) => {
         const userId = req.user.id;
         const { results } = req.body;
 
-        if (!Array.isArray(results) || results.length === 0) {
+        if (!Array.isArray(results) || results.length === 0 || results.length > 100) {
             return res.status(400).json({ error: 'Results array is required.' });
         }
 
         // Group results by topic
         const topicAggregates = {};
         for (const r of results) {
-            const topic = (r.topic || 'General').trim();
+            if (!r || typeof r !== 'object' || typeof r.correct !== 'boolean') {
+                return res.status(400).json({ error: 'Each result must include a boolean correct value.' });
+            }
+
+            const topic = (typeof r.topic === 'string' ? r.topic : 'General').trim().slice(0, 100) || 'General';
             if (!topicAggregates[topic]) {
                 topicAggregates[topic] = { attempts: 0, correct: 0 };
             }

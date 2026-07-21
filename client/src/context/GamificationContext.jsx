@@ -12,6 +12,13 @@ const DEFAULT_GAME_STATE = {
     achievements: []
 };
 
+const getLocalDateKey = (date = new Date()) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+};
+
 // eslint-disable-next-line react-refresh/only-export-components
 export const useGamification = () => useContext(GamificationContext);
 
@@ -24,11 +31,11 @@ export const GamificationProvider = ({ children }) => {
     // Load stats from server when user logs in
     useEffect(() => {
         if (!user) {
-            setTimeout(() => {
+            const resetId = window.setTimeout(() => {
                 setGameState(DEFAULT_GAME_STATE);
                 setIsStatsLoaded(false);
             }, 0);
-            return;
+            return () => window.clearTimeout(resetId);
         }
 
         let isMounted = true;
@@ -67,13 +74,15 @@ export const GamificationProvider = ({ children }) => {
     };
 
     const addXP = (amount) => {
+        if (!Number.isFinite(amount) || amount <= 0) return;
+
         setGameState(prev => {
             let newXP = prev.xp + amount;
             let newLevel = prev.level;
             let leveledUp = false;
 
-            const xpNeeded = getXpToNextLevel(newLevel);
-            if (newXP >= xpNeeded) {
+            while (newXP >= getXpToNextLevel(newLevel)) {
+                const xpNeeded = getXpToNextLevel(newLevel);
                 newLevel++;
                 newXP = newXP - xpNeeded;
                 leveledUp = true;
@@ -105,7 +114,7 @@ export const GamificationProvider = ({ children }) => {
     };
 
     const updateStreak = () => {
-        const today = new Date().toISOString().split('T')[0];
+        const today = getLocalDateKey();
         setGameState(prev => {
             if (prev.lastStudyDate === today) {
                 return prev; // Already studied today
@@ -113,7 +122,7 @@ export const GamificationProvider = ({ children }) => {
 
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayString = yesterday.toISOString().split('T')[0];
+            const yesterdayString = getLocalDateKey(yesterday);
 
             let newStreak = prev.streak;
 

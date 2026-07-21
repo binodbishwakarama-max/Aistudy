@@ -55,8 +55,8 @@ This guide will help you deploy your **MindFlow 2.0** application to the web so 
      - `SUPABASE_ANON_KEY`: *(Your Supabase Anon Public Key)*
      - `SUPABASE_SERVICE_ROLE_KEY`: *(Essential for admin auth/DB write actions in the backend)*
      - `REDIS_URL`: *(Your Upstash rediss:// URL)*
-     - `JWT_SECRET`: *(A long random string)*
      - `PORT`: `3000` 
+     - `CLIENT_ORIGINS`: *(Comma-separated frontend origins, e.g. `https://your-app.vercel.app`)*
 
 5. **Deploy**
    - Click **"Create Web Service"**.
