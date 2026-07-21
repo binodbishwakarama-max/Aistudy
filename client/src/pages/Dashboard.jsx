@@ -52,6 +52,7 @@ const Dashboard = () => {
 
   // Debounced Search Effect
   useEffect(() => {
+    let cancelled = false;
     const handler = setTimeout(async () => {
       if (!searchQuery.trim()) {
         setSearchResults(null);
@@ -61,15 +62,19 @@ const Dashboard = () => {
       setIsSearching(true);
       try {
         const res = await searchFlashcards(searchQuery);
+        if (cancelled) return;
         setSearchResults(res.results || []);
       } catch (err) {
-        console.error("Semantic search failed", err);
+        if (!cancelled) console.error("Semantic search failed", err);
       } finally {
-        setIsSearching(false);
+        if (!cancelled) setIsSearching(false);
       }
     }, 500); // 500ms debounce
 
-    return () => clearTimeout(handler);
+    return () => {
+      cancelled = true;
+      clearTimeout(handler);
+    };
   }, [searchQuery]);
 
   useEffect(() => {
@@ -337,7 +342,7 @@ const Dashboard = () => {
         transition={{ delay: 0.05, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {statCards.map((stat, i) => (
+          {statCards.map((stat) => (
             <Card key={stat.label} className="p-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--bg-strong)] text-[var(--accent)]">
                 <stat.icon size={18} />

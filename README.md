@@ -29,13 +29,13 @@ node index.js
 **Environment Variables (.env)** `server/.env`:
 ```
 PORT=3000
-JWT_SECRET=your-secret-key
 GEMINI_API_KEY=AI...
 GROQ_API_KEY=gsk_...
 SUPABASE_URL=https://...supabase.co
 SUPABASE_ANON_KEY=eyJ...
 SUPABASE_SERVICE_ROLE_KEY=eyJ...
 REDIS_URL=rediss://...upstash.io:6379
+CLIENT_ORIGINS=http://localhost:5173
 ```
 
 ### 3. Frontend (Client)

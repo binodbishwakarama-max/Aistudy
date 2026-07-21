@@ -47,14 +47,34 @@ router.patch('/', async (req, res) => {
     try {
         const { xp, level, streak, lastStudyDate, achievements } = req.body;
 
+        const isNonNegativeInteger = (value) => Number.isInteger(value) && value >= 0;
+        if (
+            !isNonNegativeInteger(xp)
+            || !isNonNegativeInteger(level)
+            || !isNonNegativeInteger(streak)
+            || (achievements !== undefined && (
+                !Array.isArray(achievements)
+                || achievements.length > 100
+                || achievements.some((achievement) => typeof achievement !== 'string' || achievement.length > 100)
+            ))
+        ) {
+            return res.status(400).json({ error: 'Invalid stats payload.' });
+        }
+
+        if (lastStudyDate !== null && lastStudyDate !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(lastStudyDate)) {
+            return res.status(400).json({ error: 'lastStudyDate must use YYYY-MM-DD format.' });
+        }
+
         const payload = {
             user_id: req.user.id,
-            xp: typeof xp === 'number' ? xp : 0,
-            level: typeof level === 'number' ? level : 1,
-            streak: typeof streak === 'number' ? streak : 0,
+            xp,
+            level,
+            streak,
             last_active: lastStudyDate || null,
             updated_at: new Date().toISOString()
         };
+
+        if (achievements !== undefined) payload.achievements = achievements;
 
         const { data, error } = await supabase
             .from('user_stats')
@@ -76,7 +96,7 @@ router.patch('/', async (req, res) => {
         });
     } catch (error) {
         logger.error('Update stats failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to update stats.' });
     }
 });
 

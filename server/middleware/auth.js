@@ -7,7 +7,8 @@ const { logger } = require('../utils/logger');
  */
 const authMiddleware = async (req, res, next) => {
     try {
-        const token = req.header('Authorization')?.replace('Bearer ', '');
+        const authorization = req.header('Authorization');
+        const token = authorization?.match(/^Bearer\s+([^\s]+)$/i)?.[1];
 
         if (!token) {
             return res.status(401).json({ error: 'Access denied. No token provided.' });
@@ -31,4 +32,3 @@ const authMiddleware = async (req, res, next) => {
 };
 
 module.exports = authMiddleware;
-

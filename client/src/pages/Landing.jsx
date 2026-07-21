@@ -66,32 +66,34 @@ const stats = [
   { label: 'Active Learners', value: '12,000+' },
 ];
 
+const chatMessages = [
+  "Analyzing 'Distributed Systems.pdf'...",
+  'Found 12 main concepts. Generating flashcards...',
+  'Flashcards generated! Ready to test active recall.',
+];
+
 const MockupWorkspace = () => {
   const [isFlipped, setIsFlipped] = useState(false);
   const [typedText, setTypedText] = useState('');
-  const [chatStep, setChatStep] = useState(0);
-
-  const chatMessages = [
-    "Analyzing 'Distributed Systems.pdf'...",
-    "Found 12 main concepts. Generating flashcards...",
-    "Flashcards generated! Ready to test active recall.",
-  ];
 
   useEffect(() => {
     let charIndex = 0;
     let messageIndex = 0;
     let textInterval;
+    let pauseTimeout;
+    let cancelled = false;
 
     const startTyping = () => {
       const currentMessage = chatMessages[messageIndex];
       textInterval = setInterval(() => {
+        if (cancelled) return;
         setTypedText(currentMessage.substring(0, charIndex));
         charIndex++;
         if (charIndex > currentMessage.length) {
           clearInterval(textInterval);
-          setTimeout(() => {
+          pauseTimeout = setTimeout(() => {
+            if (cancelled) return;
             messageIndex = (messageIndex + 1) % chatMessages.length;
-            setChatStep(messageIndex);
             charIndex = 0;
             startTyping();
           }, 3000);
@@ -100,7 +102,11 @@ const MockupWorkspace = () => {
     };
 
     startTyping();
-    return () => clearInterval(textInterval);
+    return () => {
+      cancelled = true;
+      clearInterval(textInterval);
+      clearTimeout(pauseTimeout);
+    };
   }, []);
 
   return (
