@@ -6,6 +6,7 @@ export const BRAND = {
   shortSubline: 'Lecture PDF in. Focused exam review out—in under an hour.',
   examSprintLabel: '45-min exam sprint',
   demoCta: 'Try a 45-min review',
+  demoCtaShort: 'Try review',
   steps: [
     {
       title: 'Import your PDF',

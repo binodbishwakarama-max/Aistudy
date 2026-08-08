@@ -51,7 +51,31 @@ const marqueeItems = [
   'Zero setup',
 ];
 
-const HeroGlassStack = ({ tiltX, tiltY }) => {
+const PreviewCardContent = () => (
+  <>
+    <div className="flex items-center justify-between gap-2">
+      <span className="landing-preview-card__badge">Card 4 of 12</span>
+      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">~45 min sprint</span>
+    </div>
+    <p className="landing-preview-card__question">What is the CAP theorem?</p>
+    <p className="landing-preview-card__hint">Tap to reveal — then rate how well you knew it.</p>
+    <div className="landing-preview-card__ratings">
+      {['Hard', 'Good', 'Easy'].map((label) => (
+        <span key={label}>{label}</span>
+      ))}
+    </div>
+  </>
+);
+
+const HeroGlassStack = ({ tiltX, tiltY, isMobile }) => {
+  if (isMobile) {
+    return (
+      <div className="landing-preview-card" aria-hidden>
+        <PreviewCardContent />
+      </div>
+    );
+  }
+
   const rotateX = tiltY * -8;
   const rotateY = tiltX * 10;
 
@@ -123,7 +147,16 @@ const Landing = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [navScrolled, setNavScrolled] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isMobile, setIsMobile] = useState(false);
   const heroRef = useRef(null);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setIsMobile(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: heroRef,
@@ -160,10 +193,10 @@ const Landing = () => {
 
       <header className={`landing-nav ${navScrolled ? 'is-scrolled' : ''}`}>
         <div className="page-shell">
-          <div className={`landing-nav__inner ${navScrolled ? 'liquid-glass' : ''}`}>
-            <Link to="/" className="flex items-center gap-3">
+          <div className={`landing-nav__inner ${navScrolled && !isMobile ? 'liquid-glass' : ''}`}>
+            <Link to="/" className="landing-nav__brand flex min-w-0 items-center gap-2.5">
               <BrandMark />
-              <span className="font-heading text-lg font-bold tracking-tight">MindFlow</span>
+              <span className="truncate font-heading text-lg font-bold tracking-tight">MindFlow</span>
             </Link>
             <div className="hidden items-center gap-2 sm:flex">
               <a href="#how" className="px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
@@ -179,17 +212,21 @@ const Landing = () => {
                 <Button size="sm" rightIcon={ArrowRight}>Get started</Button>
               </Link>
             </div>
-            <Link to="/demo/flashcards" className="sm:hidden">
-              <Button size="sm">{BRAND.demoCta}</Button>
+            <Link to="/demo/flashcards" className="landing-nav__cta sm:hidden">
+              <Button size="sm">{BRAND.demoCtaShort}</Button>
             </Link>
           </div>
         </div>
       </header>
 
       <section ref={heroRef} className="landing-hero">
-        <Motion.div style={{ y: heroY, opacity: heroOpacity }} className="page-shell w-full">
+        <Motion.div
+          style={isMobile ? undefined : { y: heroY, opacity: heroOpacity }}
+          className="page-shell w-full"
+        >
           <div className="landing-hero__grid">
             <Motion.div
+              className="landing-hero__copy"
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
@@ -198,38 +235,38 @@ const Landing = () => {
                 <Sparkles size={14} className="text-[var(--accent)]" />
                 {BRAND.wedge}
               </p>
-              <h1 className="font-heading mt-4 text-[clamp(2.75rem,8vw,4.5rem)] font-bold leading-[1.02] tracking-tight">
+              <h1 className="font-heading mt-3 font-bold tracking-tight sm:mt-4 sm:text-[clamp(2.75rem,8vw,4.5rem)] sm:leading-[1.02]">
                 <span className="landing-headline-gradient">{BRAND.headline}</span>
               </h1>
-              <p className="mt-5 max-w-lg text-lg leading-8 text-[var(--text-secondary)]">
+              <p className="mt-4 max-w-lg text-base leading-7 text-[var(--text-secondary)] sm:mt-5 sm:text-lg sm:leading-8">
                 {BRAND.subline}
               </p>
 
-              <div className="mt-8 flex flex-wrap gap-3">
+              <div className="landing-hero__actions mt-6 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
                 <Button size="lg" rightIcon={ArrowRight} onClick={() => navigate('/demo/flashcards')}>
-                  {BRAND.demoCta}
+                  {isMobile ? BRAND.demoCtaShort : BRAND.demoCta}
                 </Button>
-                <Link to="/register">
-                  <Button size="lg" variant="secondary">Upload your PDF</Button>
+                <Link to="/register" className="w-full sm:w-auto">
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">Upload your PDF</Button>
                 </Link>
               </div>
 
-              <div className="mt-10 flex flex-wrap gap-3">
+              <div className="landing-hero__pills mt-6 flex flex-wrap gap-2 sm:mt-10 sm:gap-3">
                 <span className="landing-stat-pill">No credit card</span>
                 <span className="landing-stat-pill">Demo in 10 seconds</span>
-                <span className="landing-stat-pill">Real SRS + analytics</span>
+                <span className="landing-stat-pill hidden sm:inline-flex">Real SRS + analytics</span>
               </div>
             </Motion.div>
 
             <Motion.div
+              className="landing-hero__visual relative"
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-              onPointerMove={handlePointerMove}
-              onPointerLeave={() => setTilt({ x: 0, y: 0 })}
-              className="relative"
+              onPointerMove={isMobile ? undefined : handlePointerMove}
+              onPointerLeave={isMobile ? undefined : () => setTilt({ x: 0, y: 0 })}
             >
-              <HeroGlassStack tiltX={tilt.x} tiltY={tilt.y} />
+              <HeroGlassStack tiltX={tilt.x} tiltY={tilt.y} isMobile={isMobile} />
             </Motion.div>
           </div>
         </Motion.div>

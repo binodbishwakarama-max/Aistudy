@@ -104,6 +104,7 @@ const Study = () => {
 
   const mode = getModeFromLocation(location.pathname, location.search, Boolean(text));
   const activeMode = modeDetails[mode] || modeDetails.library;
+  const isStudyFocus = mode === 'flashcards' || mode === 'quiz';
   const flashcardSessionKey = useMemo(() => buildSessionKey(flashcards), [flashcards]);
   const quizSessionKey = useMemo(() => buildSessionKey(quiz), [quiz]);
   const sourcePreview = useMemo(() => {
@@ -283,7 +284,7 @@ const Study = () => {
           </Motion.div>
         </AnimatePresence>
 
-        <aside className="space-y-4">
+        <aside className={`space-y-4 ${isStudyFocus ? 'hidden md:block' : ''}`}>
           {!demoRoute && (
           <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)]">
             <SRSDashboard />
@@ -303,6 +304,18 @@ const Study = () => {
           )}
         </aside>
       </div>
+
+      {isStudyFocus && text && (
+        <details className="study-mobile-source md:hidden">
+          <summary>Source material</summary>
+          <div className="study-mobile-source__body">
+            <p>{text.replace(/\s+/g, ' ').trim().slice(0, 280)}{text.length > 280 ? '…' : ''}</p>
+            <p className="mt-2 text-xs text-[var(--text-muted)]">
+              {flashcards.length} cards · {quiz.length} questions
+            </p>
+          </div>
+        </details>
+      )}
 
       {demoRoute && (
         <div className="rounded-[var(--radius-lg)] border border-[var(--border-accent)] bg-[var(--bg-strong)] px-4 py-3 text-center text-sm text-[var(--text-secondary)]">

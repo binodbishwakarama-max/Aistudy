@@ -22,6 +22,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editDraft, setEditDraft] = useState({ question: '', answer: '', explanation: '' });
   const [regenerating, setRegenerating] = useState(false);
+  const [useSimpleFlip, setUseSimpleFlip] = useState(false);
   const [sessionDurationMs, setSessionDurationMs] = useState(0);
   const [sessionStartTime] = useState(() => Date.now());
   const startTimeRef = useRef(sessionStartTime);
@@ -39,6 +40,14 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
   useEffect(() => {
     setShuffledCards(cards);
   }, [cards]);
+
+  useEffect(() => {
+    const media = window.matchMedia('(max-width: 767px)');
+    const update = () => setUseSimpleFlip(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     if (currentCard) {
@@ -262,7 +271,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
   ];
 
   return (
-    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
+    <div className={`study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6 ${isFlipped ? 'study-session--rated' : ''}`}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Motion.button
           onClick={isShuffled ? resetOrder : shuffleCards}
@@ -283,16 +292,127 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
         </div>
       </div>
 
-      <div className="relative min-h-[22rem] flex-1 sm:h-[26rem] md:flex-none lg:h-[28rem]">
+      <div className="relative min-h-[18rem] flex-1 sm:min-h-[22rem] sm:h-[26rem] md:flex-none lg:h-[28rem]">
+        {useSimpleFlip ? (
+          <div className="flashcard-simple h-full">
+            {!isFlipped ? (
+              <div
+                role="button"
+                tabIndex={0}
+                className="flashcard-simple__panel h-full w-full text-left"
+                onClick={() => setIsFlipped(true)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    setIsFlipped(true);
+                  }
+                }}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flashcard-simple__label">
+                    Card {currentIndex + 1} of {shuffledCards.length}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      toggleFavorite();
+                    }}
+                    className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full text-[var(--text-muted)]"
+                    aria-label="Favorite card"
+                  >
+                    <Star size={18} className={favorites.has(currentCard?.question) ? 'fill-[var(--warm)] text-[var(--warm)]' : ''} />
+                  </button>
+                </div>
+
+                <div className="flashcard-simple__question">
+                  {isEditing ? (
+                    <div className="w-full space-y-3" onClick={(e) => e.stopPropagation()}>
+                      <textarea
+                        value={editDraft.question}
+                        onChange={(e) => setEditDraft((prev) => ({ ...prev, question: e.target.value }))}
+                        className="w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-card)] p-3 text-sm"
+                        rows={3}
+                      />
+                      <textarea
+                        value={editDraft.answer}
+                        onChange={(e) => setEditDraft((prev) => ({ ...prev, answer: e.target.value }))}
+                        className="w-full rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-card)] p-3 text-sm"
+                        rows={4}
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSaveEdit}>Save</Button>
+                        <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>Cancel</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <h3 data-testid="flashcard-question" className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)]">
+                      {currentCard?.question}
+                    </h3>
+                  )}
+                </div>
+
+                <div className="flashcard-simple__meta flex items-center justify-between gap-2">
+                  <span>{isEditing ? 'Editing card' : 'Tap to reveal answer'}</span>
+                  {currentCard?.id && !isEditing && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                      className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-[var(--accent)]"
+                    >
+                      <Pencil size={14} /> Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="flashcard-simple__panel h-full">
+                <span className="flashcard-simple__label">Answer</span>
+                <div className="flashcard-simple__question">
+                  <p className="text-base leading-7 text-[var(--text-primary)] sm:text-lg sm:leading-9">{currentCard?.answer}</p>
+                </div>
+
+                {(currentCard?.sourceExcerpt || currentCard?.sourceSection) && (
+                  <div className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-left">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)]">
+                      <Quote size={12} />
+                      {currentCard.sourceSection ? `From ${currentCard.sourceSection}` : 'From your notes'}
+                    </div>
+                    {currentCard.sourceExcerpt && (
+                      <p className="mt-1 line-clamp-2 text-xs italic leading-5 text-[var(--text-secondary)]">
+                        “{currentCard.sourceExcerpt}”
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                <div className="flashcard-simple__meta flex items-center justify-between gap-2">
+                  <span>Rate how well you knew it</span>
+                  {currentCard?.id && (
+                    <button
+                      type="button"
+                      onClick={handleRegenerate}
+                      disabled={regenerating}
+                      className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-[var(--warm)] disabled:opacity-50"
+                    >
+                      <RefreshCw size={14} className={regenerating ? 'animate-spin' : ''} />
+                      {regenerating ? 'Remaking…' : 'Remake'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
         <Motion.div className="perspective-1000 h-full w-full cursor-pointer" onClick={() => setIsFlipped(!isFlipped)}>
           <Motion.div
-            className="relative h-full w-full"
+            className="flashcard-flipper relative h-full w-full"
             initial={false}
             animate={{ rotateY: isFlipped ? 180 : 0 }}
             transition={{ type: 'spring', stiffness: 260, damping: 20 }}
             style={{ transformStyle: 'preserve-3d' }}
           >
-            <div className="backface-hidden absolute flex h-full w-full flex-col justify-between rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)] sm:p-8">
+            <div className="flashcard-face backface-hidden absolute flex h-full w-full flex-col justify-between rounded-[var(--radius-xl)] border border-[var(--border-strong)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)] sm:p-8">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-sm font-medium text-[var(--text-muted)]">Question</div>
                 <button
@@ -350,8 +470,8 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
             </div>
 
             <div
-              className="backface-hidden absolute flex h-full w-full flex-col justify-between rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-soft)] sm:p-8"
-              style={{ transform: 'rotateY(180deg)' }}
+              className="flashcard-face backface-hidden absolute flex h-full w-full flex-col justify-between rounded-[var(--radius-xl)] border border-[var(--border-strong)] bg-[var(--bg-surface)] p-5 shadow-[var(--shadow-soft)] sm:p-8"
+              style={{ transform: 'rotateY(180deg) translateZ(1px)' }}
             >
               <div className="text-sm font-medium text-[var(--text-muted)]">Answer</div>
               <div className="flex flex-1 items-center justify-center text-center">
@@ -389,6 +509,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
             </div>
           </Motion.div>
         </Motion.div>
+        )}
       </div>
 
       {isFlipped && (
@@ -433,31 +554,31 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
       )}
 
       <div className="flex justify-center gap-3 sm:hidden">
-        <Motion.button
+        <button
+          type="button"
           onClick={prevCard}
           disabled={currentIndex === 0}
-          className="secondary-button h-12 w-12 p-0 disabled:cursor-not-allowed disabled:opacity-50"
-          whileTap={currentIndex !== 0 ? { scale: 0.95 } : {}}
+          className="study-nav-control"
           aria-label="Previous card"
         >
-          <ChevronLeft size={20} />
-        </Motion.button>
-        <Motion.button
+          <ChevronLeft size={22} strokeWidth={2.25} />
+        </button>
+        <button
+          type="button"
           onClick={() => setIsFlipped(!isFlipped)}
           className="primary-button h-12 min-w-[7rem] px-4"
-          whileTap={{ scale: 0.95 }}
         >
           {isFlipped ? 'Question' : 'Flip'}
-        </Motion.button>
-        <Motion.button
+        </button>
+        <button
+          type="button"
           onClick={nextCard}
           disabled={currentIndex === shuffledCards.length - 1}
-          className="secondary-button h-12 w-12 p-0 disabled:cursor-not-allowed disabled:opacity-50"
-          whileTap={currentIndex !== shuffledCards.length - 1 ? { scale: 0.95 } : {}}
+          className="study-nav-control"
           aria-label="Next card"
         >
-          <ChevronRight size={20} />
-        </Motion.button>
+          <ChevronRight size={22} strokeWidth={2.25} />
+        </button>
       </div>
 
       <div className="hidden flex-wrap justify-center gap-3 sm:flex">
