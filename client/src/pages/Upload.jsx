@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import FileUpload from '../components/FileUpload';
 import Button from '../components/ui/Button';
+import { BRAND } from '../config/brand';
 import { getStudyHistory } from '../services/api';
 import { useStudy } from '../context/StudyContext';
 
@@ -36,12 +37,12 @@ const UploadPage = () => {
   return (
     <div className="space-y-8">
       <Motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
-        <p className="kicker">Upload</p>
+        <p className="kicker">{BRAND.wedge}</p>
         <h1 className="font-heading mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
-          Import your source
+          Start your exam sprint
         </h1>
         <p className="mt-3 max-w-xl text-base leading-7 text-[var(--text-secondary)]">
-          Drop a PDF or text file. MindFlow parses it, generates flashcards, and opens study mode automatically.
+          Drop a lecture PDF. MindFlow parses it, generates your ~45-minute review deck, and opens study mode automatically.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-[var(--text-muted)]">
           <span className="inline-flex items-center gap-1.5">

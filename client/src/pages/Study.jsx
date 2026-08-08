@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
   Brain,
   CheckCircle,
+  Clock,
   FileText,
   HelpCircle,
   Layers,
@@ -21,7 +22,11 @@ import SRSDashboard from '../components/SRSDashboard';
 import StudyLibrary from '../components/StudyLibrary';
 import { useAuth } from '../context/AuthContext';
 import { useStudy } from '../context/StudyContext';
+import { BRAND } from '../config/brand';
+import { DEMO_DECK } from '../data/demoDeck';
 import Button from '../components/ui/Button';
+
+const isDemoPath = (pathname) => pathname.startsWith('/demo');
 
 const modeDetails = {
   flashcards: {
@@ -49,8 +54,9 @@ const modeDetails = {
 const buildSessionKey = (items) => items.map((item) => JSON.stringify(item)).join('|');
 
 const getModeFromLocation = (pathname, search, hasText) => {
-  if (pathname === '/flashcards') return 'flashcards';
-  if (pathname === '/quizzes') return 'quiz';
+  if (pathname === '/flashcards' || pathname === '/demo/flashcards') return 'flashcards';
+  if (pathname === '/quizzes' || pathname === '/demo/quizzes') return 'quiz';
+  if (pathname === '/demo') return 'flashcards';
 
   const params = new URLSearchParams(search);
   const queryMode = params.get('mode');
@@ -66,9 +72,35 @@ const Study = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { text, flashcards, quiz, generateFlashcards, generateQuiz, saveSession, loading, error, lastDeckId } = useStudy();
+  const {
+    text,
+    flashcards,
+    quiz,
+    generateFlashcards,
+    generateQuiz,
+    saveSession,
+    loading,
+    error,
+    lastDeckId,
+    isDemoMode,
+    startDemo,
+  } = useStudy();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const demoRoute = isDemoPath(location.pathname);
+
+  useLayoutEffect(() => {
+    if (demoRoute) {
+      startDemo();
+    }
+  }, [demoRoute, startDemo]);
+
+  useEffect(() => {
+    if (location.pathname === '/demo') {
+      navigate('/demo/flashcards', { replace: true });
+    }
+  }, [location.pathname, navigate]);
 
   const mode = getModeFromLocation(location.pathname, location.search, Boolean(text));
   const activeMode = modeDetails[mode] || modeDetails.library;
@@ -80,13 +112,22 @@ const Study = () => {
     return cleaned.length > 72 ? `${cleaned.slice(0, 72)}…` : cleaned;
   }, [text]);
 
-  const tabs = [
-    { id: 'library', label: 'Library', icon: BookOpen, to: '/study' },
-    { id: 'flashcards', label: 'Cards', icon: Layers, to: '/flashcards' },
-    { id: 'quiz', label: 'Quiz', icon: HelpCircle, to: '/quizzes' },
-    { id: 'adaptive', label: 'Adaptive', icon: Brain, to: '/study?mode=adaptive' },
-    { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
-  ];
+  if (demoRoute && location.pathname === '/demo') {
+    return null;
+  }
+
+  const tabs = demoRoute
+    ? [
+        { id: 'flashcards', label: 'Cards', icon: Layers, to: '/demo/flashcards' },
+        { id: 'quiz', label: 'Quiz', icon: HelpCircle, to: '/demo/quizzes' },
+      ]
+    : [
+        { id: 'library', label: 'Library', icon: BookOpen, to: '/study' },
+        { id: 'flashcards', label: 'Cards', icon: Layers, to: '/flashcards' },
+        { id: 'quiz', label: 'Quiz', icon: HelpCircle, to: '/quizzes' },
+        { id: 'adaptive', label: 'Adaptive', icon: Brain, to: '/study?mode=adaptive' },
+        { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
+      ];
 
   const handleSave = async () => {
     if (!user) {
@@ -109,7 +150,7 @@ const Study = () => {
     }
   };
 
-  if (!text && mode !== 'library') {
+  if (!demoRoute && !text && mode !== 'library') {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center py-12 text-center">
         <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
@@ -135,16 +176,25 @@ const Study = () => {
       <header className="session-bar">
         <div className="min-w-0 flex-1">
           <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-            {activeMode.title}
+            {demoRoute ? BRAND.examSprintLabel : activeMode.title}
           </p>
           <h1 className="font-heading mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl">
-            {mode === 'library' ? 'Your study library' : sourcePreview}
+            {demoRoute ? DEMO_DECK.title : mode === 'library' ? 'Your study library' : sourcePreview}
           </h1>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">{activeMode.description}</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
+            {demoRoute ? (
+              <span className="inline-flex items-center gap-1.5">
+                <Clock size={14} />
+                ~{DEMO_DECK.estimatedMinutes} min review · {flashcards.length} cards
+              </span>
+            ) : (
+              activeMode.description
+            )}
+          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {text && (
+          {text && !demoRoute && (
             <Button
               onClick={handleSave}
               loading={saving}
@@ -155,8 +205,8 @@ const Study = () => {
               {saved ? 'Saved' : 'Save'}
             </Button>
           )}
-          <Button variant="ghost" size="sm" leftIcon={Upload} onClick={() => navigate('/upload')}>
-            New
+          <Button variant="ghost" size="sm" leftIcon={Upload} onClick={() => navigate(demoRoute ? '/register' : '/upload')}>
+            {demoRoute ? 'Upload yours' : 'New'}
           </Button>
         </div>
       </header>
@@ -179,11 +229,11 @@ const Study = () => {
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className={demoRoute ? 'space-y-6' : 'grid gap-6 xl:grid-cols-[1.2fr_0.8fr]'}>
         <AnimatePresence mode="wait">
           <Motion.div
             key={mode}
-            initial={{ opacity: 0, y: 10 }}
+            initial={false}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
@@ -204,7 +254,7 @@ const Study = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Flashcard key={flashcardSessionKey} cards={flashcards} deckId={lastDeckId} />
+                  <Flashcard key={flashcardSessionKey} cards={flashcards} deckId={lastDeckId} isDemoMode={isDemoMode} />
                 )}
               </>
             )}
@@ -224,7 +274,7 @@ const Study = () => {
                     </Button>
                   </div>
                 ) : (
-                  <Quiz key={quizSessionKey} questions={quiz} deckId={lastDeckId} />
+                  <Quiz key={quizSessionKey} questions={quiz} deckId={lastDeckId} isDemoMode={isDemoMode} />
                 )}
               </>
             )}
@@ -236,9 +286,11 @@ const Study = () => {
         </AnimatePresence>
 
         <aside className="space-y-4">
+          {!demoRoute && (
           <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)]">
             <SRSDashboard />
           </div>
+          )}
           {text && (
             <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)]">
               <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Source</p>
@@ -254,7 +306,13 @@ const Study = () => {
         </aside>
       </div>
 
-      <ChatInterface />
+      {demoRoute && (
+        <div className="rounded-[var(--radius-lg)] border border-[var(--border-accent)] bg-[var(--bg-strong)] px-4 py-3 text-center text-sm text-[var(--text-secondary)]">
+          {BRAND.wedge} — demo deck only. <Link to="/register" className="font-semibold text-[var(--accent)]">Create a free account</Link> to upload your PDF.
+        </div>
+      )}
+
+      <ChatInterface demoMode={demoRoute} />
     </div>
   );
 };

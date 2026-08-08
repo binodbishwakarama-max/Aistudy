@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
   BookOpen,
@@ -12,24 +12,12 @@ import {
 import { useAuth } from '../context/AuthContext';
 import BrandMark from '../components/BrandMark';
 import Button from '../components/ui/Button';
+import { BRAND } from '../config/brand';
 
-const steps = [
-  {
-    title: 'Upload once',
-    desc: 'Drop a PDF or paste notes. MindFlow extracts the concepts worth reviewing.',
-    icon: Upload,
-  },
-  {
-    title: 'Practice actively',
-    desc: 'Flashcards and quizzes appear from the same source—no extra setup.',
-    icon: Layers,
-  },
-  {
-    title: 'Keep the streak',
-    desc: 'Spaced review and adaptive quizzes point you at what you still need.',
-    icon: BookOpen,
-  },
-];
+const steps = BRAND.steps.map((step, index) => ({
+  ...step,
+  icon: [Upload, Layers, BookOpen][index],
+}));
 
 const testimonials = [
   {
@@ -75,6 +63,7 @@ const HeroVisual = () => (
 
 const Landing = () => {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
 
   if (!loading && user) {
@@ -100,6 +89,9 @@ const Landing = () => {
               <span className="font-heading text-lg font-bold tracking-tight">MindFlow</span>
             </Link>
             <div className="flex items-center gap-2 sm:gap-3">
+              <Link to="/demo/flashcards">
+                <Button variant="ghost">{BRAND.demoCta}</Button>
+              </Link>
               <Link to="/login">
                 <Button variant="ghost">Sign in</Button>
               </Link>
@@ -118,26 +110,25 @@ const Landing = () => {
               transition={{ duration: 0.55, ease: [0.16, 1, 0.3, 1] }}
               className="max-w-xl"
             >
+              <p className="kicker">{BRAND.wedge}</p>
               <h1 className="font-heading text-5xl font-bold leading-[1.02] tracking-tight text-[var(--text-primary)] sm:text-6xl lg:text-[4.25rem]">
                 MindFlow
               </h1>
               <p className="mt-5 text-xl font-medium leading-snug text-[var(--text-primary)] sm:text-2xl">
-                Turn lecture notes into a study system that stays with you.
+                {BRAND.headline}
               </p>
               <p className="mt-4 max-w-md text-base leading-7 text-[var(--text-secondary)]">
-                Upload PDFs once. Practice with flashcards and quizzes that adapt as you improve.
+                {BRAND.subline}
               </p>
               <div className="mt-9 flex flex-wrap gap-3">
+                <Button size="lg" rightIcon={ArrowRight} onClick={() => navigate('/demo/flashcards')}>
+                  {BRAND.demoCta}
+                </Button>
                 <Link to="/register">
-                  <Button size="lg" rightIcon={ArrowRight}>
-                    Get started free
+                  <Button size="lg" variant="secondary">
+                    Upload your PDF
                   </Button>
                 </Link>
-                <a href="#how">
-                  <Button size="lg" variant="secondary">
-                    How it works
-                  </Button>
-                </a>
               </div>
             </Motion.div>
           </div>
@@ -159,10 +150,10 @@ const Landing = () => {
           <div className="max-w-2xl">
             <p className="kicker">How it works</p>
             <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Three steps. One calm loop.
+              {BRAND.wedge}
             </h2>
             <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
-              MindFlow is built for repeat study sessions—not a one-off demo screen.
+              Three steps from lecture PDF to exam-ready—in about 45 minutes.
             </p>
           </div>
 
@@ -250,20 +241,18 @@ const Landing = () => {
       <section className="border-t border-[var(--border)] py-20 sm:py-24">
         <div className="page-shell text-center">
           <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-5xl">
-            Ready when your notes are.
+            Your next exam sprint starts with one PDF.
           </h2>
           <p className="mx-auto mt-4 max-w-lg text-base leading-7 text-[var(--text-secondary)]">
-            Create a free account and turn your next lecture pack into a study session in minutes.
+            {BRAND.shortSubline}
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Button size="lg" rightIcon={ArrowRight} onClick={() => navigate('/demo/flashcards')}>
+              {BRAND.demoCta}
+            </Button>
             <Link to="/register">
-              <Button size="lg" rightIcon={ArrowRight}>
-                Start learning
-              </Button>
-            </Link>
-            <Link to="/login">
               <Button size="lg" variant="secondary">
-                Sign in
+                Create free account
               </Button>
             </Link>
           </div>

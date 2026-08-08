@@ -1,0 +1,9 @@
+-- MindFlow production migrations manifest
+-- Run each file below IN ORDER in Supabase SQL Editor:
+--
+--   1. setup.sql
+--   2. setup_adaptive.sql
+--   3. setup_study_sessions.sql
+--   4. setup_citations.sql
+--
+-- See MIGRATIONS.md for verification queries.

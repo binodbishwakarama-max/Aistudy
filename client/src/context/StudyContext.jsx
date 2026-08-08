@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useCallback } from 'react';
 import { toast } from 'react-hot-toast';
 import { generateContent, saveStudySet, loadDeck as fetchDeck, updateFlashcard as patchFlashcard, regenerateFlashcard as regenerateFlashcardApi } from '../services/api';
 import {
@@ -6,6 +6,9 @@ import {
     normalizeFlashcards,
     normalizeQuizQuestions
 } from '../utils/studyContent';
+import { DEMO_DECK } from '../data/demoDeck';
+
+const DEMO_STORAGE_KEY = 'mindflow_demo';
 
 const StudyContext = createContext();
 
@@ -25,6 +28,9 @@ export const StudyProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [uploadStage, setUploadStage] = useState('idle'); // idle | parsing | generating | ready | error
     const [lastDeckId, setLastDeckId] = useState(null);
+    const [isDemoMode, setIsDemoMode] = useState(() => (
+        typeof window !== 'undefined' && sessionStorage.getItem(DEMO_STORAGE_KEY) === '1'
+    ));
     const [error, setError] = useState(null);
     const [refreshLibrary, setRefreshLibrary] = useState(0);
     const [stats, setStats] = useState({
@@ -309,7 +315,41 @@ ${safeText}`;
         setError(null);
     };
 
+    const startDemo = useCallback(() => {
+        sessionStorage.setItem(DEMO_STORAGE_KEY, '1');
+        setIsDemoMode(true);
+        setText(DEMO_DECK.sourceText);
+        setFlashcards(DEMO_DECK.flashcards);
+        setQuiz(DEMO_DECK.quiz);
+        setLastDeckId('demo');
+        setUploadStage('ready');
+        setError(null);
+    }, []);
+
+    const exitDemo = useCallback(() => {
+        sessionStorage.removeItem(DEMO_STORAGE_KEY);
+        setIsDemoMode(false);
+        setText('');
+        setFlashcards([]);
+        setQuiz([]);
+        setLastDeckId(null);
+        setUploadStage('idle');
+    }, []);
+
     const updateFlashcardInDeck = async (cardId, patch) => {
+        if (isDemoMode) {
+            setFlashcards((prev) => prev.map((card) => (
+                card.id === cardId
+                    ? {
+                        ...card,
+                        question: patch.front ?? card.question,
+                        answer: patch.back ?? card.answer,
+                        explanation: patch.explanation ?? card.explanation,
+                    }
+                    : card
+            )));
+            return { ok: true };
+        }
         try {
             const response = await patchFlashcard(cardId, patch);
             if (response?.card) {
@@ -324,6 +364,10 @@ ${safeText}`;
     };
 
     const regenerateFlashcard = async (cardId, feedback = '') => {
+        if (isDemoMode) {
+            toast('Sign up to regenerate cards with AI.');
+            return { ok: false, error: 'Demo mode' };
+        }
         setLoading(true);
         try {
             const response = await regenerateFlashcardApi(cardId, feedback);
@@ -351,6 +395,7 @@ ${safeText}`;
             loading,
             uploadStage,
             lastDeckId,
+            isDemoMode,
             error,
             stats,
             handleFileUpload,
@@ -362,6 +407,8 @@ ${safeText}`;
             loadDeck,
             refreshLibrary,
             resetUploadStage,
+            startDemo,
+            exitDemo,
             updateFlashcardInDeck,
             regenerateFlashcard,
         }}>

@@ -17,12 +17,16 @@ import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
 import { workspaceNavigation } from '../config/workspace';
+import { BRAND } from '../config/brand';
 import BrandMark from './BrandMark';
 import Button from './ui/Button';
 import Card from './ui/Card';
 import InstallPrompt from './InstallPrompt';
+import DemoBanner from './DemoBanner';
 
 const marketingRoutes = new Set(['/', '/login', '/register']);
+
+const isDemoPath = (pathname) => pathname.startsWith('/demo');
 
 const isPathActive = (pathname, path) => {
   if (path === '/analytics') {
@@ -90,6 +94,7 @@ const Layout = ({ children }) => {
   const searchInputRef = useRef(null);
 
   const isMarketing = marketingRoutes.has(location.pathname);
+  const isDemo = isDemoPath(location.pathname);
 
   const userName = useMemo(() => {
     const fullName = user?.user_metadata?.full_name?.trim();
@@ -175,6 +180,32 @@ const Layout = ({ children }) => {
 
       {isMarketing ? (
         children
+      ) : isDemo ? (
+        <div className="workspace-shell relative min-h-screen pb-[calc(var(--bottom-nav-h)+var(--safe-area-bottom)+1rem)]">
+          <DemoBanner />
+          <main className="workspace-main px-4 py-6 sm:px-6">{children}</main>
+          <nav
+            className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2 shadow-[var(--shadow-raised)] backdrop-blur-xl xl:hidden"
+            style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
+          >
+            {[
+              { path: '/demo/flashcards', label: 'Cards' },
+              { path: '/demo/quizzes', label: 'Quiz' },
+              { path: '/register', label: 'Sign up' },
+            ].map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => navigate(item.path)}
+                className={`flex h-[52px] flex-1 flex-col items-center justify-center rounded-xl text-xs font-medium ${
+                  location.pathname === item.path ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'
+                }`}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+        </div>
       ) : (
         <>
           <aside className="workspace-sidebar hidden xl:flex">
@@ -183,7 +214,7 @@ const Layout = ({ children }) => {
                 <BrandMark />
                 <div>
                   <div className="font-heading text-lg font-bold tracking-tight">MindFlow</div>
-                  <div className="text-xs text-[var(--text-muted)]">Study workspace</div>
+                  <div className="text-xs text-[var(--text-muted)]">{BRAND.wedge}</div>
                 </div>
               </Link>
 

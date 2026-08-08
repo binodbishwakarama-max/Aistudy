@@ -10,6 +10,7 @@ import {
   Upload,
 } from 'lucide-react';
 import { getDueSummary, getStudyHistory, searchFlashcards } from '../services/api';
+import { BRAND } from '../config/brand';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
 import { useStudy } from '../context/StudyContext';
@@ -127,7 +128,7 @@ const Dashboard = () => {
           Welcome, {userName}
         </h1>
         <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
-          Upload a lecture PDF — we&apos;ll parse it, generate flashcards, and open study mode automatically.
+          {BRAND.shortSubline} Try the <button type="button" className="font-semibold text-[var(--accent)]" onClick={() => navigate('/demo/flashcards')}>demo sprint</button> first.
         </p>
         <Button
           size="lg"

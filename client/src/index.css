@@ -743,3 +743,19 @@ input:-webkit-autofill:active,
     padding-bottom: env(safe-area-inset-bottom);
   }
 }
+
+.study-thumb-dock {
+  bottom: calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 8px);
+}
+
+.study-session .primary-button,
+.study-session .secondary-button {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+@media (max-width: 639px) {
+  .study-session .perspective-1000 {
+    min-height: 18rem;
+  }
+}

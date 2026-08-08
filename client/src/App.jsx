@@ -58,6 +58,9 @@ function App() {
                     <Route path="/" element={<Landing />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
+                    <Route path="/demo" element={<Study />} />
+                    <Route path="/demo/flashcards" element={<Study />} />
+                    <Route path="/demo/quizzes" element={<Study />} />
                     <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
                     <Route path="/upload" element={<ProtectedRoute><Upload /></ProtectedRoute>} />
                     <Route path="/study" element={<ProtectedRoute><Study /></ProtectedRoute>} />

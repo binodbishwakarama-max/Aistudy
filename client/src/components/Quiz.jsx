@@ -6,7 +6,7 @@ import confetti from 'canvas-confetti';
 import { getDueSummary, recordStudySession } from '../services/api';
 import SessionSummary from './SessionSummary';
 
-const Quiz = ({ questions, deckId = null }) => {
+const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -42,14 +42,16 @@ const Quiz = ({ questions, deckId = null }) => {
     const durationSeconds = Math.max(1, Math.floor((Date.now() - sessionStartRef.current) / 1000));
 
     try {
-      await recordStudySession({
-        deckId,
-        mode: 'quiz',
-        durationSeconds,
-        cardsReviewed: totalQuestions,
-        correctCount: finalScore,
-        xpEarned: finalScore * 10,
-      });
+      if (!isDemoMode) {
+        await recordStudySession({
+          deckId,
+          mode: 'quiz',
+          durationSeconds,
+          cardsReviewed: totalQuestions,
+          correctCount: finalScore,
+          xpEarned: finalScore * 10,
+        });
+      }
     } catch (error) {
       console.error('Failed to record quiz session:', error);
     }
@@ -60,7 +62,7 @@ const Quiz = ({ questions, deckId = null }) => {
     } catch {
       setDueTomorrow(0);
     }
-  }, [deckId]);
+  }, [deckId, isDemoMode]);
 
   const restartQuiz = () => {
     setCurrentIndex(0);
@@ -179,7 +181,7 @@ const Quiz = ({ questions, deckId = null }) => {
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
+    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 pb-[calc(var(--bottom-nav-h)+1rem)] sm:space-y-6 sm:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
@@ -205,7 +207,7 @@ const Quiz = ({ questions, deckId = null }) => {
       </div>
 
       <Motion.div key={currentIndex} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-5 sm:p-8">
-        <h3 className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10">
+        <h3 data-testid="quiz-question" className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10">
           {currentQuestion?.question}
         </h3>
 

@@ -10,7 +10,7 @@ import { readJSONStorage, writeJSONStorage } from '../utils/storage';
 import SessionSummary from './SessionSummary';
 import Button from './ui/Button';
 
-const Flashcard = ({ cards, deckId = null }) => {
+const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
   const { updateFlashcardInDeck, regenerateFlashcard } = useStudy();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -71,25 +71,29 @@ const Flashcard = ({ cards, deckId = null }) => {
     const durationSeconds = Math.max(1, Math.floor((Date.now() - startTimeRef.current) / 1000));
 
     try {
-      await recordStudySession({
-        deckId: resolvedDeckId,
-        mode: 'flashcard',
-        durationSeconds,
-        cardsReviewed: reviewedCount,
-        correctCount: 0,
-        xpEarned: reviewedCount * 5,
-      });
+      if (!isDemoMode) {
+        await recordStudySession({
+          deckId: resolvedDeckId,
+          mode: 'flashcard',
+          durationSeconds,
+          cardsReviewed: reviewedCount,
+          correctCount: 0,
+          xpEarned: reviewedCount * 5,
+        });
+      }
     } catch (err) {
       console.error('Failed to record session:', err);
     }
 
-    try {
-      const due = await getDueSummary();
-      setDueTomorrow(due.dueTomorrow ?? 0);
-    } catch {
-      setDueTomorrow(0);
+    if (!isDemoMode) {
+      try {
+        const due = await getDueSummary();
+        setDueTomorrow(due.dueTomorrow ?? 0);
+      } catch {
+        setDueTomorrow(0);
+      }
     }
-  }, [resolvedDeckId]);
+  }, [resolvedDeckId, isDemoMode]);
 
   const nextCard = useCallback(() => {
     if (currentIndex < shuffledCards.length - 1) {
@@ -104,7 +108,7 @@ const Flashcard = ({ cards, deckId = null }) => {
   }, [currentIndex, shuffledCards.length, recordSession]);
 
   const handleReview = useCallback(async (rating) => {
-    if (currentCard?.id) {
+    if (currentCard?.id && !isDemoMode) {
       try {
         await reviewFlashcard(currentCard.id, rating);
       } catch (err) {
@@ -123,7 +127,7 @@ const Flashcard = ({ cards, deckId = null }) => {
     }));
 
     nextCard();
-  }, [currentCard, addXP, updateStreak, nextCard]);
+  }, [currentCard, addXP, updateStreak, nextCard, isDemoMode]);
 
   const handleSaveEdit = async () => {
     if (!currentCard?.id) return;
@@ -258,7 +262,7 @@ const Flashcard = ({ cards, deckId = null }) => {
   ];
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
+    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 pb-[calc(var(--bottom-nav-h)+5rem)] sm:space-y-6 sm:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Motion.button
           onClick={isShuffled ? resetOrder : shuffleCards}
@@ -325,7 +329,7 @@ const Flashcard = ({ cards, deckId = null }) => {
                     </div>
                   </div>
                 ) : (
-                  <h3 className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10 md:text-3xl">
+                  <h3 data-testid="flashcard-question" className="font-heading text-xl font-bold leading-8 text-[var(--text-primary)] sm:text-2xl sm:leading-10 md:text-3xl">
                     {currentCard?.question}
                   </h3>
                 )}
@@ -388,27 +392,47 @@ const Flashcard = ({ cards, deckId = null }) => {
       </div>
 
       {isFlipped && (
-        <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {ratingButtons.map(({ rating, icon: Icon, label, color, key }) => (
-            <Motion.button
-              key={rating}
-              onClick={() => handleReview(rating)}
-              className="glass-card flex min-h-[64px] flex-col items-center justify-center gap-2 px-3 py-4"
-              style={{ borderColor: `${color}30` }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <Icon size={20} style={{ color }} />
-              <span className="text-sm font-medium" style={{ color }}>
-                {label}
-              </span>
-              <span className="text-[10px] text-[var(--text-muted)]">({key})</span>
-            </Motion.button>
-          ))}
-        </Motion.div>
+        <>
+          <Motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="hidden grid-cols-2 gap-3 sm:grid sm:grid-cols-4"
+          >
+            {ratingButtons.map(({ rating, icon: Icon, label, color, key }) => (
+              <Motion.button
+                key={rating}
+                onClick={() => handleReview(rating)}
+                className="glass-card flex min-h-[64px] flex-col items-center justify-center gap-2 px-3 py-4"
+                style={{ borderColor: `${color}30` }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Icon size={20} style={{ color }} />
+                <span className="text-sm font-medium" style={{ color }}>{label}</span>
+                <span className="text-[10px] text-[var(--text-muted)]">({key})</span>
+              </Motion.button>
+            ))}
+          </Motion.div>
+
+          <div className="study-thumb-dock fixed inset-x-0 z-20 hidden border-t border-[var(--border)] bg-[rgba(255,255,255,0.96)] px-3 py-3 backdrop-blur-xl max-sm:block">
+            <div className="mx-auto grid max-w-lg grid-cols-4 gap-2">
+              {ratingButtons.map(({ rating, icon: Icon, label, color }) => (
+                <button
+                  key={rating}
+                  type="button"
+                  onClick={() => handleReview(rating)}
+                  className="flex min-h-[56px] flex-col items-center justify-center gap-1 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] active:scale-95"
+                >
+                  <Icon size={18} style={{ color }} />
+                  <span className="text-[10px] font-semibold" style={{ color }}>{label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
-      <div className="flex flex-wrap justify-center gap-3">
+      <div className="hidden flex-wrap justify-center gap-3 sm:flex">
         <Motion.button
           onClick={prevCard}
           disabled={currentIndex === 0}
