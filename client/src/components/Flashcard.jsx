@@ -262,7 +262,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
   ];
 
   return (
-    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 pb-[calc(var(--bottom-nav-h)+5rem)] sm:space-y-6 sm:pb-0">
+    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Motion.button
           onClick={isShuffled ? resetOrder : shuffleCards}
@@ -277,8 +277,8 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
           <div className="info-chip font-mono">
             {currentIndex + 1} / {shuffledCards.length}
           </div>
-          <div className="hidden text-xs text-[var(--text-muted)] sm:block">
-            Space flip · 1–4 rate · ← → navigate
+          <div className="text-xs text-[var(--text-muted)] sm:hidden">
+            Tap card to flip
           </div>
         </div>
       </div>
@@ -341,7 +341,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); setIsEditing(true); setIsFlipped(false); }}
-                    className="inline-flex items-center gap-1 text-[var(--accent)]"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-[var(--accent)]"
                   >
                     <Pencil size={14} /> Edit
                   </button>
@@ -379,7 +379,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleRegenerate(); }}
                     disabled={regenerating}
-                    className="inline-flex items-center gap-1 text-[var(--warm)] disabled:opacity-50"
+                    className="inline-flex min-h-[44px] items-center gap-1 rounded-lg px-2 text-[var(--warm)] disabled:opacity-50"
                   >
                     <RefreshCw size={14} className={regenerating ? 'animate-spin' : ''} />
                     {regenerating ? 'Remaking…' : 'Remake card'}
@@ -431,6 +431,34 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
           </div>
         </>
       )}
+
+      <div className="flex justify-center gap-3 sm:hidden">
+        <Motion.button
+          onClick={prevCard}
+          disabled={currentIndex === 0}
+          className="secondary-button h-12 w-12 p-0 disabled:cursor-not-allowed disabled:opacity-50"
+          whileTap={currentIndex !== 0 ? { scale: 0.95 } : {}}
+          aria-label="Previous card"
+        >
+          <ChevronLeft size={20} />
+        </Motion.button>
+        <Motion.button
+          onClick={() => setIsFlipped(!isFlipped)}
+          className="primary-button h-12 min-w-[7rem] px-4"
+          whileTap={{ scale: 0.95 }}
+        >
+          {isFlipped ? 'Question' : 'Flip'}
+        </Motion.button>
+        <Motion.button
+          onClick={nextCard}
+          disabled={currentIndex === shuffledCards.length - 1}
+          className="secondary-button h-12 w-12 p-0 disabled:cursor-not-allowed disabled:opacity-50"
+          whileTap={currentIndex !== shuffledCards.length - 1 ? { scale: 0.95 } : {}}
+          aria-label="Next card"
+        >
+          <ChevronRight size={20} />
+        </Motion.button>
+      </div>
 
       <div className="hidden flex-wrap justify-center gap-3 sm:flex">
         <Motion.button

@@ -58,8 +58,7 @@ const ChatInterface = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-raised)] transition-colors hover:bg-[var(--accent-strong)] xl:bottom-6 xl:right-6"
-        style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
+        className="fixed right-3 z-40 flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-raised)] transition-colors hover:bg-[var(--accent-strong)] max-xl:bottom-[calc(var(--bottom-nav-offset)+3.5rem)] xl:bottom-6 xl:right-6 xl:h-14 xl:w-14"
         title="Ask AI Tutor"
       >
         <MessageSquare size={24} />
@@ -72,8 +71,8 @@ const ChatInterface = () => {
   if (isMinimized) {
     return (
       <div
-        className="fixed left-2 right-2 z-50 w-auto max-w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:w-64"
-        style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
+        style={{ bottom: 'var(--bottom-nav-offset)' }}
+        className="fixed left-3 right-3 z-40 w-auto max-w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:w-64"
       >
         <div
           className="flex cursor-pointer items-center justify-between px-4 py-3 transition-mindflow hover:bg-[var(--bg-elevated)]"
@@ -106,8 +105,8 @@ const ChatInterface = () => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="fixed left-3 right-3 z-50 flex h-[min(72vh,34rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:h-[500px] xl:w-[380px]"
-      style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 12px)' }}
+      className="fixed left-3 right-3 z-40 flex h-[min(68vh,32rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:z-50 xl:h-[500px] xl:w-[380px]"
+      style={{ bottom: 'var(--bottom-nav-offset)' }}
     >
       <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 sm:px-4 sm:py-3.5">
         <div className="flex items-center gap-2.5">

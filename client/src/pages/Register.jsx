@@ -72,7 +72,7 @@ const Register = () => {
 
   return (
     <div className="app-shell">
-      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
+      <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12 pt-[calc(3rem+var(--safe-area-top))] pb-[calc(3rem+var(--safe-area-bottom))]">
         <Link to="/" className="inline-flex items-center gap-3">
           <BrandMark />
           <span className="font-heading text-xl font-bold tracking-tight">MindFlow</span>

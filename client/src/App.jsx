@@ -38,6 +38,7 @@ function App() {
         <StudyProvider>
           <Toaster
             position="top-center"
+            containerStyle={{ top: 'calc(0.75rem + var(--safe-area-top))' }}
             toastOptions={{
               style: {
                 background: 'var(--bg-elevated)',

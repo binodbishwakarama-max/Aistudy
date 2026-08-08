@@ -15,8 +15,8 @@ export default defineConfig({
         name: 'MindFlow',
         short_name: 'MindFlow',
         description: 'AI-powered study workspace',
-        theme_color: '#0F172A',
-        background_color: '#0F172A',
+        theme_color: '#F7F8FA',
+        background_color: '#F7F8FA',
         display: 'standalone',
         icons: [
           {

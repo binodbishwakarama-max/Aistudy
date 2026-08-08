@@ -173,12 +173,10 @@ const Study = () => {
 
   return (
     <div className="space-y-6">
-      <header className="session-bar">
+      <header className="session-bar !mb-4 !pb-3 sm:!mb-6 sm:!pb-4">
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-            {demoRoute ? BRAND.examSprintLabel : activeMode.title}
-          </p>
-          <h1 className="font-heading mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl">
+          <p className="kicker">{demoRoute ? BRAND.examSprintLabel : activeMode.title}</p>
+          <h1 className="font-heading mt-1 truncate text-lg font-bold tracking-tight sm:text-2xl">
             {demoRoute ? DEMO_DECK.title : mode === 'library' ? 'Your study library' : sourcePreview}
           </h1>
           <p className="mt-1 text-sm text-[var(--text-secondary)]">
@@ -193,7 +191,7 @@ const Study = () => {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-shrink-0 items-center gap-2">
           {text && !demoRoute && (
             <Button
               onClick={handleSave}
@@ -211,7 +209,7 @@ const Study = () => {
         </div>
       </header>
 
-      <nav className="segmented-control w-full sm:w-auto" aria-label="Study modes">
+      <nav className="segmented-control segmented-control--scroll w-full sm:w-auto" aria-label="Study modes">
         {tabs.map((tab) => {
           const isActive = tab.id === mode;
           return (
@@ -312,7 +310,7 @@ const Study = () => {
         </div>
       )}
 
-      <ChatInterface demoMode={demoRoute} />
+      {mode !== 'flashcards' && mode !== 'quiz' ? <ChatInterface /> : null}
     </div>
   );
 };

@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   AlertTriangle,
   ChevronDown,
+  HelpCircle,
+  Layers,
   LogOut,
   Menu,
   Search,
@@ -38,22 +40,12 @@ const isPathActive = (pathname, path) => {
   return pathname === path;
 };
 
-const MobileBottomNav = ({ onOpenMenu }) => {
+const MobileBottomNav = ({ items, onOpenMenu, showMore = true }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const items = [
-    { path: '/dashboard', label: 'Home', icon: LayoutDashboard, match: (p) => p === '/dashboard' },
-    { path: '/study', label: 'Study', icon: BookOpen, match: (p) => ['/study', '/flashcards', '/quizzes'].includes(p) },
-    { path: '/upload', label: 'Upload', icon: Upload, match: (p) => p === '/upload' },
-    { path: '/analytics', label: 'Progress', icon: BarChart3, match: (p) => p === '/analytics' || p === '/stats' },
-  ];
-
   return (
-    <nav
-      className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2 shadow-[var(--shadow-raised)] backdrop-blur-xl xl:hidden"
-      style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
-    >
+    <nav className="mobile-bottom-nav xl:hidden" aria-label="Primary navigation">
       {items.map((item) => {
         const active = item.match(location.pathname);
         return (
@@ -61,26 +53,68 @@ const MobileBottomNav = ({ onOpenMenu }) => {
             key={item.path}
             type="button"
             onClick={() => navigate(item.path)}
-            className={`flex h-[52px] w-[56px] flex-col items-center justify-center rounded-xl transition-colors ${
-              active ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[rgba(0,0,0,0.04)]'
-            }`}
+            className={`mobile-bottom-nav__item ${active ? 'mobile-bottom-nav__item--active' : ''}`}
+            aria-current={active ? 'page' : undefined}
           >
-            <item.icon size={22} strokeWidth={active ? 2.25 : 2} />
-            <span className="mt-1 text-[10px]">{item.label}</span>
+            {item.icon ? <item.icon size={20} strokeWidth={active ? 2.25 : 2} /> : null}
+            <span>{item.label}</span>
           </button>
         );
       })}
-      <button
-        type="button"
-        onClick={onOpenMenu}
-        className="flex h-[52px] w-[56px] flex-col items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[rgba(0,0,0,0.04)]"
-      >
-        <Menu size={22} />
-        <span className="mt-1 text-[10px]">More</span>
-      </button>
+      {showMore && onOpenMenu ? (
+        <button
+          type="button"
+          onClick={onOpenMenu}
+          className="mobile-bottom-nav__item"
+          aria-label="Open menu"
+        >
+          <Menu size={20} />
+          <span>More</span>
+        </button>
+      ) : null}
     </nav>
   );
 };
+
+const MobileWorkspaceHeader = ({ onOpenMenu, onOpenSearch }) => (
+  <header className="mobile-workspace-header xl:hidden">
+    <div className="mobile-workspace-header__inner">
+      <button
+        type="button"
+        onClick={onOpenMenu}
+        className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] transition-mindflow hover:bg-[rgba(0,0,0,0.04)]"
+        aria-label="Open menu"
+      >
+        <Menu size={22} />
+      </button>
+      <Link to="/dashboard" className="flex min-w-0 flex-1 items-center justify-center gap-2">
+        <BrandMark />
+        <span className="truncate font-heading text-base font-bold tracking-tight">MindFlow</span>
+      </Link>
+      <button
+        type="button"
+        onClick={onOpenSearch}
+        className="flex h-11 w-11 items-center justify-center rounded-xl text-[var(--text-secondary)] transition-mindflow hover:bg-[rgba(0,0,0,0.04)]"
+        aria-label="Search workspace"
+      >
+        <Search size={22} />
+      </button>
+    </div>
+  </header>
+);
+
+const workspaceNavItems = [
+  { path: '/dashboard', label: 'Home', icon: LayoutDashboard, match: (p) => p === '/dashboard' },
+  { path: '/study', label: 'Study', icon: BookOpen, match: (p) => ['/study', '/flashcards', '/quizzes'].includes(p) },
+  { path: '/upload', label: 'Upload', icon: Upload, match: (p) => p === '/upload' },
+  { path: '/analytics', label: 'Progress', icon: BarChart3, match: (p) => p === '/analytics' || p === '/stats' },
+];
+
+const demoNavItems = [
+  { path: '/demo/flashcards', label: 'Cards', icon: Layers, match: (p) => p === '/demo/flashcards' },
+  { path: '/demo/quizzes', label: 'Quiz', icon: HelpCircle, match: (p) => p === '/demo/quizzes' },
+  { path: '/register', label: 'Sign up', icon: null, match: (p) => p === '/register' },
+];
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -181,30 +215,10 @@ const Layout = ({ children }) => {
       {isMarketing ? (
         children
       ) : isDemo ? (
-        <div className="workspace-shell relative min-h-screen pb-[calc(var(--bottom-nav-h)+var(--safe-area-bottom)+1rem)]">
+        <div className="workspace-shell relative min-h-screen">
           <DemoBanner />
-          <main className="workspace-main px-4 py-6 sm:px-6">{children}</main>
-          <nav
-            className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2 shadow-[var(--shadow-raised)] backdrop-blur-xl xl:hidden"
-            style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
-          >
-            {[
-              { path: '/demo/flashcards', label: 'Cards' },
-              { path: '/demo/quizzes', label: 'Quiz' },
-              { path: '/register', label: 'Sign up' },
-            ].map((item) => (
-              <button
-                key={item.path}
-                type="button"
-                onClick={() => navigate(item.path)}
-                className={`flex h-[52px] flex-1 flex-col items-center justify-center rounded-xl text-xs font-medium ${
-                  location.pathname === item.path ? 'text-[var(--accent)]' : 'text-[var(--text-muted)]'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          <main className="workspace-main px-4 py-4 sm:px-6 sm:py-6">{children}</main>
+          <MobileBottomNav items={demoNavItems} showMore={false} />
         </div>
       ) : (
         <>
@@ -261,6 +275,11 @@ const Layout = ({ children }) => {
           </aside>
 
           <div className="workspace-content">
+            <MobileWorkspaceHeader
+              onOpenMenu={() => setMobileOpen(true)}
+              onOpenSearch={() => setMobileSearchOpen(true)}
+            />
+
             <header className="workspace-topbar hidden xl:flex">
               <div className="workspace-topbar-inner">
                 <div className="workspace-topbar-search-row">
@@ -331,7 +350,7 @@ const Layout = ({ children }) => {
                   exit={{ opacity: 0, y: -16 }}
                   className="fixed inset-0 z-[120] flex flex-col bg-[var(--bg-surface)] xl:hidden"
                 >
-                  <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg-elevated)] p-4">
+                  <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg-elevated)] p-4 pt-safe">
                     <form onSubmit={handleSearchSubmit} className="workspace-search m-0 flex-1">
                       <Search size={18} className="text-[var(--text-muted)]" />
                       <input
@@ -468,7 +487,7 @@ const Layout = ({ children }) => {
                 {children}
               </div>
             </main>
-            <MobileBottomNav onOpenMenu={() => setMobileOpen(true)} />
+            <MobileBottomNav items={workspaceNavItems} onOpenMenu={() => setMobileOpen(true)} />
             <InstallPrompt />
           </div>
         </>

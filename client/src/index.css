@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --bottom-nav-h: 72px;
+  --bottom-nav-h: 64px;
+  --safe-area-top: env(safe-area-inset-top, 0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --bottom-nav-offset: calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 0.75rem);
+  --mobile-header-h: 3.5rem;
 
   /* Apple Study Desk — cool stone light palette */
   --bg-base: #eef1f4;
@@ -147,8 +150,14 @@ button {
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  padding: 2rem;
+  padding: 1.25rem;
   box-shadow: var(--shadow-soft);
+}
+
+@media (min-width: 640px) {
+  .section-shell {
+    padding: 2rem;
+  }
 }
 
 .glass-card,
@@ -433,7 +442,13 @@ input:-webkit-autofill:active,
 
 .workspace-main {
   flex: 1;
-  padding: 1.75rem 0 calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 1.25rem);
+  padding: 1rem 0 var(--bottom-nav-offset);
+}
+
+@media (min-width: 640px) {
+  .workspace-main {
+    padding: 1.75rem 0 var(--bottom-nav-offset);
+  }
 }
 
 .workspace-search {
@@ -568,13 +583,25 @@ input:-webkit-autofill:active,
 
 /* Segmented control for study modes */
 .segmented-control {
-  display: inline-flex;
-  flex-wrap: wrap;
+  display: flex;
   gap: 0.25rem;
   padding: 0.25rem;
   border-radius: 980px;
   background: rgba(0, 0, 0, 0.04);
   border: 1px solid var(--border);
+}
+
+.segmented-control--scroll {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  border-radius: var(--radius-lg);
+  padding: 0.35rem;
+}
+
+.segmented-control--scroll::-webkit-scrollbar {
+  display: none;
 }
 
 .segmented-control a,
@@ -589,6 +616,9 @@ input:-webkit-autofill:active,
   color: var(--text-secondary);
   border: 0;
   background: transparent;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-height: 44px;
   transition:
     background 0.2s ease,
     color 0.2s ease,
@@ -614,12 +644,18 @@ input:-webkit-autofill:active,
 }
 
 .study-stage {
-  min-height: 480px;
+  min-height: 360px;
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-soft);
   overflow: hidden;
+}
+
+@media (min-width: 640px) {
+  .study-stage {
+    min-height: 480px;
+  }
 }
 
 .backface-hidden {
@@ -742,10 +778,87 @@ input:-webkit-autofill:active,
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  left: 0.75rem;
+  right: 0.75rem;
+  bottom: calc(0.5rem + var(--safe-area-bottom));
+  z-index: 40;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 0.15rem;
+  height: var(--bottom-nav-h);
+  padding: 0.35rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: var(--shadow-raised);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.mobile-bottom-nav__item {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 44px;
+  border-radius: 0.85rem;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mobile-bottom-nav__item--active {
+  color: var(--accent);
+  background: var(--bg-strong);
+}
+
+.mobile-workspace-header {
+  position: sticky;
+  top: 0;
+  z-index: 45;
+  padding-top: var(--safe-area-top);
+  border-bottom: 1px solid var(--border);
+  background: rgba(247, 248, 250, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.mobile-workspace-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: var(--mobile-header-h);
+  padding: 0.5rem 0.75rem;
+}
+
+.transition-mindflow {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.15s ease;
 }
 
 .study-thumb-dock {
-  bottom: calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 8px);
+  bottom: var(--bottom-nav-offset);
+  padding-bottom: 0.35rem;
 }
 
 .study-session .primary-button,
@@ -887,12 +1000,13 @@ input:-webkit-autofill:active,
   left: 0;
   right: 0;
   z-index: 50;
-  padding: 0.75rem 0;
+  padding: calc(0.75rem + var(--safe-area-top)) 0 0.75rem;
   transition: padding 0.3s ease, background 0.3s ease;
 }
 
 .landing-nav.is-scrolled {
-  padding: 0.5rem 0;
+  padding-top: calc(0.5rem + var(--safe-area-top));
+  padding-bottom: 0.5rem;
 }
 
 .landing-nav__inner {
@@ -949,8 +1063,14 @@ input:-webkit-autofill:active,
 
 .landing-scene {
   position: relative;
-  min-height: 420px;
+  min-height: 300px;
   perspective: 1200px;
+}
+
+@media (min-width: 640px) {
+  .landing-scene {
+    min-height: 420px;
+  }
 }
 
 .landing-card-stack {

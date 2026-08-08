@@ -15,10 +15,10 @@ const variantClasses = {
 };
 
 const sizeClasses = {
-  sm: 'h-9 px-4 text-sm',
+  sm: 'h-11 min-h-[44px] px-4 text-sm',
   md: 'h-11 px-5 text-sm',
   lg: 'h-12 px-6 text-base',
-  icon: 'h-11 w-11 p-0',
+  icon: 'h-11 w-11 min-h-[44px] min-w-[44px] p-0',
 };
 
 const Button = ({

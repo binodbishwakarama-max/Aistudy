@@ -269,16 +269,16 @@ const Dashboard = () => {
           </>
         )}
 
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {continueDeck && (
-            <Button size="lg" rightIcon={ArrowRight} onClick={() => openSession(continueDeck.id)}>
+            <Button size="lg" className="w-full sm:w-auto" rightIcon={ArrowRight} onClick={() => openSession(continueDeck.id)}>
               {dueSummary.dueCount > 0 ? 'Study due cards' : 'Continue studying'}
             </Button>
           )}
-          <Button size="lg" variant="secondary" leftIcon={Upload} onClick={() => navigate('/upload')}>
+          <Button size="lg" className="w-full sm:w-auto" variant="secondary" leftIcon={Upload} onClick={() => navigate('/upload')}>
             Upload notes
           </Button>
-          <Button size="lg" variant="ghost" leftIcon={BookOpen} onClick={() => navigate('/study')}>
+          <Button size="lg" className="w-full sm:w-auto" variant="ghost" leftIcon={BookOpen} onClick={() => navigate('/study')}>
             Open library
           </Button>
         </div>

@@ -181,7 +181,7 @@ const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
   return (
-    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 pb-[calc(var(--bottom-nav-h)+1rem)] sm:space-y-6 sm:pb-0">
+    <div className="study-session mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />

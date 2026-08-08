@@ -1,52 +1,54 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Download, X } from 'lucide-react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
 
+const studyRoutes = new Set(['/flashcards', '/quizzes', '/demo/flashcards', '/demo/quizzes']);
+
 const InstallPrompt = () => {
+  const location = useLocation();
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showAndroidInstall, setShowAndroidInstall] = useState(false);
   const [showIosInstall, setShowIosInstall] = useState(false);
   const [hasDismissed, setHasDismissed] = useState(() => !!sessionStorage.getItem('pwa-prompt-dismissed'));
 
-  useEffect(() => {
+  const isStudyRoute = studyRoutes.has(location.pathname);
 
-    // Android / Chrome mechanism
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (event) => {
+      event.preventDefault();
+      setDeferredPrompt(event);
       setShowAndroidInstall(true);
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // iOS Safari mechanism
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
 
+    let timer;
     if (isIOS && !isStandalone) {
-      // Don't show immediately on iOS; wait a bit so it's not totally aggressive
-      const timer = setTimeout(() => {
+      timer = window.setTimeout(() => {
         setShowIosInstall(true);
-      }, 5000);
-      return () => clearTimeout(timer);
+      }, 8000);
     }
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      if (timer) window.clearTimeout(timer);
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
-    
+
     deferredPrompt.prompt();
     const { outcome } = await deferredPrompt.userChoice;
-    
+
     if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
       setShowAndroidInstall(false);
     }
-    
+
     setDeferredPrompt(null);
   };
 
@@ -57,7 +59,7 @@ const InstallPrompt = () => {
     sessionStorage.setItem('pwa-prompt-dismissed', 'true');
   };
 
-  if (hasDismissed) return null;
+  if (hasDismissed || isStudyRoute) return null;
 
   return (
     <AnimatePresence>
@@ -66,43 +68,47 @@ const InstallPrompt = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}
-          className="fixed right-4 left-4 xl:left-auto xl:w-[360px] z-50"
-          style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
+          className="fixed right-3 left-3 z-30 xl:left-auto xl:w-[360px]"
+          style={{ bottom: 'var(--bottom-nav-offset)' }}
         >
-          <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl p-4 shadow-[var(--shadow-raised)] flex items-start gap-4 backdrop-blur-md">
-            <div className="flex bg-[var(--accent)] text-white rounded-xl w-10 h-10 items-center justify-center flex-shrink-0 mt-0.5">
+          <div className="flex items-start gap-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] p-4 shadow-[var(--shadow-raised)] backdrop-blur-md">
+            <div className="mt-0.5 flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-[var(--accent)] text-white">
               <Download size={20} />
             </div>
-            
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-[var(--text-primary)] text-sm mb-1">
-                Install MindFlow App
+
+            <div className="min-w-0 flex-1">
+              <h4 className="mb-1 text-sm font-semibold text-[var(--text-primary)]">
+                Install MindFlow
               </h4>
-              <p className="text-xs text-[var(--text-secondary)] leading-5">
-                {showAndroidInstall 
-                  ? 'Install the app on your device for quick access and offline capabilities.' 
-                  : <span className="flex flex-col gap-1.5 mt-1.5">
-                      <span>Tap the <strong>Share</strong> icon below</span>
-                      <span>Then select <strong>Add to Home Screen</strong></span>
+              <p className="text-xs leading-5 text-[var(--text-secondary)]">
+                {showAndroidInstall
+                  ? 'Add MindFlow to your home screen for faster access.'
+                  : (
+                    <span className="mt-1 flex flex-col gap-1">
+                      <span>Tap <strong>Share</strong> in Safari</span>
+                      <span>Then choose <strong>Add to Home Screen</strong></span>
                     </span>
-                }
+                  )}
               </p>
-              
+
               {showAndroidInstall && (
                 <button
+                  type="button"
                   onClick={handleInstallClick}
-                  className="mt-3 text-sm font-semibold text-white bg-[var(--accent)] px-4 py-2 rounded-full w-full transition-transform active:scale-95"
+                  className="mt-3 min-h-[44px] w-full rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-white transition-transform active:scale-95"
                 >
-                  Install Now
+                  Install now
                 </button>
               )}
             </div>
-            
+
             <button
+              type="button"
               onClick={handleDismiss}
-              className="text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors p-1"
+              className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[rgba(0,0,0,0.04)] hover:text-[var(--text-primary)]"
+              aria-label="Dismiss install prompt"
             >
-              <X size={16} />
+              <X size={18} />
             </button>
           </div>
         </Motion.div>
