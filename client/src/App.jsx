@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Layout from './components/Layout';
@@ -7,16 +7,17 @@ import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 import { GamificationProvider } from './context/GamificationContext';
 import { StudyProvider } from './context/StudyContext';
+import { lazyWithRetry } from './utils/lazyWithRetry';
 
-const Landing = lazy(() => import('./pages/Landing'));
-const Login = lazy(() => import('./pages/Login'));
-const Register = lazy(() => import('./pages/Register'));
-const Dashboard = lazy(() => import('./pages/Dashboard'));
-const Upload = lazy(() => import('./pages/Upload'));
-const Study = lazy(() => import('./pages/Study'));
-const Settings = lazy(() => import('./pages/Settings'));
-const StatsDashboard = lazy(() => import('./components/StatsDashboard'));
-const NotFound = lazy(() => import('./pages/NotFound'));
+const Landing = lazyWithRetry(() => import('./pages/Landing'));
+const Login = lazyWithRetry(() => import('./pages/Login'));
+const Register = lazyWithRetry(() => import('./pages/Register'));
+const Dashboard = lazyWithRetry(() => import('./pages/Dashboard'));
+const Upload = lazyWithRetry(() => import('./pages/Upload'));
+const Study = lazyWithRetry(() => import('./pages/Study'));
+const Settings = lazyWithRetry(() => import('./pages/Settings'));
+const StatsDashboard = lazyWithRetry(() => import('./components/StatsDashboard'));
+const NotFound = lazyWithRetry(() => import('./pages/NotFound'));
 
 const RouteFallback = () => (
   <div className="flex min-h-[60vh] items-center justify-center px-6">

@@ -5,6 +5,7 @@ const { serverConfig } = require('./config');
 const { logger } = require('./utils/logger');
 const { getAIStatus, probePrimaryProvider } = require('./services/aiService');
 const { initializeWorker } = require('./queue/worker');
+const { isRedisAvailable } = require('./utils/redis');
 
 const app = express();
 
@@ -56,9 +57,16 @@ app.use('/api/search', aiLimiter, require('./routes/search'));
 app.use('/api/adaptive', aiLimiter, require('./routes/adaptive'));
 
 app.get('/api/health', (_req, res) => {
+    const redisConfigured = Boolean(process.env.REDIS_URL?.trim());
+
     res.json({
         ok: true,
-        ai: getAIStatus()
+        ai: getAIStatus(),
+        redis: !redisConfigured
+            ? 'disabled'
+            : isRedisAvailable()
+                ? 'connected'
+                : 'unavailable',
     });
 });
 

@@ -23,10 +23,21 @@ This guide will help you deploy your **MindFlow 2.0** application to the web so 
     - `setup_adaptive.sql`
 5. Ensure Email Auth is enabled under **Authentication -> Providers**.
 
-### 2. Upstash (Redis Queue)
+### 2. Upstash (Redis Queue) — **Optional**
+MindFlow works without Redis. If `REDIS_URL` is missing, AI generation runs synchronously in the API (same result, slightly slower under heavy load).
+
+Only set this up if you want background job queues:
+
 1. Go to [Upstash](https://upstash.com) and create a new Redis database.
-2. Select a region close to your backend Server (e.g., if Render is in US East, pick US East).
+2. Select a region close to your backend server (e.g., if Render is in US East, pick US East).
 3. Copy the URL that starts with `rediss://...`.
+4. Paste it into Render as `REDIS_URL`.
+
+**If you see `getaddrinfo ENOTFOUND *.upstash.io`:** your Upstash database was deleted or recreated. Either:
+- Remove `REDIS_URL` from Render and redeploy (sync fallback), **or**
+- Create a new Upstash database and update `REDIS_URL` with the new endpoint.
+
+Check status after deploy: `GET /api/health` → `"redis": "connected" | "unavailable" | "disabled"`.
 
 ---
 
@@ -54,7 +65,7 @@ This guide will help you deploy your **MindFlow 2.0** application to the web so 
      - `SUPABASE_URL`: *(Your Supabase Project URL)*
      - `SUPABASE_ANON_KEY`: *(Your Supabase Anon Public Key)*
      - `SUPABASE_SERVICE_ROLE_KEY`: *(Essential for admin auth/DB write actions in the backend)*
-     - `REDIS_URL`: *(Your Upstash rediss:// URL)*
+     - `REDIS_URL`: *(Optional — Upstash `rediss://` URL. Leave unset for sync AI processing.)*
      - `JWT_SECRET`: *(A long random string)*
      - `PORT`: `3000` 
 

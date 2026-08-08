@@ -1,51 +1,69 @@
 const { Queue } = require('bullmq');
-const { connection } = require('../utils/redis');
+const { connection, isRedisAvailable } = require('../utils/redis');
 const { logger } = require('../utils/logger');
 
 const QUEUE_NAME = 'ai-generation';
 
-let generationQueue;
+let generationQueue = null;
 
-if (connection) {
+function getGenerationQueue() {
+  if (!isRedisAvailable() || !connection) {
+    return null;
+  }
+
+  if (!generationQueue) {
     generationQueue = new Queue(QUEUE_NAME, {
-        connection,
-        defaultJobOptions: {
-            attempts: 3,
-            backoff: {
-                type: 'exponential',
-                delay: 2000
-            },
-            removeOnComplete: {
-                age: 300,   // Keep completed jobs for 5 minutes so the client can poll for the result
-                count: 200  // Also cap at 200 completed jobs max to prevent unbounded memory growth
-            },
-            removeOnFail: false
-        }
+      connection,
+      defaultJobOptions: {
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 2000,
+        },
+        removeOnComplete: {
+          age: 300,
+          count: 200,
+        },
+        removeOnFail: false,
+      },
     });
 
     logger.info(`BullMQ Queue [${QUEUE_NAME}] initialized.`);
+  }
+
+  return generationQueue;
+}
+
+function resetGenerationQueue() {
+  generationQueue = null;
 }
 
 /**
  * Adds a document generation job to the queue.
  */
 const addGenerationJob = async (userId, prompt, system, contentType) => {
-    if (!generationQueue) {
-        throw new Error('Redis is not configured. Queue is unavailable.');
-    }
+  const queue = getGenerationQueue();
 
-    const job = await generationQueue.add('generate-content', {
-        userId,
-        prompt,
-        system,
-        contentType
-    });
+  if (!queue) {
+    throw new Error('Redis is not configured. Queue is unavailable.');
+  }
 
-    return job.id;
+  const job = await queue.add('generate-content', {
+    userId,
+    prompt,
+    system,
+    contentType,
+  });
+
+  return job.id;
 };
 
 module.exports = {
-    QUEUE_NAME,
-    generationQueue,
-    addGenerationJob
+  QUEUE_NAME,
+  get generationQueue() {
+    return getGenerationQueue();
+  },
+  getGenerationQueue,
+  resetGenerationQueue,
+  addGenerationJob,
 };

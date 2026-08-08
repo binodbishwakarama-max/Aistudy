@@ -1,5 +1,6 @@
 import React from 'react';
 import { RefreshCw, AlertTriangle } from 'lucide-react';
+import { isChunkLoadError, reloadForStaleChunk } from '../utils/chunkRecovery';
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -12,6 +13,10 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
+    if (isChunkLoadError(error) && reloadForStaleChunk('error boundary')) {
+      return;
+    }
+
     console.error('ErrorBoundary caught:', error, errorInfo);
   }
 
@@ -31,7 +36,9 @@ class ErrorBoundary extends React.Component {
               Something went wrong
             </h2>
             <p className="text-sm text-[var(--text-secondary)] font-medium mb-6 leading-relaxed">
-              An unexpected error occurred. This usually fixes itself with a refresh.
+              {isChunkLoadError(this.state.error)
+                ? 'A new version of MindFlow was deployed. Refresh once to load the latest build.'
+                : 'An unexpected error occurred. This usually fixes itself with a refresh.'}
             </p>
             {this.state.error && (
               <div className="mb-5 p-3 bg-[var(--bg-elevated)] border border-[var(--border)] rounded-lg text-left">

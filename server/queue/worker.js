@@ -1,5 +1,5 @@
 const { Worker } = require('bullmq');
-const { connection } = require('../utils/redis');
+const { connection, isRedisAvailable, onRedisReady } = require('../utils/redis');
 const { QUEUE_NAME } = require('./jobs');
 const { generateText } = require('../services/aiService');
 const { parseStructuredGeneration } = require('../utils/aiPayloads');
@@ -7,59 +7,65 @@ const { logger } = require('../utils/logger');
 
 let worker;
 
-const initializeWorker = () => {
-    if (!connection) {
-        logger.warn('Skipping worker initialization: No Redis connection.');
-        return;
+const startWorker = () => {
+  if (worker || !isRedisAvailable() || !connection) {
+    return;
+  }
+
+  worker = new Worker(QUEUE_NAME, async (job) => {
+    const { prompt, system, contentType, userId } = job.data;
+    logger.info(`[Worker] Started job ${job.id} for user ${userId}`);
+
+    await job.updateProgress(10);
+
+    try {
+      await job.updateProgress(30);
+
+      const generation = await generateText({
+        prompt: prompt.trim(),
+        systemInstruction: system,
+      });
+
+      await job.updateProgress(70);
+
+      const data = parseStructuredGeneration({
+        rawText: generation.text,
+        contentType,
+      });
+
+      await job.updateProgress(100);
+
+      logger.info(`[Worker] Completed job ${job.id} using provider: ${generation.provider}`);
+
+      return {
+        content: [{ text: generation.text }],
+        provider: generation.provider,
+        contentType,
+        data,
+      };
+    } catch (error) {
+      logger.error(`[Worker] Job ${job.id} failed`, { error: error.message });
+      throw error;
     }
+  }, {
+    connection,
+    concurrency: 5,
+  });
 
-    worker = new Worker(QUEUE_NAME, async (job) => {
-        const { prompt, system, contentType, userId } = job.data;
-        logger.info(`[Worker] Started job ${job.id} for user ${userId}`);
+  worker.on('failed', (job, err) => {
+    logger.error(`Job [${job?.id}] failed after attempts. Error: ${err.message}`);
+  });
 
-        // Update progress metadata
-        await job.updateProgress(10); // 10%: Job started
+  logger.info('BullMQ background worker is running.');
+};
 
-        try {
-            await job.updateProgress(30); // 30%: Calling LLM
-            
-            const generation = await generateText({
-                prompt: prompt.trim(),
-                systemInstruction: system
-            });
+const initializeWorker = () => {
+  if (!connection) {
+    logger.warn('Skipping worker initialization: No Redis connection configured.');
+    return;
+  }
 
-            await job.updateProgress(70); // 70%: LLM finished, parsing output
-
-            const data = parseStructuredGeneration({
-                rawText: generation.text,
-                contentType
-            });
-
-            await job.updateProgress(100); // 100%: Finished
-
-            logger.info(`[Worker] Completed job ${job.id} using provider: ${generation.provider}`);
-
-            // Return the necessary payload to be retrieved by the client
-            return {
-                content: [{ text: generation.text }],
-                provider: generation.provider,
-                contentType,
-                data
-            };
-        } catch (error) {
-            logger.error(`[Worker] Job ${job.id} failed`, { error: error.message });
-            throw error; // Let BullMQ handle retries
-        }
-    }, { 
-        connection,
-        concurrency: 5 // Process up to 5 AI requests simultaneously across this node
-    });
-
-    worker.on('failed', (job, err) => {
-        logger.error(`Job [${job?.id}] failed after attempts. Error: ${err.message}`);
-    });
-
-    logger.info('BullMQ Background Worker is running.');
+  onRedisReady(startWorker);
 };
 
 module.exports = { initializeWorker };
