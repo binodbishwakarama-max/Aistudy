@@ -140,9 +140,9 @@ export const getStudyHistory = async () => {
  * @param {string} context - Study material text
  * @param {Array} history - Previous chat messages
  */
-export const chatWithAI = async (message, context, history) => {
+export const chatWithAI = async (message, context, history, deckId = null) => {
     try {
-        const response = await api.post('/chat', { message, context, history });
+        const response = await api.post('/chat', { message, context, history, deckId });
         return response.data;
     } catch (error) {
         console.error("Chat Error:", error.response ? error.response.data : error.message);
@@ -204,7 +204,83 @@ export const searchFlashcards = async (query) => {
     }
 };
 
-export default api;
+/**
+ * Fetch due cards summary for dashboard
+ */
+export const getDueSummary = async () => {
+    try {
+        const response = await api.get('/study/due');
+        return response.data;
+    } catch (error) {
+        console.error('Fetch due summary error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Record a completed study session
+ */
+export const recordStudySession = async (payload) => {
+    try {
+        const response = await api.post('/study/session', payload);
+        return response.data;
+    } catch (error) {
+        console.error('Record study session error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Fetch analytics bundle (real data, no placeholders)
+ */
+export const getAnalytics = async () => {
+    try {
+        const response = await api.get('/stats/analytics');
+        return response.data;
+    } catch (error) {
+        console.error('Fetch analytics error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Update a flashcard inline
+ */
+export const updateFlashcard = async (cardId, patch) => {
+    try {
+        const response = await api.patch(`/study/card/${cardId}`, patch);
+        return response.data;
+    } catch (error) {
+        console.error('Update flashcard error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Regenerate a single flashcard with AI
+ */
+export const regenerateFlashcard = async (cardId, feedback = '') => {
+    try {
+        const response = await api.post(`/study/card/${cardId}/regenerate`, { feedback });
+        return response.data;
+    } catch (error) {
+        console.error('Regenerate flashcard error:', error);
+        throw error;
+    }
+};
+
+/**
+ * Regenerate multiple weak cards in a deck
+ */
+export const regenerateWeakCards = async (deckId, cardIds = []) => {
+    try {
+        const response = await api.post('/study/regenerate-weak', { deckId, cardIds });
+        return response.data;
+    } catch (error) {
+        console.error('Regenerate weak cards error:', error);
+        throw error;
+    }
+};
 
 /**
  * Fetch Gamification Stats
@@ -272,3 +348,5 @@ export const fetchTopicScores = async () => {
         throw error;
     }
 };
+
+export default api;

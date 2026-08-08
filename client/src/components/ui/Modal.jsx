@@ -11,7 +11,7 @@ const Modal = ({ open, onClose, title, description, children }) => (
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[140] flex items-center justify-center bg-[rgba(15,23,42,0.48)] px-4 py-8 backdrop-blur-sm"
+        className="fixed inset-0 z-[140] flex items-center justify-center bg-[rgba(29,29,31,0.4)] px-4 py-8 backdrop-blur-sm"
       >
         <Motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 12, opacity: 0 }}>
           <Card className="w-[min(32rem,calc(100vw-2rem))] p-6">

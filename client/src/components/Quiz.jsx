@@ -1,10 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { useGamification } from '../context/GamificationContext';
-import { ArrowRight, Check, Clock, RefreshCw, Shuffle, Trophy, X } from 'lucide-react';
+import { ArrowRight, Check, Clock, Shuffle, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { getDueSummary, recordStudySession } from '../services/api';
+import SessionSummary from './SessionSummary';
 
-const Quiz = ({ questions }) => {
+const Quiz = ({ questions, deckId = null }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState(null);
   const [isAnswered, setIsAnswered] = useState(false);
@@ -15,7 +17,12 @@ const Quiz = ({ questions }) => {
   const [isShuffled, setIsShuffled] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [questionTimes, setQuestionTimes] = useState([]);
-  const startTimeRef = useRef(null);
+  const [dueTomorrow, setDueTomorrow] = useState(null);
+  const [sessionStartTime] = useState(() => Date.now());
+  const startTimeRef = useRef(sessionStartTime);
+  const sessionStartRef = useRef(sessionStartTime);
+  const sessionRecordedRef = useRef(false);
+  const correctCountRef = useRef(0);
 
   const currentQuestion = shuffledQuestions[currentIndex];
   const { addXP, updateStreak } = useGamification();
@@ -28,6 +35,33 @@ const Quiz = ({ questions }) => {
     return () => clearInterval(timer);
   }, [currentIndex]);
 
+  const recordSession = useCallback(async (finalScore, totalQuestions) => {
+    if (sessionRecordedRef.current) return;
+    sessionRecordedRef.current = true;
+
+    const durationSeconds = Math.max(1, Math.floor((Date.now() - sessionStartRef.current) / 1000));
+
+    try {
+      await recordStudySession({
+        deckId,
+        mode: 'quiz',
+        durationSeconds,
+        cardsReviewed: totalQuestions,
+        correctCount: finalScore,
+        xpEarned: finalScore * 10,
+      });
+    } catch (error) {
+      console.error('Failed to record quiz session:', error);
+    }
+
+    try {
+      const due = await getDueSummary();
+      setDueTomorrow(due.dueTomorrow ?? 0);
+    } catch {
+      setDueTomorrow(0);
+    }
+  }, [deckId]);
+
   const restartQuiz = () => {
     setCurrentIndex(0);
     setSelectedOption(null);
@@ -37,6 +71,9 @@ const Quiz = ({ questions }) => {
     setShowResults(false);
     setQuestionTimes([]);
     startTimeRef.current = Date.now();
+    sessionStartRef.current = Date.now();
+    sessionRecordedRef.current = false;
+    correctCountRef.current = 0;
     setElapsedSeconds(0);
   };
 
@@ -52,7 +89,7 @@ const Quiz = ({ questions }) => {
     restartQuiz();
   };
 
-  const handleOptionClick = (index) => {
+  const handleOptionClick = useCallback((index) => {
     if (isAnswered) return;
 
     const timeTaken = elapsedSeconds;
@@ -62,24 +99,15 @@ const Quiz = ({ questions }) => {
     setSelectedOption(index);
     setIsAnswered(true);
     if (isCorrect) {
+      correctCountRef.current += 1;
       setScore((prev) => prev + 1);
       addXP(10);
     } else {
       addXP(2);
     }
+  }, [isAnswered, elapsedSeconds, currentQuestion, addXP]);
 
-    try {
-      const stats = JSON.parse(localStorage.getItem('quiz_stats') || '{}');
-      stats.totalQuestions = (stats.totalQuestions || 0) + 1;
-      stats.correctAnswers = (stats.correctAnswers || 0) + (isCorrect ? 1 : 0);
-      stats.totalTimeSpent = (stats.totalTimeSpent || 0) + timeTaken;
-      localStorage.setItem('quiz_stats', JSON.stringify(stats));
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const nextQuestion = () => {
+  const nextQuestion = useCallback(() => {
     if (currentIndex < shuffledQuestions.length - 1) {
       setElapsedSeconds(0);
       setCurrentIndex((prev) => prev + 1);
@@ -88,16 +116,43 @@ const Quiz = ({ questions }) => {
       return;
     }
 
-    const finalScore = score;
+    const finalScore = correctCountRef.current;
     setResultScore(finalScore);
     setShowResults(true);
     updateStreak();
     addXP(50);
+    recordSession(finalScore, shuffledQuestions.length);
+
     if (finalScore / shuffledQuestions.length >= 0.7) {
       addXP(100);
       confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
     }
-  };
+  }, [currentIndex, shuffledQuestions.length, updateStreak, addXP, recordSession]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (showResults) return;
+      const target = event.target;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return;
+
+      if (!isAnswered && event.key >= '1' && event.key <= '4') {
+        const optionIndex = Number(event.key) - 1;
+        if (optionIndex < (currentQuestion?.options?.length || 0)) {
+          event.preventDefault();
+          handleOptionClick(optionIndex);
+        }
+        return;
+      }
+
+      if (isAnswered && (event.key === 'Enter' || event.key === 'ArrowRight')) {
+        event.preventDefault();
+        nextQuestion();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showResults, isAnswered, currentQuestion, handleOptionClick, nextQuestion]);
 
   if (showResults) {
     const displayScore = resultScore ?? score;
@@ -106,43 +161,25 @@ const Quiz = ({ questions }) => {
     const avgTime = Math.floor(questionTimes.length ? totalTime / shuffledQuestions.length : 0);
 
     return (
-      <Motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mx-auto max-w-md">
-        <div className="section-shell p-6 text-center sm:p-8">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
-            <Trophy size={30} />
-          </div>
-          <h2 className="font-heading mt-6 text-2xl font-bold sm:text-3xl">Quiz complete</h2>
-          <div className="mt-4 text-5xl font-semibold tracking-tight text-[var(--accent)] sm:text-6xl">{percentage}%</div>
-          <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-            You answered {displayScore} out of {shuffledQuestions.length} questions correctly.
-          </p>
-
-          <div className="mt-6 rounded-2xl bg-[var(--bg-elevated)] p-4 text-left">
-            <div className="flex justify-between text-sm">
-              <span className="text-[var(--text-secondary)]">Total time</span>
-              <span className="font-semibold text-[var(--text-primary)]">
-                {Math.floor(totalTime / 60)}m {totalTime % 60}s
-              </span>
-            </div>
-            <div className="mt-3 flex justify-between text-sm">
-              <span className="text-[var(--text-secondary)]">Average per question</span>
-              <span className="font-semibold text-[var(--text-primary)]">{avgTime}s</span>
-            </div>
-          </div>
-
-          <button onClick={restartQuiz} className="primary-button mt-8 w-full justify-center">
-            <RefreshCw size={18} />
-            Try again
-          </button>
-        </div>
-      </Motion.div>
+      <SessionSummary
+        title="Quiz complete"
+        subtitle={`You answered ${displayScore} out of ${shuffledQuestions.length} questions correctly.`}
+        stats={[
+          { label: 'Score', value: `${percentage}%` },
+          { label: 'Total time', value: `${Math.floor(totalTime / 60)}m ${totalTime % 60}s` },
+          { label: 'Avg per question', value: `${avgTime}s` },
+        ]}
+        dueTomorrow={dueTomorrow}
+        onRestart={restartQuiz}
+        restartLabel="Try again"
+      />
     );
   }
 
   const progress = ((currentIndex + 1) / shuffledQuestions.length) * 100;
 
   return (
-    <div className="mx-auto w-full max-w-3xl flex-1 flex flex-col justify-center space-y-4 sm:space-y-6">
+    <div className="mx-auto flex w-full max-w-3xl flex-1 flex-col justify-center space-y-4 sm:space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button onClick={isShuffled ? resetOrder : shuffleQuestions} className="secondary-button px-4 py-2 text-sm">
           <Shuffle size={16} />
@@ -156,6 +193,9 @@ const Quiz = ({ questions }) => {
           <div className="info-chip">
             <Clock size={14} className="text-[var(--accent)]" />
             <span className="font-mono">{elapsedSeconds}s</span>
+          </div>
+          <div className="hidden text-xs text-[var(--text-muted)] sm:block">
+            1–4 answer · Enter next
           </div>
         </div>
       </div>
@@ -193,7 +233,10 @@ const Quiz = ({ questions }) => {
                 className={`w-full min-h-[44px] rounded-2xl border px-4 py-3 text-left transition-mindflow sm:py-4 ${stateStyles}`}
               >
                 <div className="flex items-center justify-between gap-3">
-                  <span className="font-medium">{option}</span>
+                  <span className="font-medium">
+                    <span className="mr-2 text-[var(--text-muted)]">{index + 1}.</span>
+                    {option}
+                  </span>
                   {isAnswered && index === currentQuestion.correctIndex && <Check className="text-[var(--success)]" size={18} />}
                   {isAnswered && index === selectedOption && index !== currentQuestion.correctIndex && (
                     <X className="text-[var(--danger)]" size={18} />
@@ -215,8 +258,8 @@ const Quiz = ({ questions }) => {
 
       {isAnswered && (
         <Motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex justify-end">
-          <Motion.button 
-            onClick={nextQuestion} 
+          <Motion.button
+            onClick={nextQuestion}
             className="primary-button w-full justify-center px-6 sm:w-auto"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

@@ -1,26 +1,19 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MoveLeft } from 'lucide-react';
+import Button from '../components/ui/Button';
 
-const NotFound = () => {
-    return (
-        <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">
-            <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-[var(--danger)]/10 text-4xl text-[var(--danger)] shadow-[var(--shadow-soft)]">
-                404
-            </div>
-            <h1 className="mb-3 text-3xl font-bold tracking-tight">Page not found</h1>
-            <p className="mb-8 max-w-sm text-[var(--text-secondary)]">
-                Sorry, we couldn’t find the page you’re looking for. It might have been removed or relocated.
-            </p>
-            <Link
-                to="/"
-                className="inline-flex items-center gap-2 rounded-xl border border-transparent bg-[var(--accent)] px-5 py-3 text-sm font-semibold text-white shadow-[0_12px_30px_rgba(26,115,232,0.18)] transition-mindflow hover:bg-[var(--accent-light)]"
-            >
-                <MoveLeft size={18} />
-                Back to Safe Harbor
-            </Link>
-        </div>
-    );
-};
+const NotFound = () => (
+  <div className="flex min-h-[60vh] flex-col items-center justify-center p-6 text-center">
+    <p className="font-heading text-6xl font-bold tracking-tight text-[var(--text-muted)]">404</p>
+    <h1 className="mt-4 font-heading text-3xl font-bold tracking-tight">Page not found</h1>
+    <p className="mt-3 max-w-sm text-[var(--text-secondary)]">
+      That route doesn’t exist. Head back home and continue studying.
+    </p>
+    <Link to="/dashboard" className="mt-8">
+      <Button leftIcon={MoveLeft}>Back to home</Button>
+    </Link>
+  </div>
+);
 
 export default NotFound;

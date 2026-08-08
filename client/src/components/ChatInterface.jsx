@@ -6,7 +6,7 @@ import { Send, Bot, User, X, MessageSquare, Minimize2 } from 'lucide-react';
 import Markdown from 'react-markdown';
 
 const ChatInterface = () => {
-  const { text } = useStudy();
+  const { text, lastDeckId } = useStudy();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState([
@@ -36,7 +36,7 @@ const ChatInterface = () => {
     setLoading(true);
 
     try {
-      const response = await chatWithAI(userMessage, text, newHistory.slice(-6));
+      const response = await chatWithAI(userMessage, text, newHistory.slice(-6), lastDeckId);
       setMessages((prev) => [...prev, response]);
     } catch (error) {
       console.error('Chat Error:', error);
@@ -58,7 +58,7 @@ const ChatInterface = () => {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setIsOpen(true)}
-        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-xl bg-[var(--accent)] text-white shadow-lg transition-mindflow hover:bg-[var(--accent-light)] xl:bottom-6 xl:right-6 glow-shadow"
+        className="fixed right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)] text-white shadow-[var(--shadow-raised)] transition-colors hover:bg-[var(--accent-strong)] xl:bottom-6 xl:right-6"
         style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
         title="Ask AI Tutor"
       >
@@ -72,7 +72,7 @@ const ChatInterface = () => {
   if (isMinimized) {
     return (
       <div
-        className="fixed left-2 right-2 z-50 w-auto max-w-64 overflow-hidden rounded-xl border-[var(--border-accent)] glass-card xl:left-auto xl:right-6 xl:w-64"
+        className="fixed left-2 right-2 z-50 w-auto max-w-64 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:w-64"
         style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
       >
         <div
@@ -106,13 +106,13 @@ const ChatInterface = () => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.97 }}
       transition={{ duration: 0.2 }}
-      className="fixed left-3 right-3 z-50 flex h-[min(72vh,34rem)] flex-col overflow-hidden rounded-2xl border-[var(--border-accent)] glass-card glow-shadow xl:left-auto xl:right-6 xl:h-[500px] xl:w-[380px]"
+      className="fixed left-3 right-3 z-50 flex h-[min(72vh,34rem)] flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-elevated)] shadow-[var(--shadow-raised)] xl:left-auto xl:right-6 xl:h-[500px] xl:w-[380px]"
       style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 12px)' }}
     >
       <div className="flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 sm:px-4 sm:py-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent)]/20">
-            <Bot size={18} className="text-[var(--accent-light)]" />
+            <Bot size={18} className="text-[var(--accent)]" />
           </div>
           <div>
             <h3 className="text-sm font-bold leading-none text-[var(--text-primary)]">MindFlow AI</h3>
@@ -166,8 +166,21 @@ const ChatInterface = () => {
               {msg.role === 'user' ? (
                 msg.content
               ) : (
-                <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-li:text-[var(--text-secondary)]">
-                  <Markdown>{msg.content}</Markdown>
+                <div>
+                  <div className="prose prose-sm max-w-none prose-p:my-1 prose-ul:my-1 prose-li:my-0.5 prose-headings:text-[var(--text-primary)] prose-p:text-[var(--text-secondary)] prose-li:text-[var(--text-secondary)]">
+                    <Markdown>{msg.content}</Markdown>
+                  </div>
+                  {msg.sources?.length > 0 && (
+                    <div className="mt-3 space-y-2 border-t border-[var(--border)] pt-3">
+                      <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Sources</p>
+                      {msg.sources.map((source, sourceIndex) => (
+                        <div key={sourceIndex} className="rounded-lg bg-[var(--bg-surface)] px-2.5 py-2 text-xs text-[var(--text-secondary)]">
+                          <span className="font-semibold text-[var(--accent)]">{source.label}</span>
+                          <p className="mt-1 leading-5">“{source.excerpt}”</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

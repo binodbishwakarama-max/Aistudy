@@ -6,81 +6,21 @@ import {
   LogOut,
   Menu,
   Search,
-  Sparkles,
-  Target,
   Trophy,
-  User,
   LayoutDashboard,
   BookOpen,
+  Upload,
+  BarChart3,
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useGamification } from '../context/GamificationContext';
-import { workspaceHighlights, workspaceNavigation } from '../config/workspace';
+import { workspaceNavigation } from '../config/workspace';
 import BrandMark from './BrandMark';
 import Button from './ui/Button';
 import Card from './ui/Card';
 import InstallPrompt from './InstallPrompt';
-
-const CustomCursor = () => {
-  const [position, setPosition] = useState({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-  const [hidden, setHidden] = useState(true);
-
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setPosition({ x: e.clientX, y: e.clientY });
-      setHidden(false);
-
-      const target = e.target;
-      if (target && typeof target.closest === 'function') {
-        const isClickable = target.closest('button, a, .ui-card, input, select, textarea, [role="button"]');
-        setIsHovered(!!isClickable);
-      }
-    };
-
-    const handleMouseLeave = () => setHidden(true);
-    const handleMouseEnter = () => setHidden(false);
-
-    window.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseleave', handleMouseLeave);
-    document.addEventListener('mouseenter', handleMouseEnter);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseleave', handleMouseLeave);
-      document.removeEventListener('mouseenter', handleMouseEnter);
-    };
-  }, []);
-
-  if (hidden) return null;
-
-  return (
-    <>
-      <Motion.div
-        className="fixed top-0 left-0 w-1.5 h-1.5 bg-[var(--accent)] rounded-full pointer-events-none z-[99999] hidden lg:block -translate-x-1/2 -translate-y-1/2"
-        animate={{
-          x: position.x,
-          y: position.y,
-        }}
-        transition={{ type: 'tween', ease: 'backOut', duration: 0.05 }}
-      />
-      <Motion.div
-        className="fixed top-0 left-0 rounded-full pointer-events-none z-[99998] hidden lg:block -translate-x-1/2 -translate-y-1/2 border"
-        animate={{
-          x: position.x,
-          y: position.y,
-          width: isHovered ? 48 : 28,
-          height: isHovered ? 48 : 28,
-          borderColor: isHovered ? 'rgba(99, 102, 241, 0.6)' : 'rgba(99, 102, 241, 0.25)',
-          backgroundColor: isHovered ? 'rgba(99, 102, 241, 0.08)' : 'rgba(99, 102, 241, 0.01)',
-        }}
-        transition={{ type: 'spring', stiffness: 450, damping: 28, mass: 0.2 }}
-      />
-    </>
-  );
-};
 
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
@@ -88,43 +28,55 @@ const isPathActive = (pathname, path) => {
   if (path === '/analytics') {
     return pathname === '/analytics' || pathname === '/stats';
   }
-
+  if (path === '/study') {
+    return ['/study', '/flashcards', '/quizzes'].includes(pathname);
+  }
   return pathname === path;
 };
 
-const MobileBottomNav = ({ onOpenSearch, onOpenMenu }) => {
+const MobileBottomNav = ({ onOpenMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const items = [
+    { path: '/dashboard', label: 'Home', icon: LayoutDashboard, match: (p) => p === '/dashboard' },
+    { path: '/study', label: 'Study', icon: BookOpen, match: (p) => ['/study', '/flashcards', '/quizzes'].includes(p) },
+    { path: '/upload', label: 'Upload', icon: Upload, match: (p) => p === '/upload' },
+    { path: '/analytics', label: 'Progress', icon: BarChart3, match: (p) => p === '/analytics' || p === '/stats' },
+  ];
+
   return (
     <nav
-      className="fixed bottom-4 inset-x-4 bg-[rgba(16,18,27,0.75)] backdrop-blur-xl border border-[rgba(255,255,255,0.08)] z-40 xl:hidden flex justify-around items-center px-2 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]"
+      className="fixed bottom-4 inset-x-4 z-40 flex items-center justify-around rounded-2xl border border-[var(--border)] bg-[rgba(255,255,255,0.92)] px-2 shadow-[var(--shadow-raised)] backdrop-blur-xl xl:hidden"
       style={{ height: 'calc(var(--bottom-nav-h) - 8px)' }}
     >
-      <button onClick={() => navigate('/dashboard')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/dashboard' || location.pathname === '/' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <LayoutDashboard size={22} className={location.pathname === '/dashboard' || location.pathname === '/' ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Home</span>
-      </button>
-      <button onClick={() => navigate('/study')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <BookOpen size={22} className={['/study', '/flashcards', '/quizzes'].includes(location.pathname) ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Study</span>
-      </button>
-      <button onClick={onOpenSearch} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
-        <Search size={22} />
-        <span className="text-[10px] mt-1">Search</span>
-      </button>
-      <button onClick={() => navigate('/settings')} className={`flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl transition-colors ${location.pathname === '/settings' ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[var(--bg-elevated)]'}`}>
-        <User size={22} className={location.pathname === '/settings' ? 'fill-[var(--accent-glow)]' : ''} />
-        <span className="text-[10px] mt-1">Profile</span>
-      </button>
-      <button onClick={onOpenMenu} className="flex flex-col items-center justify-center w-[52px] h-[52px] rounded-xl text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] transition-colors">
+      {items.map((item) => {
+        const active = item.match(location.pathname);
+        return (
+          <button
+            key={item.path}
+            type="button"
+            onClick={() => navigate(item.path)}
+            className={`flex h-[52px] w-[56px] flex-col items-center justify-center rounded-xl transition-colors ${
+              active ? 'text-[var(--accent)] font-semibold' : 'text-[var(--text-muted)] hover:bg-[rgba(0,0,0,0.04)]'
+            }`}
+          >
+            <item.icon size={22} strokeWidth={active ? 2.25 : 2} />
+            <span className="mt-1 text-[10px]">{item.label}</span>
+          </button>
+        );
+      })}
+      <button
+        type="button"
+        onClick={onOpenMenu}
+        className="flex h-[52px] w-[56px] flex-col items-center justify-center rounded-xl text-[var(--text-muted)] transition-colors hover:bg-[rgba(0,0,0,0.04)]"
+      >
         <Menu size={22} />
-        <span className="text-[10px] mt-1">More</span>
+        <span className="mt-1 text-[10px]">More</span>
       </button>
     </nav>
   );
 };
-
 
 const Layout = ({ children }) => {
   const location = useLocation();
@@ -134,7 +86,7 @@ const Layout = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [workspaceQuery, setWorkspaceQuery] = useState('');
-
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
 
   const isMarketing = marketingRoutes.has(location.pathname);
@@ -168,7 +120,6 @@ const Layout = ({ children }) => {
 
   const handleSearchSubmit = (event) => {
     event.preventDefault();
-
     const query = workspaceQuery.trim().toLowerCase();
     if (!query) return;
 
@@ -184,7 +135,6 @@ const Layout = ({ children }) => {
     }
   };
 
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   useEffect(() => {
     if (mobileSearchOpen && searchInputRef.current) {
       setTimeout(() => searchInputRef.current.focus(), 100);
@@ -192,34 +142,30 @@ const Layout = ({ children }) => {
   }, [mobileSearchOpen]);
 
   return (
-    <div className={isMarketing ? 'min-h-screen text-[var(--text-primary)] relative overflow-hidden' : 'workspace-shell text-[var(--text-primary)] relative overflow-hidden'}>
-      {/* Custom Magnetic Cursor */}
-      <CustomCursor />
-
-      {/* Film Grain Noise Overlay */}
-      <div className="noise-overlay" />
-
-      {/* Floating Ambient Auroras */}
-      <div className="ambient-aurora-1" />
-      <div className="ambient-aurora-2" />
-
+    <div
+      className={
+        isMarketing
+          ? 'relative min-h-screen overflow-hidden text-[var(--text-primary)]'
+          : 'workspace-shell relative overflow-hidden text-[var(--text-primary)]'
+      }
+    >
       <AnimatePresence>
         {showLevelUp && (
           <Motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(15,23,42,0.36)] px-4 backdrop-blur-md"
+            className="fixed inset-0 z-[120] flex items-center justify-center bg-[rgba(29,29,31,0.35)] px-4 backdrop-blur-md"
           >
             <Motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}>
               <Card className="w-full max-w-sm p-8 text-center">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
-                  <Trophy className="h-8 w-8" />
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[var(--warm-soft)] text-[var(--warm)]">
+                  <Trophy className="h-7 w-7" />
                 </div>
                 <p className="kicker mt-5">Level up</p>
-                <h2 className="font-heading mt-2 text-3xl font-bold">You reached Level {gameState.level}</h2>
+                <h2 className="font-heading mt-2 text-3xl font-bold tracking-tight">Level {gameState.level}</h2>
                 <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-                  Nice work. Your study habit is turning into a repeatable system.
+                  Your study habit is compounding. Keep the streak going.
                 </p>
               </Card>
             </Motion.div>
@@ -232,48 +178,36 @@ const Layout = ({ children }) => {
       ) : (
         <>
           <aside className="workspace-sidebar hidden xl:flex">
-            <div className="flex h-full flex-col gap-6">
-              <Link to="/" className="flex items-center gap-3">
+            <div className="flex h-full flex-col gap-5">
+              <Link to="/dashboard" className="flex items-center gap-3">
                 <BrandMark />
                 <div>
                   <div className="font-heading text-lg font-bold tracking-tight">MindFlow</div>
-                  <div className="text-sm text-[var(--text-muted)]">AI study workspace</div>
+                  <div className="text-xs text-[var(--text-muted)]">Study workspace</div>
                 </div>
               </Link>
 
-              <Card variant="accent" className="p-5">
+              <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-4">
                 <div className="flex items-center gap-3">
                   <div className="workspace-avatar">{userInitials}</div>
                   <div className="min-w-0">
                     <div className="truncate text-sm font-semibold text-[var(--text-primary)]">{userName}</div>
-                    <div className="truncate text-xs text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
+                    <div className="truncate text-xs text-[var(--text-muted)]">
+                      Level {gameState.level} · {gameState.streak}d streak
+                    </div>
                   </div>
                 </div>
-                <div className="mt-4 grid grid-cols-2 gap-3">
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
-                    <div className="text-xs text-[var(--text-muted)]">Level</div>
-                    <div className="mt-1 text-lg font-semibold">{gameState.level}</div>
-                  </div>
-                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-card)] px-3 py-3">
-                    <div className="text-xs text-[var(--text-muted)]">Streak</div>
-                    <div className="mt-1 text-lg font-semibold">{gameState.streak}d</div>
-                  </div>
-                </div>
-              </Card>
+              </div>
 
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {workspaceNavigation.map((item) => {
                   const active = isPathActive(location.pathname, item.path);
-
                   return (
-                    <Motion.button
+                    <button
                       key={item.path}
                       type="button"
                       onClick={() => handleNavigation(item.path)}
                       className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
-                      whileHover={{ scale: 1.02, x: 4 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 24 }}
                     >
                       <span className="workspace-nav-icon">
                         <item.icon size={18} />
@@ -282,26 +216,12 @@ const Layout = ({ children }) => {
                         <span className="block text-sm font-semibold">{item.label}</span>
                         <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
                       </span>
-                    </Motion.button>
+                    </button>
                   );
                 })}
               </nav>
 
-              <div className="mt-auto space-y-3">
-                {workspaceHighlights.map((highlight) => (
-                  <Card key={highlight.label} className="p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                        <highlight.icon size={18} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-semibold">{highlight.label}</div>
-                        <p className="mt-1 text-xs leading-6 text-[var(--text-secondary)]">{highlight.value}</p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-
+              <div className="mt-auto">
                 <Button variant="secondary" className="w-full justify-center" leftIcon={LogOut} onClick={handleLogout}>
                   Log out
                 </Button>
@@ -319,23 +239,12 @@ const Layout = ({ children }) => {
                       value={workspaceQuery}
                       onChange={(event) => setWorkspaceQuery(event.target.value)}
                       className="workspace-search-input"
-                      placeholder="Jump to upload, flashcards, analytics..."
+                      placeholder="Jump to study, upload, progress..."
                     />
                   </form>
                 </div>
 
                 <div className="workspace-topbar-actions">
-                  <div className="hidden items-center gap-2 lg:flex">
-                    <span className="info-chip">
-                      <Sparkles size={14} className="text-[var(--accent)]" />
-                      <span>XP {gameState.xp}</span>
-                    </span>
-                    <span className="info-chip">
-                      <Trophy size={14} className="text-[var(--warm)]" />
-                      <span>Level {gameState.level}</span>
-                    </span>
-                  </div>
-
                   <div className="relative">
                     <button
                       type="button"
@@ -345,7 +254,7 @@ const Layout = ({ children }) => {
                       <span className="workspace-avatar workspace-avatar--small">{userInitials}</span>
                       <span className="hidden min-w-0 text-left md:block">
                         <span className="block truncate text-sm font-semibold">{userName}</span>
-                        <span className="block truncate text-xs text-[var(--text-muted)]">{user?.email || 'Workspace member'}</span>
+                        <span className="block truncate text-xs text-[var(--text-muted)]">{user?.email || 'Workspace'}</span>
                       </span>
                       <ChevronDown size={16} className="text-[var(--text-muted)]" />
                     </button>
@@ -366,7 +275,7 @@ const Layout = ({ children }) => {
                                 <div className="truncate text-xs text-[var(--text-muted)]">{user?.email || 'Signed in'}</div>
                               </div>
                             </div>
-                            <div className="mt-4 space-y-2">
+                            <div className="mt-4 space-y-1">
                               <button type="button" onClick={() => handleNavigation('/settings')} className="workspace-dropdown-item">
                                 Open settings
                               </button>
@@ -386,52 +295,58 @@ const Layout = ({ children }) => {
             <AnimatePresence>
               {mobileSearchOpen && (
                 <Motion.div
-                  initial={{ opacity: 0, y: -20 }}
+                  initial={{ opacity: 0, y: -16 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="fixed inset-0 z-[120] bg-[var(--bg-base)] xl:hidden flex flex-col"
+                  exit={{ opacity: 0, y: -16 }}
+                  className="fixed inset-0 z-[120] flex flex-col bg-[var(--bg-surface)] xl:hidden"
                 >
-                  <div className="flex items-center gap-2 p-4 border-b border-[var(--border)] bg-[var(--bg-card)] pb-safe-top pt-safe-top">
-                    <form onSubmit={handleSearchSubmit} className="workspace-search flex-1 m-0 shadow-none border-[var(--border-strong)]">
+                  <div className="flex items-center gap-2 border-b border-[var(--border)] bg-[var(--bg-elevated)] p-4">
+                    <form onSubmit={handleSearchSubmit} className="workspace-search m-0 flex-1">
                       <Search size={18} className="text-[var(--text-muted)]" />
                       <input
                         ref={searchInputRef}
                         value={workspaceQuery}
                         onChange={(event) => setWorkspaceQuery(event.target.value)}
-                        className="workspace-search-input text-base h-8"
-                        placeholder="Jump to upload, flashcards, analytics..."
+                        className="workspace-search-input h-8 text-base"
+                        placeholder="Jump to study, upload, progress..."
                       />
                     </form>
                     <Button variant="ghost" size="icon" className="flex-shrink-0" onClick={() => setMobileSearchOpen(false)}>
-                      <X size={24} />
+                      <X size={22} />
                     </Button>
                   </div>
-                  <div className="flex-1 overflow-y-auto p-4 bg-[var(--bg-base)]">
-                    <div className="kicker mb-3">Quick Navigation Navigation</div>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <div className="kicker mb-3">Quick navigation</div>
                     <div className="grid gap-2">
-                       {workspaceNavigation.filter(item => 
-                          workspaceQuery ? 
-                            [item.label, item.description, ...(item.keywords || [])].join(' ').toLowerCase().includes(workspaceQuery.toLowerCase()) 
-                            : true
-                        ).map((item) => (
-                           <button
-                             key={item.path}
-                             onClick={() => {
-                               handleNavigation(item.path);
-                               setMobileSearchOpen(false);
-                               setWorkspaceQuery('');
-                             }}
-                             className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border)] rounded-[20px] transition-mindflow hover:border-[var(--accent)]"
-                           >
-                             <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--bg-strong)] text-[var(--accent)]">
-                               <item.icon size={20} />
-                             </div>
-                             <div className="text-left flex-1 min-w-0">
-                               <div className="text-base font-semibold text-[var(--text-primary)]">{item.label}</div>
-                               <div className="text-sm text-[var(--text-secondary)] truncate">{item.description}</div>
-                             </div>
-                           </button>
-                       ))}
+                      {workspaceNavigation
+                        .filter((item) =>
+                          workspaceQuery
+                            ? [item.label, item.description, ...(item.keywords || [])]
+                                .join(' ')
+                                .toLowerCase()
+                                .includes(workspaceQuery.toLowerCase())
+                            : true,
+                        )
+                        .map((item) => (
+                          <button
+                            key={item.path}
+                            type="button"
+                            onClick={() => {
+                              handleNavigation(item.path);
+                              setMobileSearchOpen(false);
+                              setWorkspaceQuery('');
+                            }}
+                            className="flex items-center gap-4 rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-elevated)] p-4 text-left transition-colors hover:border-[var(--border-strong)]"
+                          >
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--bg-strong)] text-[var(--accent)]">
+                              <item.icon size={20} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="text-base font-semibold text-[var(--text-primary)]">{item.label}</div>
+                              <div className="truncate text-sm text-[var(--text-secondary)]">{item.description}</div>
+                            </div>
+                          </button>
+                        ))}
                     </div>
                   </div>
                 </Motion.div>
@@ -444,7 +359,7 @@ const Layout = ({ children }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 z-[110] bg-[rgba(15,23,42,0.38)] backdrop-blur-sm xl:hidden"
+                  className="fixed inset-0 z-[110] bg-[rgba(29,29,31,0.32)] backdrop-blur-sm xl:hidden"
                   onClick={closeOverlays}
                 >
                   <Motion.div
@@ -455,7 +370,7 @@ const Layout = ({ children }) => {
                     onClick={(event) => event.stopPropagation()}
                   >
                     <Card
-                      className="flex h-full flex-col rounded-none border-y-0 border-l-0 p-6 sm:rounded-r-[32px] sm:border sm:border-l-0 overflow-y-auto"
+                      className="flex h-full flex-col overflow-y-auto rounded-none border-y-0 border-l-0 p-6 sm:rounded-r-[28px] sm:border sm:border-l-0"
                       style={{ paddingBottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 1.5rem)' }}
                     >
                       <div className="flex items-center justify-between gap-3">
@@ -463,7 +378,7 @@ const Layout = ({ children }) => {
                           <BrandMark />
                           <div>
                             <div className="font-heading text-lg font-bold">MindFlow</div>
-                            <div className="text-sm text-[var(--text-muted)]">AI study workspace</div>
+                            <div className="text-sm text-[var(--text-muted)]">Study workspace</div>
                           </div>
                         </div>
                         <Button variant="ghost" size="icon" onClick={closeOverlays} aria-label="Close menu">
@@ -471,19 +386,15 @@ const Layout = ({ children }) => {
                         </Button>
                       </div>
 
-                      <div className="mt-6 space-y-2">
+                      <div className="mt-6 space-y-1">
                         {workspaceNavigation.map((item) => {
                           const active = isPathActive(location.pathname, item.path);
-
                           return (
-                            <Motion.button
+                            <button
                               key={item.path}
                               type="button"
                               onClick={() => handleNavigation(item.path)}
                               className={`workspace-nav-item ${active ? 'workspace-nav-item--active' : ''}`}
-                              whileHover={{ scale: 1.02, x: 4 }}
-                              whileTap={{ scale: 0.98 }}
-                              transition={{ type: 'spring', stiffness: 400, damping: 24 }}
                             >
                               <span className="workspace-nav-icon">
                                 <item.icon size={18} />
@@ -492,12 +403,12 @@ const Layout = ({ children }) => {
                                 <span className="block text-sm font-semibold">{item.label}</span>
                                 <span className="block truncate text-xs text-[var(--text-muted)]">{item.description}</span>
                               </span>
-                            </Motion.button>
+                            </button>
                           );
                         })}
                       </div>
 
-                      <Card variant="accent" className="mt-auto p-5">
+                      <div className="mt-auto rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-surface)] p-4">
                         <div className="flex items-center gap-3">
                           <span className="workspace-avatar">{userInitials}</span>
                           <div className="min-w-0">
@@ -508,7 +419,7 @@ const Layout = ({ children }) => {
                         <Button variant="secondary" className="mt-4 w-full justify-center" leftIcon={LogOut} onClick={handleLogout}>
                           Log out
                         </Button>
-                      </Card>
+                      </div>
                     </Card>
                   </Motion.div>
                 </Motion.div>
@@ -518,7 +429,7 @@ const Layout = ({ children }) => {
             <main className="workspace-main">
               <div className="workspace-main-inner">
                 {authError && (
-                  <div className="mb-5 flex items-start gap-3 rounded-2xl border border-[rgba(217,48,37,0.22)] bg-[rgba(217,48,37,0.06)] px-4 py-3 text-sm">
+                  <div className="mb-5 flex items-start gap-3 rounded-[var(--radius-md)] border border-[rgba(215,0,21,0.2)] bg-[var(--danger-soft)] px-4 py-3 text-sm">
                     <AlertTriangle size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
                     <span>{authError}</span>
                   </div>
@@ -526,10 +437,7 @@ const Layout = ({ children }) => {
                 {children}
               </div>
             </main>
-            <MobileBottomNav 
-              onOpenSearch={() => { window.scrollTo(0, 0); setMobileSearchOpen(true); }} 
-              onOpenMenu={() => setMobileOpen(true)} 
-            />
+            <MobileBottomNav onOpenMenu={() => setMobileOpen(true)} />
             <InstallPrompt />
           </div>
         </>

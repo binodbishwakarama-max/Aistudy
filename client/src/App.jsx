@@ -25,7 +25,7 @@ const RouteFallback = () => (
         <div className="absolute inset-0 rounded-full border-2 border-[var(--border)]" />
         <div className="absolute inset-0 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
       </div>
-      <p className="text-sm font-medium text-[var(--text-muted)]">Loading your workspace...</p>
+      <p className="text-sm font-medium text-[var(--text-muted)]">Loading…</p>
     </div>
   </div>
 );
@@ -39,11 +39,11 @@ function App() {
             position="top-center"
             toastOptions={{
               style: {
-                background: 'var(--bg-card)',
+                background: 'var(--bg-elevated)',
                 color: 'var(--text-primary)',
                 border: '1px solid var(--border)',
-                borderRadius: '18px',
-                boxShadow: 'var(--shadow-soft)',
+                borderRadius: '14px',
+                boxShadow: 'var(--shadow-raised)',
               },
               success: { iconTheme: { primary: 'var(--success)' } },
               error: { iconTheme: { primary: 'var(--danger)' } },

@@ -72,9 +72,13 @@ export const normalizeFlashcards = (cards) => {
   return arr
     .map((card) => ({
       id: card?.id,
+      deckId: card?.deck_id || card?.deckId || null,
       question: normalizeText(card?.question) || normalizeText(card?.front) || normalizeText(card?.q),
       answer: normalizeText(card?.answer) || normalizeText(card?.back) || normalizeText(card?.a),
       explanation: normalizeText(card?.explanation) || normalizeText(card?.hint),
+      topics: Array.isArray(card?.topics) ? card.topics.map((t) => normalizeText(t)).filter(Boolean) : [],
+      sourceExcerpt: normalizeText(card?.source_excerpt) || normalizeText(card?.sourceExcerpt),
+      sourceSection: normalizeText(card?.source_section) || normalizeText(card?.sourceSection),
     }))
     .filter((card) => card.question && card.answer);
 };

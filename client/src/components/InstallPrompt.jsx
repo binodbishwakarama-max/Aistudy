@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Download, X, Share } from 'lucide-react';
+import { Download, X } from 'lucide-react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
 
 const InstallPrompt = () => {
@@ -70,7 +70,7 @@ const InstallPrompt = () => {
           style={{ bottom: 'calc(var(--bottom-nav-h) + var(--safe-area-bottom) + 16px)' }}
         >
           <div className="bg-[var(--bg-elevated)] border border-[var(--border)] rounded-2xl p-4 shadow-[var(--shadow-raised)] flex items-start gap-4 backdrop-blur-md">
-            <div className="flex bg-[var(--accent)] text-[var(--bg-base)] rounded-xl w-10 h-10 items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="flex bg-[var(--accent)] text-white rounded-xl w-10 h-10 items-center justify-center flex-shrink-0 mt-0.5">
               <Download size={20} />
             </div>
             
@@ -91,7 +91,7 @@ const InstallPrompt = () => {
               {showAndroidInstall && (
                 <button
                   onClick={handleInstallClick}
-                  className="mt-3 text-sm font-semibold text-[var(--bg-base)] bg-[var(--text-primary)] px-4 py-2 rounded-lg w-full transition-transform active:scale-95"
+                  className="mt-3 text-sm font-semibold text-white bg-[var(--accent)] px-4 py-2 rounded-full w-full transition-transform active:scale-95"
                 >
                   Install Now
                 </button>

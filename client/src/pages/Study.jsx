@@ -3,17 +3,14 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import {
-  ArrowLeft,
-  BarChart3,
-  BookOpen,
   Brain,
   CheckCircle,
   FileText,
   HelpCircle,
   Layers,
+  BookOpen,
   Save,
-  Sparkles,
-  Target,
+  Upload,
 } from 'lucide-react';
 import ChatInterface from '../components/ChatInterface';
 import Flashcard from '../components/Flashcard';
@@ -25,28 +22,27 @@ import StudyLibrary from '../components/StudyLibrary';
 import { useAuth } from '../context/AuthContext';
 import { useStudy } from '../context/StudyContext';
 import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
 
 const modeDetails = {
   flashcards: {
     title: 'Flashcards',
-    description: 'Review the source one prompt at a time.',
+    description: 'Review one prompt at a time.',
   },
   quiz: {
     title: 'Quizzes',
-    description: 'Pressure test recall with multiple-choice questions.',
+    description: 'Multiple-choice knowledge checks.',
   },
   review: {
     title: 'Review sheet',
-    description: 'Scan the core ideas before a deeper study pass.',
+    description: 'Scan core ideas before a deeper pass.',
   },
   library: {
     title: 'Library',
-    description: 'Open a saved session and continue where you left off.',
+    description: 'Open a saved session and continue.',
   },
   adaptive: {
     title: 'Adaptive',
-    description: 'AI-powered quiz that targets your weak topics and adjusts difficulty in real-time.',
+    description: 'Difficulty adjusts to your weak topics.',
   },
 };
 
@@ -70,24 +66,26 @@ const Study = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { text, flashcards, quiz, generateFlashcards, generateQuiz, saveSession, loading, error } = useStudy();
+  const { text, flashcards, quiz, generateFlashcards, generateQuiz, saveSession, loading, error, lastDeckId } = useStudy();
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   const mode = getModeFromLocation(location.pathname, location.search, Boolean(text));
   const activeMode = modeDetails[mode] || modeDetails.library;
-  const sourceCharacters = text.length;
-  const approximateWords = useMemo(() => (text ? text.trim().split(/\s+/).filter(Boolean).length : 0), [text]);
   const flashcardSessionKey = useMemo(() => buildSessionKey(flashcards), [flashcards]);
   const quizSessionKey = useMemo(() => buildSessionKey(quiz), [quiz]);
+  const sourcePreview = useMemo(() => {
+    if (!text) return 'No source loaded';
+    const cleaned = text.replace(/\s+/g, ' ').trim();
+    return cleaned.length > 72 ? `${cleaned.slice(0, 72)}…` : cleaned;
+  }, [text]);
 
   const tabs = [
-    { id: 'flashcards', label: 'Flashcards', icon: Layers, to: '/flashcards' },
-    { id: 'quiz', label: 'Quizzes', icon: HelpCircle, to: '/quizzes' },
-    { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
-    { id: 'adaptive', label: 'Adaptive', icon: Brain, to: '/study?mode=adaptive' },
     { id: 'library', label: 'Library', icon: BookOpen, to: '/study' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, to: '/analytics' },
+    { id: 'flashcards', label: 'Cards', icon: Layers, to: '/flashcards' },
+    { id: 'quiz', label: 'Quiz', icon: HelpCircle, to: '/quizzes' },
+    { id: 'adaptive', label: 'Adaptive', icon: Brain, to: '/study?mode=adaptive' },
+    { id: 'review', label: 'Review', icon: FileText, to: '/study?mode=review' },
   ];
 
   const handleSave = async () => {
@@ -113,206 +111,147 @@ const Study = () => {
 
   if (!text && mode !== 'library') {
     return (
-      <Card className="mx-auto flex min-h-[70vh] max-w-3xl flex-col items-center justify-center p-6 text-center sm:p-10">
-        <div className="pill-badge">
-          <Sparkles size={14} className="text-[var(--accent)]" />
-          Start a study session
-        </div>
-        <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-4xl">Upload a source before you start reviewing.</h1>
-        <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-          Add a document from the upload screen to generate flashcards, quizzes, and a review sheet, or open a saved
-          session from your library.
+      <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col items-center justify-center py-12 text-center">
+        <h1 className="font-heading text-3xl font-bold tracking-tight sm:text-4xl">
+          Load a source to study
+        </h1>
+        <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
+          Upload a document to generate flashcards and quizzes, or open a saved session from your library.
         </p>
         <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Button onClick={() => navigate('/upload')}>Upload document</Button>
+          <Button leftIcon={Upload} onClick={() => navigate('/upload')}>
+            Upload document
+          </Button>
           <Button variant="secondary" onClick={() => navigate('/study')}>
             Open library
           </Button>
         </div>
-      </Card>
+      </div>
     );
   }
 
-  const contentShellClass = 'min-h-[420px] sm:min-h-[520px]';
-
   return (
     <div className="space-y-6">
-      <Motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-        <Card variant="accent" className="p-6 sm:p-10">
-          <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr] xl:items-end">
-            <div className="max-w-3xl">
-              <div className="pill-badge">
-                <Target size={14} className="text-[var(--accent)]" />
-                {activeMode.title}
-              </div>
-              <h1 className="font-heading mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
-                {mode === 'library' ? 'Continue a saved study session' : 'Keep your revision flow in one place'}
-              </h1>
-              <p className="mt-4 text-base leading-8 text-[var(--text-secondary)]">{activeMode.description}</p>
-              {text && (
-                <p className="mt-4 max-w-3xl text-sm leading-7 text-[var(--text-muted)]">
-                  {text.replace(/\s+/g, ' ').trim().slice(0, 240)}
-                  {text.length > 240 ? '...' : ''}
-                </p>
-              )}
-            </div>
+      <header className="session-bar">
+        <div className="min-w-0 flex-1">
+          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+            {activeMode.title}
+          </p>
+          <h1 className="font-heading mt-1 truncate text-xl font-bold tracking-tight sm:text-2xl">
+            {mode === 'library' ? 'Your study library' : sourcePreview}
+          </h1>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">{activeMode.description}</p>
+        </div>
 
-            <div className="flex flex-col gap-3 sm:flex-row xl:justify-end">
-              {text && (
-                <Button
-                  onClick={handleSave}
-                  loading={saving}
-                  variant={saved ? 'subtle' : 'secondary'}
-                  leftIcon={saved ? CheckCircle : Save}
-                  className="w-full justify-center sm:w-auto"
-                >
-                  {saved ? 'Saved' : 'Save session'}
-                </Button>
-              )}
-              <Button variant="ghost" leftIcon={ArrowLeft} onClick={() => navigate('/upload')} className="w-full justify-center sm:w-auto">
-                New document
-              </Button>
-            </div>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {text && (
+            <Button
+              onClick={handleSave}
+              loading={saving}
+              variant={saved ? 'subtle' : 'secondary'}
+              leftIcon={saved ? CheckCircle : Save}
+              size="sm"
+            >
+              {saved ? 'Saved' : 'Save'}
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" leftIcon={Upload} onClick={() => navigate('/upload')}>
+            New
+          </Button>
+        </div>
+      </header>
 
-          <div className="mt-6 grid gap-3 sm:grid-cols-3">
-            <Card className="p-4">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Source</div>
-              <div className="mt-2 text-lg font-semibold">{text ? `${sourceCharacters.toLocaleString()} characters` : 'No source loaded'}</div>
-            </Card>
-            <Card className="p-4">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Words</div>
-              <div className="mt-2 text-lg font-semibold">{text ? approximateWords.toLocaleString() : 0}</div>
-            </Card>
-            <Card className="p-4">
-              <div className="text-sm font-medium text-[var(--text-muted)]">Generated</div>
-              <div className="mt-2 text-lg font-semibold">
-                {flashcards.length} cards - {quiz.length} questions
-              </div>
-            </Card>
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {tabs.map((tab) => {
-              const isActive = tab.id === mode || (tab.id === 'analytics' && location.pathname === '/analytics');
-              return (
-                <Link
-                  key={tab.id}
-                  to={tab.to}
-                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium transition-mindflow ${
-                    isActive
-                      ? 'border border-[var(--border-accent)] bg-[var(--bg-strong)] text-[var(--accent)]'
-                      : 'border border-[var(--border)] bg-[var(--bg-card)] text-[var(--text-secondary)] hover:bg-[var(--bg-elevated)]'
-                  }`}
-                >
-                  <tab.icon size={16} />
-                  {tab.label}
-                </Link>
-              );
-            })}
-          </div>
-        </Card>
-      </Motion.section>
+      <nav className="segmented-control w-full sm:w-auto" aria-label="Study modes">
+        {tabs.map((tab) => {
+          const isActive = tab.id === mode;
+          return (
+            <Link key={tab.id} to={tab.to} className={isActive ? 'is-active' : ''}>
+              <tab.icon size={15} />
+              {tab.label}
+            </Link>
+          );
+        })}
+      </nav>
 
       {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-[rgba(217,48,37,0.22)] bg-[rgba(217,48,37,0.06)] px-4 py-3 text-sm">
-          <Sparkles size={18} className="mt-0.5 flex-shrink-0 text-[var(--danger)]" />
-          <span>{error}</span>
+        <div className="rounded-[var(--radius-md)] border border-[rgba(215,0,21,0.2)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]">
+          {error}
         </div>
       )}
 
-      <div className="grid gap-6 xl:grid-cols-[1.12fr_0.88fr]">
+      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <AnimatePresence mode="wait">
-          <Motion.section
+          <Motion.div
             key={mode}
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
+            exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22 }}
+            className="study-stage p-4 sm:p-6"
           >
-            <Card className={`overflow-hidden sm:p-8 ${['flashcards', 'quiz', 'adaptive'].includes(mode) ? 'p-0 pt-4' : 'p-5'} ${contentShellClass}`}>
-              {mode === 'flashcards' && (
-                <>
-                  {flashcards.length === 0 ? (
-                    <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-                      <div className="pill-badge">
-                        <Layers size={14} className="text-[var(--accent)]" />
-                        Flashcards
-                      </div>
-                      <h2 className="font-heading mt-5 text-3xl font-bold">Generate a focused card deck.</h2>
-                      <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-                        Create prompt-and-answer cards from your uploaded source and move straight into active recall.
-                      </p>
-                      <Button className="mt-8" loading={loading} onClick={generateFlashcards}>
-                        Generate flashcards
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col">
-                      <Flashcard key={flashcardSessionKey} cards={flashcards} />
-                    </div>
-                  )}
-                </>
-              )}
+            {mode === 'flashcards' && (
+              <>
+                {flashcards.length === 0 ? (
+                  <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
+                    <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+                      Generate flashcards
+                    </h2>
+                    <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-secondary)]">
+                      Create prompt-and-answer cards from your uploaded source.
+                    </p>
+                    <Button className="mt-8" loading={loading} onClick={generateFlashcards}>
+                      Generate flashcards
+                    </Button>
+                  </div>
+                ) : (
+                  <Flashcard key={flashcardSessionKey} cards={flashcards} deckId={lastDeckId} />
+                )}
+              </>
+            )}
 
-              {mode === 'quiz' && (
-                <>
-                  {quiz.length === 0 ? (
-                    <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-                      <div className="pill-badge">
-                        <HelpCircle size={14} className="text-[var(--accent)]" />
-                        Quizzes
-                      </div>
-                      <h2 className="font-heading mt-5 text-3xl font-bold">Turn the source into a quick recall check.</h2>
-                      <p className="mt-4 max-w-xl text-base leading-8 text-[var(--text-secondary)]">
-                        Generate multiple-choice questions to pressure test understanding and surface weak spots quickly.
-                      </p>
-                      <Button className="mt-8" loading={loading} onClick={generateQuiz}>
-                        Generate quiz
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col">
-                      <Quiz key={quizSessionKey} questions={quiz} />
-                    </div>
-                  )}
-                </>
-              )}
+            {mode === 'quiz' && (
+              <>
+                {quiz.length === 0 ? (
+                  <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
+                    <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
+                      Generate a quiz
+                    </h2>
+                    <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-secondary)]">
+                      Turn the source into multiple-choice questions.
+                    </p>
+                    <Button className="mt-8" loading={loading} onClick={generateQuiz}>
+                      Generate quiz
+                    </Button>
+                  </div>
+                ) : (
+                  <Quiz key={quizSessionKey} questions={quiz} deckId={lastDeckId} />
+                )}
+              </>
+            )}
 
-              {mode === 'review' && <ReviewSheet flashcards={flashcards} />}
-
-              {mode === 'adaptive' && <div className="px-4 pb-4 sm:px-0 sm:pb-0 h-full flex flex-col"><AdaptiveQuiz /></div>}
-
-              {mode === 'library' && <StudyLibrary onSelect={() => navigate('/flashcards')} />}
-            </Card>
-          </Motion.section>
+            {mode === 'review' && <ReviewSheet flashcards={flashcards} />}
+            {mode === 'adaptive' && <AdaptiveQuiz />}
+            {mode === 'library' && <StudyLibrary onSelect={() => navigate('/flashcards')} />}
+          </Motion.div>
         </AnimatePresence>
 
-        <div className="grid gap-6">
-          <Card className="p-5">
+        <aside className="space-y-4">
+          <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)]">
             <SRSDashboard />
-          </Card>
-
-          <Card className="p-5 sm:p-6">
-            <div className="kicker">Source preview</div>
-            <h2 className="font-heading mt-3 text-2xl font-bold tracking-tight">What you are studying right now</h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--text-secondary)]">
-              {text
-                ? `${text.replace(/\s+/g, ' ').trim().slice(0, 620)}${text.length > 620 ? '...' : ''}`
-                : 'Open a saved session or upload a new source from the upload page.'}
-            </p>
-          </Card>
-
-          <Card variant="accent" className="p-5 sm:p-6">
-            <div className="text-sm font-semibold text-[var(--text-primary)]">Need a broader progress view?</div>
-            <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">
-              Analytics shows your weekly output, heatmap, accuracy, and study momentum across sessions.
-            </p>
-            <Button variant="secondary" className="mt-5" onClick={() => navigate('/analytics')}>
-              Open analytics
-            </Button>
-          </Card>
-        </div>
+          </div>
+          {text && (
+            <div className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)]">
+              <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Source</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
+                {text.replace(/\s+/g, ' ').trim().slice(0, 420)}
+                {text.length > 420 ? '…' : ''}
+              </p>
+              <p className="mt-3 text-xs text-[var(--text-muted)]">
+                {flashcards.length} cards · {quiz.length} questions
+              </p>
+            </div>
+          )}
+        </aside>
       </div>
 
       <ChatInterface />

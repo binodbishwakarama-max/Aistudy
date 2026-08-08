@@ -1,7 +1,25 @@
 # MindFlow 2.0: Technical Architecture & System Design
-**Version:** 2.0.0 (Proposed)  
-**Status:** Design Phase  
+**Version:** 2.0.0  
+**Status:** In Production (see § Current Stack below)  
 **Author:** AI Systems Architect
+
+---
+
+## Current Production Stack (as implemented)
+
+MindFlow runs as a **monolithic Express API + React SPA** backed by **Supabase (PostgreSQL + pgvector + Auth + RLS)**. The sections below that reference MongoDB, Pinecone, Redis/BullMQ describe the original design proposal; the live system uses:
+
+| Concern | Production choice |
+|--------|-------------------|
+| Primary DB | Supabase PostgreSQL (`decks`, `flashcards`, `quiz_questions`, `user_stats`, `study_sessions`) |
+| Vector search | pgvector embeddings on `flashcards` (semantic search) |
+| Auth | Supabase Auth (JWT passed to Express middleware) |
+| File ingest | Client-side PDF parse → API generates content synchronously |
+| SRS | SM-2 fields on `flashcards` (`srs_interval`, `next_review_at`, etc.) |
+| Analytics | `GET /api/stats/analytics` + `study_sessions` table (no client-side fake data) |
+| Jobs | Inline API handlers (no Redis queue yet) |
+
+**Migration note:** Run `setup_study_sessions.sql` on Supabase to enable session tracking and real analytics charts. Run `setup_citations.sql` for source text storage, flashcard citations, and grounded chat/regeneration.
 
 ---
 

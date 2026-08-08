@@ -1,44 +1,35 @@
 import {
   BarChart3,
   BookOpen,
-  BrainCircuit,
   LayoutDashboard,
   Settings,
-  Sparkles,
   Upload,
 } from 'lucide-react';
 
 export const workspaceNavigation = [
   {
-    label: 'Overview',
+    label: 'Home',
     path: '/dashboard',
     icon: LayoutDashboard,
-    description: 'Home and recent activity',
+    description: 'Next actions and recent work',
     keywords: ['home', 'overview', 'dashboard', 'recent'],
   },
   {
-    label: 'Upload Notes',
+    label: 'Study',
+    path: '/study',
+    icon: BookOpen,
+    description: 'Cards, quizzes, and library',
+    keywords: ['study', 'flashcards', 'cards', 'review', 'quiz', 'quizzes', 'adaptive', 'library'],
+  },
+  {
+    label: 'Upload',
     path: '/upload',
     icon: Upload,
     description: 'Import notes and PDFs',
     keywords: ['upload', 'notes', 'pdf', 'source'],
   },
   {
-    label: 'Flashcards',
-    path: '/flashcards',
-    icon: BookOpen,
-    description: 'Active recall practice',
-    keywords: ['flashcards', 'cards', 'review'],
-  },
-  {
-    label: 'Quizzes',
-    path: '/quizzes',
-    icon: BrainCircuit,
-    description: 'Timed knowledge checks',
-    keywords: ['quizzes', 'quiz', 'mcq', 'questions'],
-  },
-  {
-    label: 'Analytics',
+    label: 'Progress',
     path: '/analytics',
     icon: BarChart3,
     description: 'Accuracy and momentum',
@@ -53,10 +44,4 @@ export const workspaceNavigation = [
   },
 ];
 
-export const workspaceHighlights = [
-  {
-    label: 'AI-first workflow',
-    value: 'Upload once, review across cards and quizzes',
-    icon: Sparkles,
-  },
-];
+export const workspaceHighlights = [];

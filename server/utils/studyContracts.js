@@ -16,15 +16,20 @@ const normalizeFlashcardForStorage = (card = {}) => ({
     front: normalizeText(card.front) || normalizeText(card.question),
     back: normalizeText(card.back) || normalizeText(card.answer),
     explanation: normalizeText(card.explanation),
-    topics: normalizeTopics(card.topics)
+    topics: normalizeTopics(card.topics),
+    source_excerpt: normalizeText(card.source_excerpt) || normalizeText(card.sourceExcerpt),
+    source_section: normalizeText(card.source_section) || normalizeText(card.sourceSection),
 });
 
 const normalizeFlashcardForClient = (card = {}) => ({
     id: card.id,
+    deckId: card.deck_id || card.deckId || null,
     question: normalizeText(card.question) || normalizeText(card.front),
     answer: normalizeText(card.answer) || normalizeText(card.back),
     explanation: normalizeText(card.explanation),
     topics: normalizeTopics(card.topics),
+    sourceExcerpt: normalizeText(card.source_excerpt) || normalizeText(card.sourceExcerpt),
+    sourceSection: normalizeText(card.source_section) || normalizeText(card.sourceSection),
     next_review_at: card.next_review_at || null,
     srs_interval: card.srs_interval ?? 0,
     srs_ease_factor: card.srs_ease_factor ?? 2.5,
@@ -126,6 +131,7 @@ const prepareStudySetForSave = ({ flashcards = [], quiz = [] } = {}) => {
 
 const normalizeDeckResponse = ({ deck = {}, flashcards = [], quiz = [] } = {}) => ({
     ...deck,
+    sourceText: deck.source_text || deck.sourceText || '',
     flashcards: validateFlashcards(flashcards, { allowEmpty: true }),
     quiz: validateQuizQuestions(quiz, { allowEmpty: true }),
     question_count: deck.question_count ?? quiz.length

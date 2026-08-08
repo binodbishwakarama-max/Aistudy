@@ -1,43 +1,16 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion as Motion } from 'framer-motion';
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
-import { Brain, BookOpen, Clock, Flame, Sparkles, Target, Trophy, Zap } from 'lucide-react';
+import { Brain, BookOpen, Clock, Flame, Target, Trophy, Zap } from 'lucide-react';
 import { useGamification } from '../context/GamificationContext';
-import { supabase } from '../services/supabaseClient';
-import { readJSONStorage } from '../utils/storage';
-
-const generateHeatmapData = () => {
-  const data = [];
-  const today = new Date();
-  const stored = readJSONStorage('daily_activity', {});
-
-  for (let index = 83; index >= 0; index -= 1) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - index);
-    const key = date.toISOString().split('T')[0];
-    const count = stored[key] ?? (index < 7 ? Math.floor(Math.random() * 5) : Math.floor(Math.random() * 3));
-    data.push({ date, count, key });
-  }
-
-  return data;
-};
+import { getAnalytics } from '../services/api';
 
 const getHeatColor = (count) => {
-  if (count === 0) return 'bg-[var(--bg-elevated)]';
-  if (count <= 1) return 'bg-[rgba(99,102,241,0.18)]';
-  if (count <= 3) return 'bg-[rgba(99,102,241,0.38)]';
-  if (count <= 5) return 'bg-[rgba(99,102,241,0.58)]';
+  if (count === 0) return 'bg-[rgba(0,0,0,0.06)]';
+  if (count <= 1) return 'bg-[rgba(0,113,227,0.18)]';
+  if (count <= 3) return 'bg-[rgba(0,113,227,0.38)]';
+  if (count <= 5) return 'bg-[rgba(0,113,227,0.58)]';
   return 'bg-[var(--accent)]';
-};
-
-const generateWeeklyData = () => {
-  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const stored = readJSONStorage('weekly_study', {});
-  return days.map((day) => ({
-    day,
-    cards: stored[day]?.cards ?? Math.floor(Math.random() * 15 + 2),
-    quizzes: stored[day]?.quizzes ?? Math.floor(Math.random() * 8 + 1),
-  }));
 };
 
 const ChartTooltip = ({ active, payload, label }) => {
@@ -91,6 +64,15 @@ const DifficultyBar = ({ label, value, total, color }) => {
   );
 };
 
+const EmptyChart = ({ message }) => (
+  <div className="flex h-52 flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--border)] bg-[var(--bg-surface)] text-center sm:h-56">
+    <p className="text-sm font-medium text-[var(--text-secondary)]">{message}</p>
+    <p className="mt-2 max-w-xs text-xs text-[var(--text-muted)]">
+      Complete a flashcard or quiz session to start tracking activity here.
+    </p>
+  </div>
+);
+
 const StatsDashboard = () => {
   const { gameState } = useGamification();
   const [stats, setStats] = useState({
@@ -98,53 +80,47 @@ const StatsDashboard = () => {
     correctAnswers: 0,
     totalTimeSpent: 0,
     cardsReviewed: 0,
+    dueCount: 0,
     difficulty: { easy: 0, medium: 0, hard: 0 },
+    weeklyActivity: [],
+    heatmap: [],
+    hasSessionData: false,
   });
   const [loading, setLoading] = useState(true);
-  const heatmapData = useMemo(() => generateHeatmapData(), []);
-  const weeklyData = useMemo(() => generateWeeklyData(), []);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    let active = true;
+
     const fetchStats = async () => {
       try {
-        if (!supabase) {
-          setLoading(false);
-          return;
-        }
-
-        const {
-          data: { user },
-        } = await supabase.auth.getUser();
-
-        if (!user) {
-          setLoading(false);
-          return;
-        }
-
-        const { data: cards, error: cardError } = await supabase.from('flashcards').select('*');
-        if (cardError) throw cardError;
-
-        const reviewedCards = (cards || []).filter((card) => card.srs_repetitions > 0);
-        const easy = (cards || []).filter((card) => card.srs_interval > 7).length;
-        const medium = (cards || []).filter((card) => card.srs_interval > 1 && card.srs_interval <= 7).length;
-        const hard = (cards || []).filter((card) => card.srs_interval === 1 && card.srs_repetitions > 0).length;
-        const quizStats = readJSONStorage('quiz_stats', {});
+        const data = await getAnalytics();
+        if (!active) return;
 
         setStats({
-          totalQuestions: quizStats.totalQuestions || 0,
-          correctAnswers: quizStats.correctAnswers || 0,
-          totalTimeSpent: quizStats.totalTimeSpent || 0,
-          cardsReviewed: reviewedCards.length,
-          difficulty: { easy, medium, hard },
+          totalQuestions: data.totalQuestions || 0,
+          correctAnswers: data.correctAnswers || 0,
+          totalTimeSpent: data.totalTimeSpent || 0,
+          cardsReviewed: data.cardsReviewed || 0,
+          dueCount: data.dueCount || 0,
+          difficulty: data.difficulty || { easy: 0, medium: 0, hard: 0 },
+          weeklyActivity: data.weeklyActivity || [],
+          heatmap: data.heatmap || [],
+          hasSessionData: Boolean(data.hasSessionData),
         });
-      } catch (error) {
-        console.error('Error fetching stats:', error);
+      } catch {
+        if (active) {
+          setError('Could not load analytics. Try again after your next study session.');
+        }
       } finally {
-        setLoading(false);
+        if (active) setLoading(false);
       }
     };
 
     fetchStats();
+    return () => {
+      active = false;
+    };
   }, []);
 
   if (loading) {
@@ -162,7 +138,8 @@ const StatsDashboard = () => {
   }
 
   const accuracy = stats.totalQuestions > 0 ? Math.round((stats.correctAnswers / stats.totalQuestions) * 100) : 0;
-  const activeDays = heatmapData.filter((item) => item.count > 0).length;
+  const activeDays = stats.heatmap.filter((item) => item.count > 0).length;
+  const weeklyHasData = stats.weeklyActivity.some((day) => day.cards > 0 || day.quizzes > 0);
 
   const formatTime = (seconds) => {
     const hours = Math.floor(seconds / 3600);
@@ -173,16 +150,19 @@ const StatsDashboard = () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
-      <Motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="section-shell p-5 sm:p-8">
+      {error && (
+        <div className="rounded-[var(--radius-md)] border border-[rgba(215,0,21,0.2)] bg-[var(--danger-soft)] px-4 py-3 text-sm text-[var(--danger)]">
+          {error}
+        </div>
+      )}
+
+      <Motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="rounded-[var(--radius-xl)] border border-[var(--border)] bg-[var(--bg-elevated)] p-5 shadow-[var(--shadow-soft)] sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <div className="pill-badge">
-              <Sparkles size={14} className="text-[var(--accent)]" />
-              Learning insights
-            </div>
-            <h2 className="font-heading mt-4 text-3xl font-bold tracking-tight sm:text-4xl">Your progress at a glance</h2>
+            <p className="kicker">Progress</p>
+            <h2 className="font-heading mt-2 text-3xl font-bold tracking-tight sm:text-4xl">Your study momentum</h2>
             <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">
-              Review study time, accuracy, consistency, and how your card deck is improving over time.
+              Real data from your decks and study sessions — no placeholders.
             </p>
           </div>
 
@@ -199,9 +179,9 @@ const StatsDashboard = () => {
         </div>
 
         <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard icon={Target} label="Accuracy" value={`${accuracy}%`} subtitle={`${stats.correctAnswers}/${stats.totalQuestions} correct`} />
-          <StatCard icon={BookOpen} label="Cards reviewed" value={stats.cardsReviewed} subtitle="Flashcards" />
-          <StatCard icon={Clock} label="Study time" value={formatTime(stats.totalTimeSpent)} subtitle="Total time" />
+          <StatCard icon={Target} label="Quiz accuracy" value={stats.totalQuestions > 0 ? `${accuracy}%` : '—'} subtitle={stats.totalQuestions > 0 ? `${stats.correctAnswers}/${stats.totalQuestions} correct` : 'No quiz sessions yet'} />
+          <StatCard icon={BookOpen} label="Cards reviewed" value={stats.cardsReviewed} subtitle={stats.dueCount > 0 ? `${stats.dueCount} due now` : 'SRS tracked'} />
+          <StatCard icon={Clock} label="Study time" value={stats.totalTimeSpent > 0 ? formatTime(stats.totalTimeSpent) : '—'} subtitle={stats.hasSessionData ? 'From recorded sessions' : 'No sessions yet'} />
           <StatCard icon={Zap} label="XP earned" value={gameState.xp} subtitle="Current total" accent />
         </div>
       </Motion.section>
@@ -217,57 +197,47 @@ const StatsDashboard = () => {
             <h3 className="text-xl font-semibold">Weekly activity</h3>
             <p className="mt-1 text-sm text-[var(--text-secondary)]">Cards and quizzes completed this week</p>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[var(--text-secondary)]">
-            <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
-              Cards
-            </span>
-            <span className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-light)]" />
-              Quizzes
-            </span>
-          </div>
+          {weeklyHasData && (
+            <div className="flex flex-wrap items-center gap-4 text-xs font-medium text-[var(--text-secondary)]">
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
+                Cards
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="h-2.5 w-2.5 rounded-full bg-[var(--accent-light)]" />
+                Quizzes
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="mt-6 h-52 sm:h-56">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={weeklyData} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="cardsFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.24} />
-                  <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.02} />
-                </linearGradient>
-                <linearGradient id="quizFill" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="var(--accent-light)" stopOpacity={0.24} />
-                  <stop offset="95%" stopColor="var(--accent-light)" stopOpacity={0.02} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" vertical={false} />
-              <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)', fontWeight: 500 }} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
-              <Tooltip content={<ChartTooltip />} />
-              <Area
-                type="monotone"
-                dataKey="cards"
-                name="Cards"
-                stroke="var(--accent)"
-                strokeWidth={2.5}
-                fill="url(#cardsFill)"
-                dot={false}
-                activeDot={{ r: 4, fill: 'var(--accent)', strokeWidth: 0 }}
-              />
-              <Area
-                type="monotone"
-                dataKey="quizzes"
-                name="Quizzes"
-                stroke="var(--accent-light)"
-                strokeWidth={2}
-                fill="url(#quizFill)"
-                dot={false}
-                activeDot={{ r: 4, fill: 'var(--accent-light)', strokeWidth: 0 }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+        <div className="mt-6">
+          {weeklyHasData ? (
+            <div className="h-52 sm:h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={stats.weeklyActivity} margin={{ top: 5, right: 5, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="cardsFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent)" stopOpacity={0.24} />
+                      <stop offset="95%" stopColor="var(--accent)" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="quizFill" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--accent-light)" stopOpacity={0.24} />
+                      <stop offset="95%" stopColor="var(--accent-light)" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.06)" vertical={false} />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: 'var(--text-muted)', fontWeight: 500 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: 'var(--text-muted)' }} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Area type="monotone" dataKey="cards" name="Cards" stroke="var(--accent)" strokeWidth={2.5} fill="url(#cardsFill)" dot={false} activeDot={{ r: 4, fill: 'var(--accent)', strokeWidth: 0 }} />
+                  <Area type="monotone" dataKey="quizzes" name="Quizzes" stroke="var(--accent-light)" strokeWidth={2} fill="url(#quizFill)" dot={false} activeDot={{ r: 4, fill: 'var(--accent-light)', strokeWidth: 0 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <EmptyChart message="No activity recorded this week" />
+          )}
         </div>
       </Motion.section>
 
@@ -280,14 +250,18 @@ const StatsDashboard = () => {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h3 className="text-xl font-semibold">Study heatmap</h3>
-            <p className="mt-1 text-sm text-[var(--text-secondary)]">{activeDays} active days in the last 12 weeks</p>
+            <p className="mt-1 text-sm text-[var(--text-secondary)]">
+              {activeDays > 0
+                ? `${activeDays} active days in the last 12 weeks`
+                : 'No study sessions recorded yet'}
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-medium text-[var(--text-muted)]">
             <span>Less</span>
-            <span className="h-3 w-3 rounded-sm bg-[var(--bg-elevated)]" />
-            <span className="h-3 w-3 rounded-sm bg-[rgba(26,115,232,0.18)]" />
-            <span className="h-3 w-3 rounded-sm bg-[rgba(26,115,232,0.35)]" />
-            <span className="h-3 w-3 rounded-sm bg-[rgba(26,115,232,0.55)]" />
+            <span className="h-3 w-3 rounded-sm bg-[rgba(0,0,0,0.06)]" />
+            <span className="h-3 w-3 rounded-sm bg-[rgba(0,113,227,0.18)]" />
+            <span className="h-3 w-3 rounded-sm bg-[rgba(0,113,227,0.35)]" />
+            <span className="h-3 w-3 rounded-sm bg-[rgba(0,113,227,0.55)]" />
             <span className="h-3 w-3 rounded-sm bg-[var(--accent)]" />
             <span>More</span>
           </div>
@@ -297,14 +271,14 @@ const StatsDashboard = () => {
           {Array.from({ length: 12 }, (_, weekIndex) => (
             <div key={weekIndex} className="flex flex-col gap-1">
               {Array.from({ length: 7 }, (_, dayIndex) => {
-                const cell = heatmapData[weekIndex * 7 + dayIndex];
+                const cell = stats.heatmap[weekIndex * 7 + dayIndex];
                 if (!cell) return <div key={dayIndex} className="h-3.5 w-3.5" />;
 
                 return (
                   <div
                     key={dayIndex}
                     className={`h-3.5 w-3.5 rounded-sm ${getHeatColor(cell.count)}`}
-                    title={`${cell.key}: ${cell.count} activities`}
+                    title={`${cell.key}: ${cell.count} session${cell.count === 1 ? '' : 's'}`}
                   />
                 );
               })}
@@ -318,8 +292,8 @@ const StatsDashboard = () => {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-        className="section-shell p-5 sm:p-6"
-      >
+          className="section-shell p-5 sm:p-6"
+        >
           <div className="flex flex-wrap items-center gap-2">
             <Brain size={18} className="text-[var(--accent)]" />
             <h3 className="text-xl font-semibold">Knowledge breakdown</h3>
