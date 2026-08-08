@@ -4,14 +4,14 @@ import { cn } from '../../utils/cn';
 
 const variantClasses = {
   primary:
-    'border-transparent bg-[var(--accent)] text-white shadow-[0_4px_14px_rgba(0,113,227,0.25)] hover:bg-[var(--accent-strong)]',
+    'rounded-[12px] border-transparent bg-[var(--accent)] text-white hover:bg-[var(--accent-strong)]',
   secondary:
-    'border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] hover:border-[rgba(0,0,0,0.2)]',
-  ghost: 'border-transparent bg-transparent text-[var(--text-secondary)] hover:bg-[rgba(0,0,0,0.04)]',
+    'rounded-[12px] border-[var(--border-strong)] bg-[var(--bg-elevated)] text-[var(--text-primary)] hover:bg-[var(--bg-surface)] hover:border-[rgba(0,0,0,0.2)]',
+  ghost: 'rounded-[12px] border-transparent bg-transparent text-[var(--text-secondary)] hover:bg-[rgba(0,0,0,0.04)]',
   subtle:
-    'border-[var(--border)] bg-[rgba(0,0,0,0.03)] text-[var(--text-primary)] hover:bg-[rgba(0,0,0,0.05)]',
+    'rounded-[12px] border-[var(--border)] bg-[rgba(0,0,0,0.03)] text-[var(--text-primary)] hover:bg-[rgba(0,0,0,0.05)]',
   danger:
-    'border-transparent bg-[var(--danger)] text-white shadow-[0_4px_14px_rgba(215,0,21,0.2)] hover:brightness-110',
+    'rounded-[12px] border-transparent bg-[var(--danger)] text-white hover:brightness-110',
 };
 
 const sizeClasses = {

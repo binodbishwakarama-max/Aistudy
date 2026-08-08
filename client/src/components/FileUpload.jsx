@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, CheckCircle, FileText, Sparkles, Upload } from 'lucide-react';
+import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
 
@@ -163,22 +163,13 @@ const FileUpload = () => {
                 className="flex min-h-[220px] flex-col justify-between"
               >
                 <div>
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--bg-card)] text-[var(--accent)] shadow-[var(--shadow-soft)]">
-                    <Upload size={22} />
+                  <div className="flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--accent)]">
+                    <Upload size={20} />
                   </div>
-                  <div className="mt-6 flex flex-wrap items-center gap-2">
-                    <div className="pill-badge">
-                      <Sparkles size={14} className="text-[var(--accent)]" />
-                      Auto-generate
-                    </div>
-                    <div className="pill-badge">
-                      <FileText size={14} className="text-[var(--warm)]" />
-                      PDF and TXT
-                    </div>
-                  </div>
-                  <h3 className="font-heading mt-5 text-2xl font-bold">Drop a file — we&apos;ll build your deck</h3>
+                  <p className="mt-5 text-sm text-[var(--text-muted)]">PDF or TXT · builds cards automatically</p>
+                  <h3 className="font-heading mt-2 text-2xl font-bold">Drop a lecture file</h3>
                   <p className="mt-3 max-w-md text-sm leading-7 text-[var(--text-secondary)]">
-                    Upload once. MindFlow parses your notes, generates flashcards, and opens study mode automatically.
+                    Upload once. MindFlow parses your notes, generates flashcards, and opens study mode.
                   </p>
                 </div>
               </Motion.div>

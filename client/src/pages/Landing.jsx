@@ -1,154 +1,56 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { motion as Motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import {
   ArrowRight,
-  BookOpen,
   ChevronLeft,
   ChevronRight,
-  Clock,
-  Layers,
-  Sparkles,
-  Upload,
-  Zap,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import BrandMark from '../components/BrandMark';
 import Button from '../components/ui/Button';
 import { BRAND } from '../config/brand';
 
-const steps = BRAND.steps.map((step, index) => ({
-  ...step,
-  icon: [Upload, Layers, BookOpen][index],
-}));
-
 const testimonials = [
   {
-    quote: 'MindFlow turns a messy lecture PDF into a 45-minute sprint I can actually finish before the exam.',
+    quote: 'I finished a lecture pack the night before and walked into the exam knowing exactly what I still needed.',
     name: 'Ava Larson',
     role: 'Medical Student',
   },
   {
-    quote: 'The glass-clear flow from upload to due cards tomorrow is what every study app promises but rarely delivers.',
+    quote: 'Upload, review, done. The due cards the next day are what keep me coming back.',
     name: 'Daniel Chen',
     role: 'Engineering Major',
   },
   {
-    quote: 'I open the app and know exactly what to review. No fake dashboards, no noise.',
+    quote: 'No dashboard theater. Just the cards I need, from the notes I already have.',
     name: 'Mina Sarto',
     role: 'Grad Researcher',
   },
 ];
 
-const marqueeItems = [
-  '45-min exam sprint',
-  'Spaced repetition',
-  'Source citations',
-  'Adaptive quizzes',
-  'PDF → flashcards',
-  'Due-card dashboard',
-  'AI tutor',
-  'Zero setup',
-];
-
-const PreviewCardContent = () => (
-  <>
+const HeroPreview = () => (
+  <div className="landing-preview-card" aria-hidden>
     <div className="flex items-center justify-between gap-2">
       <span className="landing-preview-card__badge">Card 4 of 12</span>
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">~45 min sprint</span>
+      <span className="text-[11px] font-medium text-[var(--text-muted)]">~45 min</span>
     </div>
     <p className="landing-preview-card__question">What is the CAP theorem?</p>
-    <p className="landing-preview-card__hint">Tap to reveal — then rate how well you knew it.</p>
+    <p className="landing-preview-card__hint">Tap to reveal, then rate how well you knew it.</p>
     <div className="landing-preview-card__ratings">
       {['Hard', 'Good', 'Easy'].map((label) => (
         <span key={label}>{label}</span>
       ))}
     </div>
-  </>
+  </div>
 );
-
-const HeroGlassStack = ({ tiltX, tiltY, isMobile }) => {
-  if (isMobile) {
-    return (
-      <div className="landing-preview-card" aria-hidden>
-        <PreviewCardContent />
-      </div>
-    );
-  }
-
-  const rotateX = tiltY * -8;
-  const rotateY = tiltX * 10;
-
-  return (
-    <div className="landing-scene">
-      <div
-        className="landing-card-stack"
-        style={{
-          transform: `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
-        }}
-      >
-        <div className="landing-glass-card liquid-glass landing-glass-card--back">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Question</p>
-          <p className="mt-2 text-sm font-medium text-[var(--text-secondary)]">What is eventual consistency?</p>
-        </div>
-
-        <div className="landing-glass-card liquid-glass landing-glass-card--mid">
-          <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">Question</p>
-          <p className="mt-2 text-base font-semibold">What problem does Raft solve?</p>
-        </div>
-
-        <div className="landing-glass-card liquid-glass liquid-glass--dark landing-glass-card--front">
-          <div className="flex items-center justify-between gap-2">
-            <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider">
-              Card 4 of 12
-            </span>
-            <span className="text-[10px] text-white/60">~45 min sprint</span>
-          </div>
-          <p className="font-heading mt-5 text-xl font-bold leading-snug sm:text-2xl">
-            What is the CAP theorem?
-          </p>
-          <p className="mt-4 text-sm leading-7 text-white/75">
-            Tap to reveal — then rate how well you knew it.
-          </p>
-          <div className="mt-6 flex gap-2">
-            {['Hard', 'Good', 'Easy'].map((label) => (
-              <span
-                key={label}
-                className="rounded-xl bg-white/12 px-3 py-2 text-[10px] font-semibold backdrop-blur-sm"
-              >
-                {label}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
-        <span className="landing-stat-pill">
-          <Clock size={12} className="text-[var(--accent)]" />
-          45 min
-        </span>
-        <span className="landing-stat-pill">
-          <Layers size={12} className="text-[var(--accent)]" />
-          12 cards
-        </span>
-        <span className="landing-stat-pill">
-          <Zap size={12} className="text-[var(--accent)]" />
-          1 PDF
-        </span>
-      </div>
-    </div>
-  );
-};
 
 const Landing = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [navScrolled, setNavScrolled] = useState(false);
-  const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const heroRef = useRef(null);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 767px)');
@@ -158,26 +60,12 @@ const Landing = () => {
     return () => media.removeEventListener('change', update);
   }, []);
 
-  const { scrollYProgress } = useScroll({
-    target: heroRef,
-    offset: ['start start', 'end start'],
-  });
-  const heroY = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const heroOpacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   useEffect(() => {
-    const onScroll = () => setNavScrolled(window.scrollY > 24);
+    const onScroll = () => setNavScrolled(window.scrollY > 16);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
-
-  const handlePointerMove = (event) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = (event.clientX - rect.left) / rect.width - 0.5;
-    const y = (event.clientY - rect.top) / rect.height - 0.5;
-    setTilt({ x, y });
-  };
 
   if (!loading && user) {
     return <Navigate to="/dashboard" replace />;
@@ -185,31 +73,22 @@ const Landing = () => {
 
   return (
     <div className="landing-premium">
-      <div className="landing-ambient" aria-hidden>
-        <div className="landing-orb landing-orb--1" />
-        <div className="landing-orb landing-orb--2" />
-        <div className="landing-orb landing-orb--3" />
-      </div>
-
       <header className={`landing-nav ${navScrolled ? 'is-scrolled' : ''}`}>
         <div className="page-shell">
-          <div className={`landing-nav__inner ${navScrolled && !isMobile ? 'liquid-glass' : ''}`}>
+          <div className="landing-nav__inner">
             <Link to="/" className="landing-nav__brand flex min-w-0 items-center gap-2.5">
               <BrandMark />
               <span className="truncate font-heading text-lg font-bold tracking-tight">MindFlow</span>
             </Link>
-            <div className="hidden items-center gap-2 sm:flex">
-              <a href="#how" className="px-3 py-2 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+            <div className="hidden items-center gap-1 sm:flex">
+              <a href="#how" className="px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
                 How it works
               </a>
-              <Link to="/demo/flashcards">
-                <Button variant="ghost" size="sm">{BRAND.demoCta}</Button>
+              <Link to="/login" className="px-3 py-2 text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                Sign in
               </Link>
-              <Link to="/login">
-                <Button variant="ghost" size="sm">Sign in</Button>
-              </Link>
-              <Link to="/register">
-                <Button size="sm" rightIcon={ArrowRight}>Get started</Button>
+              <Link to="/demo/flashcards" className="ml-1">
+                <Button size="sm">{BRAND.demoCtaShort}</Button>
               </Link>
             </div>
             <Link to="/demo/flashcards" className="landing-nav__cta sm:hidden">
@@ -219,177 +98,141 @@ const Landing = () => {
         </div>
       </header>
 
-      <section ref={heroRef} className="landing-hero">
-        <Motion.div
-          style={isMobile ? undefined : { y: heroY, opacity: heroOpacity }}
-          className="page-shell w-full"
-        >
+      <section className="landing-hero">
+        <div className="page-shell w-full">
           <div className="landing-hero__grid">
-            <Motion.div
-              className="landing-hero__copy"
-              initial={{ opacity: 0, y: 28 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <p className="kicker inline-flex items-center gap-2">
-                <Sparkles size={14} className="text-[var(--accent)]" />
-                {BRAND.wedge}
-              </p>
-              <h1 className="font-heading mt-3 font-bold tracking-tight sm:mt-4 sm:text-[clamp(2.75rem,8vw,4.5rem)] sm:leading-[1.02]">
-                <span className="landing-headline-gradient">{BRAND.headline}</span>
+            <div className="landing-hero__copy">
+              <p className="landing-eyebrow">{BRAND.wedge}</p>
+              <h1 className="font-heading mt-3 text-[clamp(2rem,6vw,3.25rem)] font-bold leading-[1.12] tracking-tight text-[var(--text-primary)]">
+                {BRAND.headline}
               </h1>
-              <p className="mt-4 max-w-lg text-base leading-7 text-[var(--text-secondary)] sm:mt-5 sm:text-lg sm:leading-8">
+              <p className="mt-4 max-w-md text-[0.95rem] leading-7 text-[var(--text-secondary)] sm:mt-5 sm:text-base sm:leading-8">
                 {BRAND.subline}
               </p>
 
-              <div className="landing-hero__actions mt-6 sm:mt-8 sm:flex sm:flex-wrap sm:gap-3">
+              <div className="landing-hero__actions mt-7 sm:mt-8">
                 <Button size="lg" rightIcon={ArrowRight} onClick={() => navigate('/demo/flashcards')}>
                   {isMobile ? BRAND.demoCtaShort : BRAND.demoCta}
                 </Button>
                 <Link to="/register" className="w-full sm:w-auto">
-                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">Upload your PDF</Button>
+                  <Button size="lg" variant="secondary" className="w-full sm:w-auto">
+                    Upload a PDF
+                  </Button>
                 </Link>
               </div>
 
-              <div className="landing-hero__pills mt-6 flex flex-wrap gap-2 sm:mt-10 sm:gap-3">
-                <span className="landing-stat-pill">No credit card</span>
-                <span className="landing-stat-pill">Demo in 10 seconds</span>
-                <span className="landing-stat-pill hidden sm:inline-flex">Real SRS + analytics</span>
+              <p className="mt-5 text-sm text-[var(--text-muted)]">
+                No account needed for the demo · 12 cards · ~45 minutes
+              </p>
+            </div>
+
+            <div className="landing-hero__visual">
+              <HeroPreview />
+              <div className="landing-preview-meta">
+                <span>45 min</span>
+                <span aria-hidden>·</span>
+                <span>12 cards</span>
+                <span aria-hidden>·</span>
+                <span>1 PDF</span>
               </div>
-            </Motion.div>
-
-            <Motion.div
-              className="landing-hero__visual relative"
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
-              onPointerMove={isMobile ? undefined : handlePointerMove}
-              onPointerLeave={isMobile ? undefined : () => setTilt({ x: 0, y: 0 })}
-            >
-              <HeroGlassStack tiltX={tilt.x} tiltY={tilt.y} isMobile={isMobile} />
-            </Motion.div>
-          </div>
-        </Motion.div>
-      </section>
-
-      <section className="relative z-[1] border-y border-[rgba(255,255,255,0.5)] py-6">
-        <div className="landing-marquee">
-          <div className="landing-marquee__track">
-            {[...marqueeItems, ...marqueeItems].map((item, index) => (
-              <span key={`${item}-${index}`} className="text-sm font-semibold tracking-wide text-[var(--text-muted)]">
-                {item}
-              </span>
-            ))}
+            </div>
           </div>
         </div>
       </section>
 
       <section className="landing-story">
         <div className="page-shell">
-          <div className="landing-story__panel liquid-glass">
-            <div className="grid gap-8 lg:grid-cols-2 lg:items-center">
+          <div className="landing-story__panel">
+            <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-end">
               <div>
-                <p className="kicker">The loop</p>
-                <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                <p className="landing-eyebrow">The loop</p>
+                <h2 className="font-heading mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
                   Messy PDF in. Exam-ready in 45 minutes.
                 </h2>
-                <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
-                  MindFlow isn&apos;t another AI toy—it&apos;s a single sprint from lecture pack to spaced review,
-                  with citations you can trust and a home screen that tells you what&apos;s due tomorrow.
+                <p className="mt-4 max-w-xl text-base leading-7 text-[var(--text-secondary)]">
+                  One sprint from lecture pack to spaced review—with citations from your notes
+                  and a home screen that shows what&apos;s due tomorrow.
                 </p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              <dl className="landing-metrics">
                 {[
-                  { label: 'Upload', value: '< 60s', sub: 'to first card' },
-                  { label: 'Sprint', value: '~45m', sub: 'focused review' },
-                  { label: 'Return', value: 'Due', sub: 'cards tomorrow' },
+                  { label: 'To first card', value: '< 60s' },
+                  { label: 'Focused review', value: '~45m' },
+                  { label: 'Next session', value: 'Due cards' },
                 ].map((item) => (
-                  <div key={item.label} className="liquid-glass rounded-2xl p-4 text-center">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">{item.label}</p>
-                    <p className="font-heading mt-2 text-2xl font-bold text-[var(--accent)]">{item.value}</p>
-                    <p className="mt-1 text-xs text-[var(--text-secondary)]">{item.sub}</p>
+                  <div key={item.label} className="landing-metrics__item">
+                    <dt>{item.label}</dt>
+                    <dd>{item.value}</dd>
                   </div>
                 ))}
-              </div>
+              </dl>
             </div>
           </div>
         </div>
       </section>
 
-      <section id="how" className="relative z-[1] py-20 sm:py-28">
+      <section id="how" className="landing-section">
         <div className="page-shell">
-          <div className="max-w-2xl">
-            <p className="kicker">How it works</p>
-            <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+          <div className="max-w-xl">
+            <p className="landing-eyebrow">How it works</p>
+            <h2 className="font-heading mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
               PDF → 45-min exam review
             </h2>
-            <p className="mt-4 text-base leading-7 text-[var(--text-secondary)]">
+            <p className="mt-3 text-base leading-7 text-[var(--text-secondary)]">
               Three steps from lecture PDF to exam-ready—in about 45 minutes.
             </p>
           </div>
 
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {steps.map((step, index) => (
-              <Motion.div
-                key={step.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-40px' }}
-                transition={{ delay: index * 0.1, duration: 0.45 }}
-                className="landing-step-card liquid-glass"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[rgba(0,113,227,0.12)] text-[var(--accent)]">
-                  <step.icon size={22} />
+          <ol className="landing-steps">
+            {BRAND.steps.map((step, index) => (
+              <li key={step.title} className="landing-step">
+                <span className="landing-step__num" aria-hidden>
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+                <div>
+                  <h3 className="text-lg font-semibold tracking-tight text-[var(--text-primary)]">{step.title}</h3>
+                  <p className="mt-2 text-sm leading-7 text-[var(--text-secondary)]">{step.desc}</p>
                 </div>
-                <p className="mt-6 text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-                  Step 0{index + 1}
-                </p>
-                <h3 className="mt-2 text-xl font-semibold tracking-tight">{step.title}</h3>
-                <p className="mt-3 text-sm leading-7 text-[var(--text-secondary)]">{step.desc}</p>
-              </Motion.div>
+              </li>
             ))}
-          </div>
+          </ol>
         </div>
       </section>
 
-      <section className="relative z-[1] py-20 sm:py-24">
+      <section className="landing-section landing-section--tight">
         <div className="page-shell">
-          <div className="liquid-glass mx-auto max-w-3xl rounded-[32px] p-8 text-center sm:p-12">
-            <p className="kicker">Students</p>
-            <h2 className="font-heading mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-              Built for the night before.
-            </h2>
-
-            <div className="relative mt-10 min-h-[150px]">
+          <div className="landing-quote">
+            <p className="landing-eyebrow">From students</p>
+            <div className="relative mt-6 min-h-[120px]">
               <AnimatePresence mode="wait">
                 <Motion.div
                   key={currentTestimonial}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <p className="text-lg leading-8 text-[var(--text-secondary)] sm:text-xl">
+                  <blockquote className="text-lg leading-8 text-[var(--text-primary)] sm:text-xl sm:leading-9">
                     &ldquo;{testimonials[currentTestimonial].quote}&rdquo;
-                  </p>
-                  <p className="mt-6 text-sm font-semibold text-[var(--text-primary)]">
-                    {testimonials[currentTestimonial].name}
-                    <span className="font-normal text-[var(--text-muted)]">
-                      {' '}· {testimonials[currentTestimonial].role}
+                  </blockquote>
+                  <p className="mt-5 text-sm text-[var(--text-muted)]">
+                    <span className="font-medium text-[var(--text-secondary)]">
+                      {testimonials[currentTestimonial].name}
                     </span>
+                    {' '}· {testimonials[currentTestimonial].role}
                   </p>
                 </Motion.div>
               </AnimatePresence>
             </div>
 
-            <div className="mt-8 flex items-center justify-center gap-3">
+            <div className="mt-8 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setCurrentTestimonial((p) => (p + testimonials.length - 1) % testimonials.length)}
-                className="liquid-glass flex h-11 w-11 items-center justify-center rounded-full"
-                aria-label="Previous testimonial"
+                className="landing-icon-btn"
+                aria-label="Previous quote"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={18} />
               </button>
               <span className="font-mono text-xs text-[var(--text-muted)]">
                 {currentTestimonial + 1} / {testimonials.length}
@@ -397,26 +240,26 @@ const Landing = () => {
               <button
                 type="button"
                 onClick={() => setCurrentTestimonial((p) => (p + 1) % testimonials.length)}
-                className="liquid-glass flex h-11 w-11 items-center justify-center rounded-full"
-                aria-label="Next testimonial"
+                className="landing-icon-btn"
+                aria-label="Next quote"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={18} />
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="relative z-[1] pb-24 pt-8">
+      <section className="landing-section">
         <div className="page-shell">
-          <div className="landing-cta-panel liquid-glass">
-            <h2 className="font-heading text-3xl font-bold tracking-tight sm:text-5xl">
+          <div className="landing-cta">
+            <h2 className="font-heading text-2xl font-bold tracking-tight sm:text-3xl">
               Your next exam sprint starts with one PDF.
             </h2>
-            <p className="mx-auto mt-4 max-w-lg text-base leading-7 text-[var(--text-secondary)]">
+            <p className="mt-3 max-w-md text-base leading-7 text-[var(--text-secondary)]">
               {BRAND.shortSubline}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button size="lg" rightIcon={ArrowRight} onClick={() => navigate('/demo/flashcards')}>
                 {BRAND.demoCta}
               </Button>
@@ -428,13 +271,13 @@ const Landing = () => {
         </div>
       </section>
 
-      <footer className="relative z-[1] border-t border-[rgba(255,255,255,0.45)] py-8">
+      <footer className="landing-footer">
         <div className="page-shell flex flex-col gap-4 text-sm text-[var(--text-muted)] sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <BrandMark />
-            <span className="font-semibold text-[var(--text-primary)]">MindFlow</span>
+            <span className="font-medium text-[var(--text-primary)]">MindFlow</span>
           </div>
-          <div className="flex flex-wrap gap-4">
+          <div className="flex flex-wrap gap-5">
             <a href="#how" className="hover:text-[var(--text-primary)]">How it works</a>
             <Link to="/login" className="hover:text-[var(--text-primary)]">Sign in</Link>
             <Link to="/register" className="hover:text-[var(--text-primary)]">Get started</Link>

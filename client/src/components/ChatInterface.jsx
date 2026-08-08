@@ -62,7 +62,7 @@ const ChatInterface = () => {
         title="Ask AI Tutor"
       >
         <MessageSquare size={24} />
-        <span className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-[var(--bg-base)] bg-[var(--success)]" />
+        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-[var(--accent)]" />
       </Motion.button>
     );
   }

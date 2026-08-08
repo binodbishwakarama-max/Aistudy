@@ -10,15 +10,15 @@ export const BRAND = {
   steps: [
     {
       title: 'Import your PDF',
-      desc: 'Drop a lecture pack. MindFlow parses it and estimates a ~45-minute review plan.',
+      desc: 'Drop a lecture pack. MindFlow builds a ~45-minute review plan from the source.',
     },
     {
       title: 'Sprint through cards',
-      desc: 'Flashcards and quizzes from the same source—rate what you miss, skip what you know.',
+      desc: 'Flashcards and quizzes from the same notes—rate what you miss, skip what you know.',
     },
     {
       title: 'Return tomorrow',
-      desc: 'Spaced repetition resurfaces weak topics so you walk in exam-ready.',
+      desc: 'Weak topics resurface on a schedule so you walk in exam-ready.',
     },
   ],
 };
