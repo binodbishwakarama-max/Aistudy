@@ -223,7 +223,7 @@ const Layout = ({ children }) => {
       ) : (
         <>
           <aside className="workspace-sidebar hidden xl:flex">
-            <div className="flex h-full flex-col gap-5">
+            <div className="flex h-full w-full min-w-0 flex-col gap-4 overflow-hidden">
               <Link to="/dashboard" className="flex items-center gap-3">
                 <BrandMark />
                 <div>
