@@ -18,6 +18,7 @@ import {
 import confetti from 'canvas-confetti';
 import { generateAdaptiveQuiz, submitAdaptiveResults } from '../services/api';
 import { toast } from 'react-hot-toast';
+import ProgressiveLoader from './ui/ProgressiveLoader';
 
 const DIFFICULTY_COLORS = {
   foundational: { bg: 'rgba(24,128,56,0.08)', border: 'rgba(24,128,56,0.25)', text: 'var(--success)', label: 'Foundational' },
@@ -196,15 +197,15 @@ const AdaptiveQuiz = () => {
   // LOADING
   if (phase === 'loading') {
     return (
-      <div className="flex min-h-[420px] flex-col items-center justify-center text-center">
-        <div className="relative mx-auto mb-4 h-14 w-14">
-          <div className="absolute inset-0 rounded-full border-2 border-[var(--border)]" />
-          <div className="absolute inset-0 animate-spin rounded-full border-2 border-[var(--accent)] border-t-transparent" />
-        </div>
-        <p className="mt-2 text-sm font-medium text-[var(--text-muted)]">
-          Analyzing your knowledge base and generating questions…
-        </p>
-      </div>
+      <ProgressiveLoader
+        title="Generating Adaptive Quiz"
+        steps={[
+          'Analyzing memory retention & SRS weights...',
+          'Selecting targeted topics for review...',
+          'Synthesizing active-recall question items...',
+          'Balancing foundational & advanced difficulty curve...',
+        ]}
+      />
     );
   }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Upload, FileText, CheckCircle, AlertCircle, ArrowRight, ClipboardList } from 'lucide-react';
 import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
+import ProgressiveLoader from './ui/ProgressiveLoader';
 
 const formatFileSize = (size) => {
   if (!size && size !== 0) return null;
@@ -130,41 +131,22 @@ const FileUpload = () => {
       <div className="p-6 sm:p-8">
         <AnimatePresence mode="wait">
           {isProcessing ? (
-            <Motion.div
-              key="processing"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex min-h-[220px] flex-col items-center justify-center text-center"
-            >
-              {/* Minimal Linear Progress Bar */}
-              <div className="w-full max-w-sm">
-                <div className="mb-3 flex items-center justify-between text-xs text-[var(--text-muted)] font-mono">
-                  <span>{uploadStage === 'parsing' ? 'PARSING DOCUMENT' : 'GENERATING FLASHCARDS'}</span>
-                  <span>{uploadStage === 'parsing' ? '50%' : '85%'}</span>
-                </div>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--bg-base)] border border-[var(--border)]">
-                  <Motion.div
-                    className="h-full bg-[var(--text-primary)] rounded-full"
-                    initial={{ width: '10%' }}
-                    animate={{ width: uploadStage === 'parsing' ? '50%' : '85%' }}
-                    transition={{ duration: 0.5, ease: 'easeInOut' }}
-                  />
-                </div>
-              </div>
-
-              {fileMeta && (
-                <div className="mt-4 text-xs text-[var(--text-muted)]">
-                  {fileMeta.name} · {fileMeta.size}
-                </div>
-              )}
-
-              <p className="mt-3 text-xs text-[var(--text-secondary)]">
-                {uploadStage === 'parsing'
-                  ? 'Extracting structured text from your file...'
-                  : 'Synthesizing cards and quiz items...'}
-              </p>
-            </Motion.div>
+            <ProgressiveLoader
+              title={uploadStage === 'parsing' ? 'Document Processing' : 'Flashcard Generation'}
+              steps={
+                uploadStage === 'parsing'
+                  ? [
+                      'Extracting text & section hierarchy...',
+                      'Cleaning optical markup & math formulas...',
+                      'Tokenizing concepts for card synthesis...',
+                    ]
+                  : [
+                      'Formulating active-recall flashcard pairs...',
+                      'Generating multiple-choice quiz distractor options...',
+                      'Building Leitner SRS review queue...',
+                    ]
+              }
+            />
           ) : isReady ? (
             <Motion.div
               key="success"
