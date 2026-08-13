@@ -25,19 +25,16 @@ const TESTIMONIALS = [
     quote: "Uploaded my 5th sem DBMS & Operating Systems lecture PDFs the night before CIA exams. MindFlow's active recall cards saved my internal marks!",
     name: "Rohan Sharma",
     role: "Computer Science (CSE), DSU Bangalore",
-    avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150&auto=format&fit=crop&q=80",
   },
   {
     quote: "The adaptive quiz engine automatically highlighted my weak Signal Processing topics before midterms. I scored 94% in my DSU semester exams.",
     name: "Ananya Deshmukh",
     role: "Electronics & Communication (ECE), DSU",
-    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
   },
   {
     quote: "No fluff or useless dashboard clutter. Just clean flashcards from our exact DSU lecture PPTs. A must-have for every engineering student.",
     name: "Karthik Venkatesh",
     role: "Data Science (B.Tech), DSU Bangalore",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
   },
 ];
 
@@ -314,20 +311,13 @@ const Landing = () => {
                   "{TESTIMONIALS[currentTestimonial].quote}"
                 </blockquote>
 
-                <div className="flex items-center justify-center gap-3">
-                  <img
-                    src={TESTIMONIALS[currentTestimonial].avatar}
-                    alt={TESTIMONIALS[currentTestimonial].name}
-                    className="h-10 w-10 rounded-full object-cover border border-[var(--border)]"
-                  />
-                  <div className="text-left">
+                <div className="text-center">
                     <div className="text-sm font-bold text-[var(--text-primary)]">
                       {TESTIMONIALS[currentTestimonial].name}
                     </div>
                     <div className="text-xs text-[var(--text-muted)]">
                       {TESTIMONIALS[currentTestimonial].role}
                     </div>
-                  </div>
                 </div>
               </Motion.div>
             </AnimatePresence>
