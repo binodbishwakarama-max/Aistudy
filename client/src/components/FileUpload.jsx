@@ -5,12 +5,6 @@ import { motion as Motion, AnimatePresence } from 'framer-motion';
 import { useStudy } from '../context/StudyContext';
 import ProgressiveLoader from './ui/ProgressiveLoader';
 
-const formatFileSize = (size) => {
-  if (!size && size !== 0) return null;
-  if (size < 1024) return `${size} B`;
-  if (size < 1024 * 1024) return `${Math.round(size / 1024)} KB`;
-  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
-};
 
 const SAMPLE_NOTES = [
   {
@@ -46,15 +40,9 @@ const FileUpload = () => {
   const [activeTab, setActiveTab] = useState('upload'); // 'upload' | 'text'
   const [pastedText, setPastedText] = useState('');
   const [isDragging, setIsDragging] = useState(false);
-  const [fileMeta, setFileMeta] = useState(null);
   const [generatedCount, setGeneratedCount] = useState(0);
 
   const processFile = async (file) => {
-    setFileMeta({
-      name: file.name,
-      size: formatFileSize(file.size),
-      kind: file.type === 'application/pdf' ? 'PDF' : 'TXT',
-    });
 
     const result = await handleFileUploadAndGenerate(file);
     if (result.ok) {
@@ -65,11 +53,6 @@ const FileUpload = () => {
 
   const processTextSubmit = async () => {
     if (!pastedText.trim() || pastedText.trim().length < 20) return;
-    setFileMeta({
-      name: 'Pasted Notes',
-      size: `${pastedText.length} characters`,
-      kind: 'TXT',
-    });
 
     const result = await handleGenerate(pastedText);
     if (result.ok) {
@@ -81,11 +64,6 @@ const FileUpload = () => {
   const loadSample = async (sample) => {
     setPastedText(sample.text);
     setActiveTab('text');
-    setFileMeta({
-      name: `${sample.title}.txt`,
-      size: `${sample.text.length} characters`,
-      kind: 'TXT',
-    });
 
     const result = await handleGenerate(sample.text);
     if (result.ok) {
