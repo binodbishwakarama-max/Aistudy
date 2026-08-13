@@ -116,44 +116,29 @@ router.post('/generate', async (req, res) => {
         const userId = req.user.id;
         const { questionCount = 10 } = req.body;
 
-        // 1. Fetch all flashcards across all user decks
-        const { data: flashcards, error: fcError } = await supabase
-            .from('flashcards')
-            .select('front, back, explanation, topics, deck_id')
-            .in('deck_id',
-                supabase
-                    .from('decks')
-                    .select('id')
-                    .eq('user_id', userId)
-            );
+        // 1. Fetch all decks owned by user
+        const { data: decks, error: deckError } = await supabase
+            .from('decks')
+            .select('id')
+            .eq('user_id', userId);
 
-        // Fallback: If the subquery approach fails, use a two-step fetch
-        let cards = flashcards;
-        if (fcError || !cards) {
-            const { data: decks, error: deckError } = await supabase
-                .from('decks')
-                .select('id')
-                .eq('user_id', userId);
+        if (deckError) throw deckError;
 
-            if (deckError) throw deckError;
-
-            if (!decks || decks.length === 0) {
-                return res.status(400).json({
-                    error: 'No study decks found. Upload and generate flashcards first.'
-                });
-            }
-
-            const deckIds = decks.map((d) => d.id);
-            const { data: fallbackCards, error: fallbackError } = await supabase
-                .from('flashcards')
-                .select('front, back, explanation, topics, deck_id')
-                .in('deck_id', deckIds);
-
-            if (fallbackError) throw fallbackError;
-            cards = fallbackCards || [];
+        if (!decks || decks.length === 0) {
+            return res.status(400).json({
+                error: 'No study decks found. Upload and generate flashcards first.'
+            });
         }
 
-        if (cards.length === 0) {
+        const deckIds = decks.map((d) => d.id);
+        const { data: cards, error: cardsError } = await supabase
+            .from('flashcards')
+            .select('front, back, explanation, topics, deck_id')
+            .in('deck_id', deckIds);
+
+        if (cardsError) throw cardsError;
+
+        if (!cards || cards.length === 0) {
             return res.status(400).json({
                 error: 'No flashcards found across your decks. Generate some content first.'
             });
