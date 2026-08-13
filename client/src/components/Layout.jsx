@@ -217,7 +217,7 @@ const Layout = ({ children }) => {
       ) : isDemo ? (
         <div className="relative min-h-screen bg-[var(--bg-base)]">
           <DemoBanner />
-          <main className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8 pb-[var(--bottom-nav-offset)]">{children}</main>
+          <main className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8 xl:pb-8 pb-[var(--bottom-nav-offset)]">{children}</main>
           <MobileBottomNav items={demoNavItems} showMore={false} />
         </div>
       ) : (
