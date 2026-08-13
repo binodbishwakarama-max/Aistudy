@@ -183,7 +183,7 @@ const Layout = ({ children }) => {
   return (
     <div
       className={
-        isMarketing
+        isMarketing || isDemo
           ? 'relative min-h-screen overflow-hidden text-[var(--text-primary)]'
           : 'workspace-shell relative overflow-hidden text-[var(--text-primary)]'
       }
@@ -215,9 +215,9 @@ const Layout = ({ children }) => {
       {isMarketing ? (
         children
       ) : isDemo ? (
-        <div className="workspace-shell relative min-h-screen">
+        <div className="relative min-h-screen bg-[var(--bg-base)]">
           <DemoBanner />
-          <main className="workspace-main px-4 py-4 sm:px-6 sm:py-6">{children}</main>
+          <main className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 sm:py-8 pb-[var(--bottom-nav-offset)]">{children}</main>
           <MobileBottomNav items={demoNavItems} showMore={false} />
         </div>
       ) : (

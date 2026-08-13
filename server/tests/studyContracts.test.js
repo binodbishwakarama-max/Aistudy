@@ -18,7 +18,9 @@ test('prepareStudySetForSave accepts question/answer flashcards', () => {
             front: 'What is photosynthesis?',
             back: 'A process plants use to convert light into energy.',
             explanation: '',
-            topics: []
+            topics: [],
+            source_section: '',
+            source_excerpt: ''
         }
     ]);
     assert.deepEqual(result.quiz, []);
@@ -84,10 +86,13 @@ test('validateFlashcards normalizes stored cards for the client', () => {
 
     assert.deepEqual(cards[0], {
         id: 'card-1',
+        deckId: null,
         question: 'Question',
         answer: 'Answer',
         explanation: 'Why it matters',
         topics: [],
+        sourceSection: '',
+        sourceExcerpt: '',
         next_review_at: null,
         srs_interval: 0,
         srs_ease_factor: 2.5,

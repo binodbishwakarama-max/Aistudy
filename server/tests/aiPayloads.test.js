@@ -22,10 +22,13 @@ test('parseStructuredGeneration validates flashcards', () => {
 
     assert.deepEqual(parsed, [{
         id: undefined,
+        deckId: null,
         question: 'Q',
         answer: 'A',
         explanation: 'Because',
         topics: [],
+        sourceSection: '',
+        sourceExcerpt: '',
         next_review_at: null,
         srs_interval: 0,
         srs_ease_factor: 2.5,
