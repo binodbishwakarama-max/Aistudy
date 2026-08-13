@@ -329,6 +329,20 @@ router.post('/submit', async (req, res) => {
         else if (accuracy >= 70) xpEarned += 100;
         else if (accuracy >= 50) xpEarned += 50;
 
+        // Record adaptive study session for analytics & heatmap
+        try {
+            await supabase.from('study_sessions').insert({
+                user_id: userId,
+                mode: 'adaptive',
+                duration_seconds: Math.max(1, totalAttempts * 15),
+                cards_reviewed: totalAttempts,
+                correct_count: totalCorrect,
+                xp_earned: xpEarned,
+            });
+        } catch (err) {
+            logger.warn('Failed to insert study_session for adaptive quiz submit', { reason: err.message });
+        }
+
         res.json({
             success: true,
             accuracy,

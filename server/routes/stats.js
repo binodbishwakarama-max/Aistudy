@@ -94,24 +94,34 @@ router.get('/', async (req, res) => {
 
 router.get('/analytics', async (req, res) => {
     try {
-        const { data: decks, error: decksError } = await supabase
-            .from('decks')
-            .select('id')
-            .eq('user_id', req.user.id);
+        let deckIds = [];
+        try {
+            const { data: decks, error: decksError } = await supabase
+                .from('decks')
+                .select('id')
+                .eq('user_id', req.user.id);
 
-        if (decksError) throw decksError;
+            if (!decksError && decks) {
+                deckIds = decks.map((deck) => deck.id);
+            }
+        } catch (err) {
+            logger.warn('Query decks failed during analytics fetch', { reason: err.message });
+        }
 
-        const deckIds = (decks || []).map((deck) => deck.id);
         let cards = [];
-
         if (deckIds.length > 0) {
-            const { data: cardRows, error: cardsError } = await supabase
-                .from('flashcards')
-                .select('id, deck_id, srs_interval, srs_repetitions, next_review_at')
-                .in('deck_id', deckIds);
+            try {
+                const { data: cardRows, error: cardsError } = await supabase
+                    .from('flashcards')
+                    .select('id, deck_id, srs_interval, srs_repetitions, next_review_at')
+                    .in('deck_id', deckIds);
 
-            if (cardsError) throw cardsError;
-            cards = cardRows || [];
+                if (!cardsError && cardRows) {
+                    cards = cardRows;
+                }
+            } catch (err) {
+                logger.warn('Query flashcards failed during analytics fetch', { reason: err.message });
+            }
         }
 
         const now = new Date();
@@ -124,18 +134,22 @@ router.get('/analytics', async (req, res) => {
         const since = new Date();
         since.setDate(since.getDate() - 84);
 
-        const { data: sessions, error: sessionsError } = await supabase
-            .from('study_sessions')
-            .select('*')
-            .eq('user_id', req.user.id)
-            .gte('started_at', since.toISOString())
-            .order('started_at', { ascending: false });
+        let sessionRows = [];
+        try {
+            const { data: sessions, error: sessionsError } = await supabase
+                .from('study_sessions')
+                .select('*')
+                .eq('user_id', req.user.id)
+                .gte('started_at', since.toISOString())
+                .order('started_at', { ascending: false });
 
-        if (sessionsError && sessionsError.code !== '42P01') {
-            throw sessionsError;
+            if (!sessionsError && sessions) {
+                sessionRows = sessions;
+            }
+        } catch (err) {
+            logger.warn('Query study_sessions failed during analytics fetch', { reason: err.message });
         }
 
-        const sessionRows = sessionsError?.code === '42P01' ? [] : (sessions || []);
         const quizSessions = sessionRows.filter((session) => session.mode === 'quiz' || session.mode === 'adaptive');
         const totalQuestions = quizSessions.reduce((sum, session) => sum + (session.cards_reviewed || 0), 0);
         const correctAnswers = quizSessions.reduce((sum, session) => sum + (session.correct_count || 0), 0);
