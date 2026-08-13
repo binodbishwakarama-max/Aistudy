@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('MindFlow wedge + demo loop', () => {
-  test('landing shows PDF → 45-min exam review positioning', async ({ page }) => {
+  test('landing shows active recall positioning', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: 'PDF → 45-min exam review' })).toBeVisible();
-    await expect(page.getByRole('button', { name: /Try a 45-min review/i }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Structured Active Recall for Complex Coursework.' })).toBeVisible();
+    await expect(page.getByRole('button', { name: /Try Live Demo Deck/i }).first()).toBeVisible();
   });
 
   test('demo mode loads flashcards without signup', async ({ page }) => {
