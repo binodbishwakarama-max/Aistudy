@@ -369,6 +369,7 @@ input:-webkit-autofill:active,
   background: rgba(247, 248, 250, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  overflow-y: auto;
 }
 
 .workspace-content {
@@ -949,6 +950,13 @@ input:-webkit-autofill:active,
   box-shadow: var(--shadow-raised);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+@media (min-width: 1280px) {
+  .mobile-bottom-nav,
+  .mobile-workspace-header {
+    display: none !important;
+  }
 }
 
 .mobile-bottom-nav__item {
