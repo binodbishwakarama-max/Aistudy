@@ -7,12 +7,15 @@ import { markChunkRecoverySuccess, setupChunkRecovery } from './utils/chunkRecov
 
 setupChunkRecovery()
 
-registerSW({
+const updateSW = registerSW({
   immediate: true,
-  onRegisterError(error) {
-    console.error('[MindFlow] Service worker registration failed:', error)
+  onNeedRefresh() {
+    updateSW(true);
   },
-})
+  onRegisterError(error) {
+    console.error('[MindFlow] Service worker registration failed:', error);
+  },
+});
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
