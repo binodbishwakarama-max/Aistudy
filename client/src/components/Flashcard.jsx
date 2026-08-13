@@ -7,6 +7,7 @@ import confetti from 'canvas-confetti';
 import { toast } from 'react-hot-toast';
 import { getDueSummary, recordStudySession, reviewFlashcard } from '../services/api';
 import { readJSONStorage, writeJSONStorage } from '../utils/storage';
+import { playSound } from '../utils/soundEngine';
 import SessionSummary from './SessionSummary';
 import Button from './ui/Button';
 
@@ -112,11 +113,13 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
       setSessionDurationMs(Date.now() - startTimeRef.current);
       setIsCompleted(true);
       recordSession(shuffledCards.length);
+      playSound('achievement');
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
     }
   }, [currentIndex, shuffledCards.length, recordSession]);
 
   const handleReview = useCallback(async (rating) => {
+    playSound(rating >= 3 ? 'correct' : 'click');
     if (currentCard?.id && !isDemoMode) {
       try {
         await reviewFlashcard(currentCard.id, rating);

@@ -4,6 +4,7 @@ import { useGamification } from '../context/GamificationContext';
 import { ArrowRight, Check, Clock, Shuffle, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { getDueSummary, recordStudySession } from '../services/api';
+import { playSound } from '../utils/soundEngine';
 import SessionSummary from './SessionSummary';
 
 const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
@@ -104,8 +105,10 @@ const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
       correctCountRef.current += 1;
       setScore((prev) => prev + 1);
       addXP(10);
+      playSound('correct');
     } else {
       addXP(2);
+      playSound('incorrect');
     }
   }, [isAnswered, elapsedSeconds, currentQuestion, addXP]);
 
@@ -115,6 +118,7 @@ const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
       setCurrentIndex((prev) => prev + 1);
       setSelectedOption(null);
       setIsAnswered(false);
+      playSound('click');
       return;
     }
 
@@ -127,7 +131,10 @@ const Quiz = ({ questions, deckId = null, isDemoMode = false }) => {
 
     if (finalScore / shuffledQuestions.length >= 0.7) {
       addXP(100);
+      playSound('achievement');
       confetti({ particleCount: 150, spread: 100, origin: { y: 0.6 } });
+    } else {
+      playSound('click');
     }
   }, [currentIndex, shuffledQuestions.length, updateStreak, addXP, recordSession]);
 

@@ -18,6 +18,7 @@ import {
 import confetti from 'canvas-confetti';
 import { generateAdaptiveQuiz, submitAdaptiveResults } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { playSound } from '../utils/soundEngine';
 import ProgressiveLoader from './ui/ProgressiveLoader';
 
 const DIFFICULTY_COLORS = {
@@ -106,8 +107,10 @@ const AdaptiveQuiz = () => {
       setScore((prev) => prev + 1);
       setConsecutiveWrong(0);
       addXP(15);
+      playSound('correct');
     } else {
       addXP(3);
+      playSound('incorrect');
       const newStreak = consecutiveWrong + 1;
       setConsecutiveWrong(newStreak);
 

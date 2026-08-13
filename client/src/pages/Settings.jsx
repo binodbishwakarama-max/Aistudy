@@ -1,8 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { Bell, MoonStar, ShieldCheck, UserRound } from 'lucide-react';
+import { Bell, MoonStar, ShieldCheck, UserRound, Volume2, VolumeX, Sparkles } from 'lucide-react';
 import { motion as Motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import Card from '../components/ui/Card';
+import {
+  getSoundEnabled,
+  setSoundEnabled,
+  getSoundVolume,
+  setSoundVolume,
+  playSound,
+} from '../utils/soundEngine';
 
 const ToggleRow = ({ icon: Icon, title, description, enabled, onToggle }) => (
   <button
@@ -35,6 +42,9 @@ const ToggleRow = ({ icon: Icon, title, description, enabled, onToggle }) => (
 
 const Settings = () => {
   const { user } = useAuth();
+  const [soundEnabled, setSoundEnabledState] = useState(getSoundEnabled);
+  const [soundVolume, setSoundVolumeState] = useState(getSoundVolume);
+
   const [preferences, setPreferences] = useState({
     notifications: true,
     focusMode: true,
@@ -47,19 +57,33 @@ const Settings = () => {
     return user?.email?.split('@')[0] || 'Student';
   }, [user]);
 
+  const handleSoundToggle = () => {
+    const next = !soundEnabled;
+    setSoundEnabledState(next);
+    setSoundEnabled(next);
+    if (next) playSound('click');
+  };
+
+  const handleVolumeChange = (e) => {
+    const val = parseFloat(e.target.value);
+    setSoundVolumeState(val);
+    setSoundVolume(val);
+    playSound('click');
+  };
+
   const togglePreference = (key) => {
     setPreferences((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12">
       <Motion.header initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
         <p className="kicker">Settings</p>
         <h1 className="font-heading mt-2 text-3xl font-bold tracking-tight sm:text-4xl">
           Preferences
         </h1>
         <p className="mt-3 max-w-xl text-base leading-7 text-[var(--text-secondary)]">
-          Account details and calm defaults for how MindFlow behaves while you study.
+          Account details and Google-level audio feedback preferences while you study.
         </p>
       </Motion.header>
 
@@ -78,8 +102,8 @@ const Settings = () => {
 
             <div className="mt-6 space-y-3">
               {[
-                { label: 'Workspace plan', value: 'MindFlow Starter' },
-                { label: 'Default mode', value: 'Flashcards + Quiz' },
+                { label: 'Workspace plan', value: 'MindFlow Pro' },
+                { label: 'Audio Engine', value: 'Web Audio API (Synthesized)' },
                 { label: 'Appearance', value: 'Apple Study Desk (light)' },
               ].map((item) => (
                 <div key={item.label} className="rounded-[var(--radius-md)] border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-3">
@@ -91,9 +115,77 @@ const Settings = () => {
           </Card>
         </Motion.section>
 
-        <Motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }}>
+        <Motion.section initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="space-y-6">
           <Card className="p-6 sm:p-8">
-            <h2 className="font-heading text-2xl font-bold tracking-tight">Workspace controls</h2>
+            <h2 className="font-heading text-2xl font-bold tracking-tight">Audio & Feedback Controls</h2>
+            <div className="mt-6 space-y-4">
+              <ToggleRow
+                icon={soundEnabled ? Volume2 : VolumeX}
+                title="Tactile Audio Feedback"
+                description="Subtle, Google-level Web Audio synthesis for card flips, quiz answers, and achievements."
+                enabled={soundEnabled}
+                onToggle={handleSoundToggle}
+              />
+
+              {soundEnabled && (
+                <div className="rounded-[var(--radius-lg)] border border-[var(--border)] bg-[var(--bg-surface)] p-5 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Master Volume ({Math.round(soundVolume * 100)}%)
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={soundVolume}
+                    onChange={handleVolumeChange}
+                    className="w-full cursor-pointer accent-[var(--accent)]"
+                  />
+
+                  <div className="border-t border-[var(--border)] pt-4">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                      Test Sound Profiles:
+                    </span>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => playSound('cardFlip')}
+                        className="rounded-md border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 text-xs font-semibold text-[var(--text-primary)] transition-colors hover:border-[var(--border-strong)]"
+                      >
+                        Card Flip
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => playSound('correct')}
+                        className="rounded-md border border-[rgba(24,128,56,0.3)] bg-[rgba(24,128,56,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--success)] transition-colors"
+                      >
+                        Correct Chime
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => playSound('incorrect')}
+                        className="rounded-md border border-[rgba(217,48,37,0.3)] bg-[rgba(217,48,37,0.08)] px-3 py-1.5 text-xs font-semibold text-[var(--danger)] transition-colors"
+                      >
+                        Incorrect Thud
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => playSound('achievement')}
+                        className="rounded-md border border-[rgba(0,113,227,0.3)] bg-[var(--bg-strong)] px-3 py-1.5 text-xs font-semibold text-[var(--accent)] transition-colors"
+                      >
+                        Achievement Arpeggio
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </Card>
+
+          <Card className="p-6 sm:p-8">
+            <h2 className="font-heading text-2xl font-bold tracking-tight">Workspace preferences</h2>
             <div className="mt-6 space-y-3">
               <ToggleRow
                 icon={Bell}
