@@ -5,8 +5,6 @@ const { serverConfig } = require('./config');
 const { logger } = require('./utils/logger');
 const { getAIStatus, probePrimaryProvider } = require('./services/aiService');
 const { initializeWorker } = require('./queue/worker');
-const { isRedisAvailable } = require('./utils/redis');
-
 const app = express();
 
 // Start Background Worker
@@ -22,20 +20,24 @@ process.on('unhandledRejection', (reason) => {
     });
 });
 
+app.set('trust proxy', 1);
+
 // --- Rate Limiters ---
 const globalLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100,
+    max: 1000, // Up to 1000 requests per 15 minutes per unique IP
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS' || req.path === '/api/health',
     message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' }
 });
 
 const aiLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 20,
+    max: 150, // Up to 150 AI requests per 15 minutes per unique IP
     standardHeaders: true,
     legacyHeaders: false,
+    skip: (req) => req.method === 'OPTIONS',
     message: { error: 'AI request limit reached. Please wait 15 minutes before generating more content.' }
 });
 
