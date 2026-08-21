@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { readJSONStorage } from '../utils/storage';
 
-let envUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+let envUrl = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://mindflow-q9q4.onrender.com/api' : 'http://localhost:3000/api');
 if (envUrl.endsWith('/')) envUrl = envUrl.slice(0, -1);
 if (!envUrl.endsWith('/api')) envUrl += '/api';
 const API_URL = envUrl + '/auth';

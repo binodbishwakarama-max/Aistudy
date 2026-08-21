@@ -39,7 +39,7 @@ app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, server-to-server)
         if (!origin) return callback(null, true);
-        if (ALLOWED_ORIGINS.includes(origin)) {
+        if (ALLOWED_ORIGINS.includes(origin) || origin.endsWith('.vercel.app')) {
             return callback(null, true);
         }
         return callback(new Error('Not allowed by CORS'));

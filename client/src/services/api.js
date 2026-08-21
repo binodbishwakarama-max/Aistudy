@@ -2,7 +2,7 @@ import axios from 'axios';
 import { supabase } from './supabaseClient';
 
 const normalizeApiBase = (value) => {
-    let base = value || 'http://localhost:3000/api';
+    let base = value || (import.meta.env.PROD ? 'https://mindflow-q9q4.onrender.com/api' : 'http://localhost:3000/api');
 
     if (base.endsWith('/')) {
         base = base.slice(0, -1);
