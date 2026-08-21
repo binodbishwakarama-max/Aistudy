@@ -37,6 +37,42 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/1</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/1/calculus-and-linear-algebra</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/1/problem-solving-through-c</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/2</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/2/differential-equations-and-vector-calculus</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/2/python-for-computational-thinking</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/3</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
@@ -97,13 +133,37 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/5/automata-theory-and-computability</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/6</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/6/system-software-and-compilers</loc>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/6/system-software-and-compiler-design</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/6/cloud-computing-and-devops</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/7</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse/7/machine-learning-and-deep-learning</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -113,6 +173,36 @@
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/3</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/3/discrete-mathematics-for-ai</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/3/data-structures-and-algorithms-with-python</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/4</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/4/probability-and-statistics-for-data-science</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/5</loc>
@@ -133,10 +223,40 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/6</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/6/deep-learning-and-neural-networks</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-aiml/6/natural-language-processing</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/4</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/4/statistical-inference-and-r-programming</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/5</loc>
@@ -151,10 +271,40 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/5/data-visualization-and-bi</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/6</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cse-ds/6/big-data-analytics-with-spark</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/4</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/4/number-theory-and-cryptography</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/5</loc>
@@ -164,6 +314,24 @@
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/5/applied-cryptography-and-network-security</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/5/ethical-hacking-and-penetration-testing</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/6</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/cyber-security/6/digital-forensics-and-incident-response</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -187,10 +355,40 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ise/4/software-engineering-and-agile</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ise/5</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ise/5/enterprise-java-and-web-frameworks</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ece</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/3</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/3/network-theory-and-analysis</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/4</loc>
@@ -200,6 +398,30 @@
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/4/signals-and-systems</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/4/analog-communication-systems</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/5</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/5/digital-signal-processing</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ece/5/vlSI-design-and-cmos</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -223,10 +445,40 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/me/3/mechanics-of-materials</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/me/4</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/me/4/fluid-mechanics-and-machinery</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ae</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ae/3</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ae/3/introduction-to-aerospace-engineering</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ae/4</loc>
@@ -236,6 +488,12 @@
   </url>
   <url>
     <loc>https://www.mindflowlearn.co.in/dsu-hub/ae/4/aerodynamics-and-fluid-flow</loc>
+    <lastmod>2026-08-21</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.mindflowlearn.co.in/dsu-hub/ae/4/aircraft-propulsion</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
