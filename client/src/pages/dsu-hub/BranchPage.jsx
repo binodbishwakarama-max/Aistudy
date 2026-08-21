@@ -26,17 +26,17 @@ const BranchPage = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20">
       {/* Breadcrumb & Header */}
-      <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] py-10 px-6 sm:px-10">
+      <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] py-6 px-4 sm:px-10 sm:py-10">
         <div className="mx-auto max-w-5xl">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-4" aria-label="Breadcrumb">
+          <nav className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-muted)] mb-3 sm:mb-4" aria-label="Breadcrumb">
             <Link to="/dsu-hub" className="hover:text-[var(--text-primary)] transition-colors">DSU Hub</Link>
             <ChevronRight size={12} />
             <span className="font-semibold text-[var(--text-primary)]">{branch.shortName}</span>
           </nav>
 
-          <div className="flex flex-wrap items-center gap-3 mb-2">
-            <span className="text-xs font-mono font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-1 rounded">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
+            <span className="text-xs font-mono font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-2.5 py-0.5 rounded">
               {branch.shortName} Department
             </span>
             <span className="text-xs text-[var(--text-muted)]">
@@ -44,7 +44,7 @@ const BranchPage = () => {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
             {branch.name}
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -54,7 +54,7 @@ const BranchPage = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="mx-auto max-w-5xl px-6 sm:px-10 pt-10">
+      <main className="mx-auto max-w-5xl px-4 sm:px-10 pt-6 sm:pt-10">
         {/* Semester Selection Grid */}
         <div>
           <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">

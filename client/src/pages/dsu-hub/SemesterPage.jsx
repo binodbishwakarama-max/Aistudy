@@ -23,10 +23,10 @@ const SemesterPage = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20">
       {/* Header */}
-      <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] py-10 px-6 sm:px-10">
+      <header className="border-b border-[var(--border)] bg-[var(--bg-surface)] py-6 px-4 sm:px-10 sm:py-10">
         <div className="mx-auto max-w-5xl">
           {/* Breadcrumbs */}
-          <nav className="flex items-center gap-2 text-xs text-[var(--text-muted)] mb-4" aria-label="Breadcrumb">
+          <nav className="flex flex-wrap items-center gap-1.5 text-xs text-[var(--text-muted)] mb-3 sm:mb-4" aria-label="Breadcrumb">
             <Link to="/dsu-hub" className="hover:text-[var(--text-primary)] transition-colors">DSU Hub</Link>
             <ChevronRight size={12} />
             <Link to={`/dsu-hub/${branch.slug}`} className="hover:text-[var(--text-primary)] transition-colors">{branch.shortName}</Link>
@@ -34,13 +34,13 @@ const SemesterPage = () => {
             <span className="font-semibold text-[var(--text-primary)]">Semester {semester.number}</span>
           </nav>
 
-          <div className="flex items-center gap-2 text-xs font-mono font-bold text-[var(--accent)] mb-2">
+          <div className="flex flex-wrap items-center gap-2 text-xs font-mono font-bold text-[var(--accent)] mb-2">
             <span>{branch.name}</span>
             <span>•</span>
             <span>Sem {semester.number}</span>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
+          <h1 className="text-xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight text-[var(--text-primary)]">
             Semester {semester.number} Question Papers &amp; Guidance
           </h1>
           <p className="mt-2 text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl leading-relaxed">
@@ -50,12 +50,12 @@ const SemesterPage = () => {
       </header>
 
       {/* Main Content Area */}
-      <main className="mx-auto max-w-5xl px-6 sm:px-10 pt-10">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-[var(--text-primary)]">
+      <main className="mx-auto max-w-5xl px-4 sm:px-10 pt-6 sm:pt-10">
+        <div className="mb-4 sm:mb-6 flex items-center justify-between">
+          <h2 className="text-base sm:text-lg font-bold text-[var(--text-primary)]">
             Semester {semester.number} Subjects ({semester.subjects.length})
           </h2>
-          <span className="text-xs text-[var(--text-muted)]">Dayananda Sagar University</span>
+          <span className="text-[11px] sm:text-xs text-[var(--text-muted)]">Dayananda Sagar University</span>
         </div>
 
         {/* Subject Grid */}

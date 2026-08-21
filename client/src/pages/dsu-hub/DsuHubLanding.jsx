@@ -24,37 +24,37 @@ const DsuHubLanding = () => {
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20">
       {/* Hero Header */}
-      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--bg-surface)] py-14 px-6 sm:px-10">
+      <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--bg-surface)] py-8 px-4 sm:px-10 sm:py-14">
         <div className="mx-auto max-w-5xl">
-          <div className="mb-4">
-            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] px-3.5 py-1 text-xs font-semibold text-[var(--text-secondary)]">
+          <div className="mb-3 sm:mb-4">
+            <span className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-0.5 text-xs font-semibold text-[var(--text-secondary)]">
               <span>Dayananda Sagar University</span>
             </span>
           </div>
 
-          <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-[var(--text-primary)]">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-[var(--text-primary)] leading-tight">
             DSU Question Papers &amp; Exam Notes
           </h1>
-          <p className="mt-3 max-w-2xl text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
+          <p className="mt-2.5 max-w-2xl text-xs sm:text-base text-[var(--text-secondary)] leading-relaxed">
             Free, unblocked access to branch-wise previous year question papers (PYQs), passing strategies, and high-yield module guidance for DSU engineering semesters.
           </p>
 
           {/* Search Bar */}
-          <div className="mt-8 relative max-w-xl">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={18} />
+          <div className="mt-6 sm:mt-8 relative max-w-xl">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" size={16} />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by subject name or code (e.g. 21CS32, DBMS, Algorithms)..."
-              className="w-full rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] py-3.5 pl-11 pr-4 text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all shadow-sm"
+              placeholder="Search subject (e.g. 21CS32, DBMS, Python)..."
+              className="w-full rounded-2xl border border-[var(--border-strong)] bg-[var(--bg-elevated)] py-3 pl-10 pr-4 text-xs sm:text-sm text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all shadow-sm"
             />
           </div>
         </div>
       </section>
 
       {/* Main Content Area */}
-      <main className="mx-auto max-w-5xl px-6 sm:px-10 pt-10">
+      <main className="mx-auto max-w-5xl px-4 sm:px-10 pt-6 sm:pt-10">
         {/* Search Results State */}
         {searchQuery.trim().length > 0 ? (
           <div>

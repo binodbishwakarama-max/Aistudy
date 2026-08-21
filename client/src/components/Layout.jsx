@@ -28,6 +28,13 @@ import DemoBanner from './DemoBanner';
 
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
+const isPublicPath = (pathname) => (
+  marketingRoutes.has(pathname) ||
+  pathname.startsWith('/dsu-hub') ||
+  pathname === '/privacy' ||
+  pathname === '/terms'
+);
+
 const isDemoPath = (pathname) => pathname.startsWith('/demo');
 
 const isPathActive = (pathname, path) => {
@@ -127,7 +134,7 @@ const Layout = ({ children }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
 
-  const isMarketing = marketingRoutes.has(location.pathname);
+  const isPublic = isPublicPath(location.pathname);
   const isDemo = isDemoPath(location.pathname);
 
   const userName = useMemo(() => {
@@ -212,8 +219,28 @@ const Layout = ({ children }) => {
         )}
       </AnimatePresence>
 
-      {isMarketing ? (
-        children
+      {isPublic ? (
+        marketingRoutes.has(location.pathname) ? (
+          children
+        ) : (
+          <div className="min-h-screen bg-[var(--bg-base)] flex flex-col">
+            <header className="sticky top-0 z-40 border-b border-[var(--border)] bg-[var(--bg-base)]/85 backdrop-blur-md px-4 py-3 sm:px-8 flex items-center justify-between">
+              <Link to="/" className="flex items-center gap-2.5">
+                <BrandMark />
+                <span className="font-heading text-base font-bold tracking-tight text-[var(--text-primary)]">MindFlow</span>
+              </Link>
+              <div className="flex items-center gap-3">
+                <Link to="/dsu-hub" className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">DSU Hub</Link>
+                {user ? (
+                  <Link to="/dashboard" className="text-xs font-bold bg-[var(--accent)] text-white px-3 py-1.5 rounded-lg shadow-sm">Dashboard →</Link>
+                ) : (
+                  <Link to="/login" className="text-xs font-semibold border border-[var(--border)] bg-[var(--bg-elevated)] px-3 py-1.5 rounded-lg hover:border-[var(--accent)] transition-colors">Sign In</Link>
+                )}
+              </div>
+            </header>
+            <main className="flex-1">{children}</main>
+          </div>
+        )
       ) : isDemo ? (
         <div className="relative min-h-screen bg-[var(--bg-base)]">
           <DemoBanner />
