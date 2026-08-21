@@ -13,7 +13,14 @@ import {
   Lightbulb,
   Tag,
   ArrowRight,
-  Share2
+  Share2,
+  Video,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  Award,
+  Flame,
+  GraduationCap
 } from 'lucide-react';
 import { getSubject } from '../../data/dsuHubData';
 import { toast } from 'react-hot-toast';
@@ -29,19 +36,28 @@ const SubjectPage = () => {
   const { branchSlug, semesterNum, subjectCode } = useParams();
   const subject = getSubject(branchSlug, semesterNum, subjectCode);
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('all');
+  const [expandedQuestions, setExpandedQuestions] = useState({});
 
   if (!subject) {
     return <Navigate to="/dsu-hub" replace />;
   }
 
-  const { branch, semester, guidance, pyqs = [] } = subject;
+  const { branch, semester, guidance, pyqs = [], resources = [], predictedQuestions = [] } = subject;
+
+  const toggleQuestion = (index) => {
+    setExpandedQuestions((prev) => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${subject.name} (${subject.code}) PYQs - DSU Hub`,
-          text: `Previous year question papers and exam guidance for ${subject.name} at Dayananda Sagar University.`,
+          title: `${subject.name} (${subject.code}) PYQs & Resources - DSU Hub`,
+          text: `Question papers, predicted questions, and open-source video courses for ${subject.name} at Dayananda Sagar University.`,
           url: window.location.href,
         });
       } catch {
@@ -93,15 +109,67 @@ const SubjectPage = () => {
               <span>Share Subject</span>
             </button>
           </div>
+
+          {/* Quick Tab Navigator */}
+          <div className="flex flex-wrap gap-2 mt-6 pt-4 border-t border-[var(--border)]">
+            <button
+              onClick={() => setActiveTab('all')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === 'all'
+                  ? 'bg-[var(--accent)] text-white shadow-sm'
+                  : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              All Materials
+            </button>
+            <button
+              onClick={() => setActiveTab('pyqs')}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                activeTab === 'pyqs'
+                  ? 'bg-[var(--accent)] text-white shadow-sm'
+                  : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+              }`}
+            >
+              <FileText size={13} />
+              <span>Papers ({pyqs.length})</span>
+            </button>
+            {predictedQuestions.length > 0 && (
+              <button
+                onClick={() => setActiveTab('predicted')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'predicted'
+                    ? 'bg-amber-600 text-white shadow-sm'
+                    : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <Flame size={13} className="text-amber-500" />
+                <span>Predicted Questions ({predictedQuestions.length})</span>
+              </button>
+            )}
+            {resources.length > 0 && (
+              <button
+                onClick={() => setActiveTab('resources')}
+                className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                  activeTab === 'resources'
+                    ? 'bg-emerald-600 text-white shadow-sm'
+                    : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                }`}
+              >
+                <GraduationCap size={13} className="text-emerald-500" />
+                <span>Open Source Courses ({resources.length})</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
       <main className="mx-auto max-w-5xl px-4 sm:px-10 pt-6 sm:pt-10 grid gap-8 lg:grid-cols-3">
-        {/* Left 2 Cols: Guidance Notes & PYQs */}
-        <div className="lg:col-span-2 space-y-6 sm:space-y-10">
-          {/* Exam Guidance Block */}
-          {guidance && (
+        {/* Left 2 Cols: Main Learning Materials */}
+        <div className="lg:col-span-2 space-y-8 sm:space-y-10">
+
+          {/* 1. Exam Guidance Block */}
+          {(activeTab === 'all' || activeTab === 'pyqs') && guidance && (
             <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 sm:p-8 shadow-sm">
               <div className="flex items-center gap-2 text-[var(--accent)] font-bold text-base mb-3 sm:mb-4">
                 <Lightbulb size={18} />
@@ -142,76 +210,191 @@ const SubjectPage = () => {
             </section>
           )}
 
-          {/* Previous Year Questions Section */}
-          <section>
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <FileText size={18} className="text-[var(--accent)]" />
-                <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
-                  Previous Year Question Papers ({pyqs.length})
-                </h2>
+          {/* 2. High-Probability Predicted Exam Questions */}
+          {(activeTab === 'all' || activeTab === 'predicted') && predictedQuestions.length > 0 && (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Flame size={20} className="text-amber-500" />
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+                    🔥 Most Predictable Exam Questions ({predictedQuestions.length})
+                  </h2>
+                </div>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded bg-amber-500/10 text-amber-500">
+                  High Probability
+                </span>
               </div>
-              <span className="text-xs text-[var(--text-muted)]">DSU Verified</span>
-            </div>
 
-            {pyqs.length === 0 ? (
-              <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8 text-center text-xs text-[var(--text-muted)]">
-                Question papers for this subject are currently being digitized. Check back soon!
-              </div>
-            ) : (
               <div className="space-y-3">
-                {pyqs.map((paper, idx) => {
-                  const typeInfo = EXAM_TYPE_LABELS[paper.examType] || EXAM_TYPE_LABELS.other;
-
+                {predictedQuestions.map((item, idx) => {
+                  const isExpanded = expandedQuestions[idx];
                   return (
                     <div
                       key={idx}
-                      className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 transition-all hover:border-[var(--border-accent)] hover:shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
+                      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 transition-all hover:border-[var(--border-accent)]"
                     >
-                      <div className="space-y-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded ${typeInfo.bg} ${typeInfo.text}`}>
-                            {typeInfo.label}
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                          {item.probability || 'High Probability'}
+                        </span>
+                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-[var(--accent)]/10 text-[var(--accent)]">
+                          {item.marks} Marks
+                        </span>
+                        {item.module && (
+                          <span className="text-[10px] sm:text-[11px] font-medium text-[var(--text-muted)]">
+                            {item.module}
                           </span>
-                          <span className="text-xs font-mono font-bold text-[var(--text-muted)]">
-                            Year {paper.year}
-                          </span>
-                          {paper.duration && (
-                            <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
-                              ⏱️ {paper.duration}
-                            </span>
-                          )}
-                          {paper.maxMarks && (
-                            <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
-                              🎯 {paper.maxMarks} Marks
-                            </span>
-                          )}
-                        </div>
-                        <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
-                          {paper.title}
-                        </h3>
-                        <p className="text-[11px] text-[var(--text-muted)] font-mono">
-                          Dayananda Sagar University • {subject.code} {paper.date ? `• Exam Date: ${paper.date}` : ''}
-                        </p>
+                        )}
                       </div>
 
-                      <div className="w-full sm:w-auto pt-2 sm:pt-0">
-                        <a
-                          href={paper.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all active:scale-[0.98]"
-                        >
-                          <ExternalLink size={13} />
-                          <span>View PDF Paper</span>
-                        </a>
-                      </div>
+                      <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] leading-snug">
+                        Q{idx + 1}. {item.question}
+                      </h3>
+
+                      {item.answerKey && (
+                        <div className="mt-3 pt-3 border-t border-[var(--border)]">
+                          <button
+                            onClick={() => toggleQuestion(idx)}
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--accent)] hover:underline"
+                          >
+                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                            <span>{isExpanded ? 'Hide Key Solution Strategy' : 'View Key Solution Strategy & Answer Breakdown'}</span>
+                          </button>
+
+                          {isExpanded && (
+                            <div className="mt-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] p-3 text-xs text-[var(--text-secondary)] leading-relaxed">
+                              <span className="font-bold text-[var(--text-primary)] block mb-1">
+                                🔑 Key Points to Include for Full Marks:
+                              </span>
+                              <p>{item.answerKey}</p>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
               </div>
-            )}
-          </section>
+            </section>
+          )}
+
+          {/* 3. Open Source Video Lectures & Playlists */}
+          {(activeTab === 'all' || activeTab === 'resources') && resources.length > 0 && (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <GraduationCap size={20} className="text-emerald-500" />
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+                    🎓 Open Source Courses &amp; Video Playlists ({resources.length})
+                  </h2>
+                </div>
+                <span className="text-xs text-[var(--text-muted)]">MIT • Stanford • Harvard • NPTEL</span>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {resources.map((res, idx) => (
+                  <a
+                    key={idx}
+                    href={res.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-all hover:border-[var(--accent)] hover:shadow-sm flex flex-col justify-between"
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-2">
+                        <span className="text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                          {res.provider}
+                        </span>
+                        <ExternalLink size={12} className="text-[var(--text-muted)] group-hover:text-[var(--accent)] transition-colors" />
+                      </div>
+                      <h3 className="text-xs sm:text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors leading-snug">
+                        {res.title}
+                      </h3>
+                    </div>
+
+                    <div className="mt-3 pt-2 border-t border-[var(--border)] flex items-center justify-between text-[11px] text-[var(--text-muted)]">
+                      <span className="capitalize">{res.type.replace('_', ' ')}</span>
+                      <span className="font-semibold text-[var(--accent)] group-hover:underline">Watch Course ↗</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* 4. Previous Year Questions Section */}
+          {(activeTab === 'all' || activeTab === 'pyqs') && (
+            <section className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <FileText size={18} className="text-[var(--accent)]" />
+                  <h2 className="text-lg sm:text-xl font-bold text-[var(--text-primary)]">
+                    Previous Year Question Papers ({pyqs.length})
+                  </h2>
+                </div>
+                <span className="text-xs text-[var(--text-muted)]">DSU Verified</span>
+              </div>
+
+              {pyqs.length === 0 ? (
+                <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 sm:p-8 text-center text-xs text-[var(--text-muted)]">
+                  Question papers for this subject are currently being digitized. Check back soon!
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {pyqs.map((paper, idx) => {
+                    const typeInfo = EXAM_TYPE_LABELS[paper.examType] || EXAM_TYPE_LABELS.other;
+
+                    return (
+                      <div
+                        key={idx}
+                        className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 transition-all hover:border-[var(--border-accent)] hover:shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded ${typeInfo.bg} ${typeInfo.text}`}>
+                              {typeInfo.label}
+                            </span>
+                            <span className="text-xs font-mono font-bold text-[var(--text-muted)]">
+                              Year {paper.year}
+                            </span>
+                            {paper.duration && (
+                              <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
+                                ⏱️ {paper.duration}
+                              </span>
+                            )}
+                            {paper.maxMarks && (
+                              <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
+                                🎯 {paper.maxMarks} Marks
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
+                            {paper.title}
+                          </h3>
+                          <p className="text-[11px] text-[var(--text-muted)] font-mono">
+                            Dayananda Sagar University • {subject.code} {paper.date ? `• Exam Date: ${paper.date}` : ''}
+                          </p>
+                        </div>
+
+                        <div className="w-full sm:w-auto pt-2 sm:pt-0">
+                          <a
+                            href={paper.fileUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all active:scale-[0.98]"
+                          >
+                            <ExternalLink size={13} />
+                            <span>View PDF Paper</span>
+                          </a>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
+          )}
+
         </div>
 
         {/* Right Col: Soft Conversion CTA Card */}

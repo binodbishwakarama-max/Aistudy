@@ -287,12 +287,50 @@ for (const branch of DSU_BRANCHES) {
           </div>
         ` : ''}
 
+        ${sub.predictedQuestions && sub.predictedQuestions.length > 0 ? `
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: #b45309; margin-bottom: 16px;">🔥 Most Predictable Exam Questions (${sub.predictedQuestions.length})</h2>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+              ${sub.predictedQuestions.map((q, qIdx) => `
+                <div style="border: 1px solid #fde68a; border-radius: 12px; padding: 16px; background: #fffbeb;">
+                  <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                    <span style="font-size: 11px; font-weight: 700; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 4px;">${q.probability || 'High Probability'}</span>
+                    <span style="font-size: 11px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 4px;">${q.marks} Marks</span>
+                    ${q.module ? `<span style="font-size: 11px; color: #78350f;">${q.module}</span>` : ''}
+                  </div>
+                  <h3 style="font-size: 14px; font-weight: 700; color: #1e293b; margin: 0 0 8px 0;">Q${qIdx + 1}. ${q.question}</h3>
+                  ${q.answerKey ? `<p style="font-size: 12px; color: #475569; margin: 0; line-height: 1.5;"><strong style="color: #0f172a;">Key Points:</strong> ${q.answerKey}</p>` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
+        ${sub.resources && sub.resources.length > 0 ? `
+          <div style="margin-bottom: 32px;">
+            <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">🎓 Open Source Courses &amp; Video Playlists (${sub.resources.length})</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+              ${sub.resources.map((r) => `
+                <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #ffffff; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <span style="font-size: 10px; font-weight: 700; color: #059669; background: #ecfdf5; padding: 2px 8px; border-radius: 4px;">${r.provider}</span>
+                    <h3 style="font-size: 14px; font-weight: 700; margin: 8px 0 4px 0; color: #0f172a;">${r.title}</h3>
+                  </div>
+                  <a href="${r.url}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none; margin-top: 12px;">Watch Course ↗</a>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+
         <h2 style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 16px;">📄 Previous Year Question Papers (${sub.pyqs ? sub.pyqs.length : 0})</h2>
         <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px;">
           ${(sub.pyqs || []).map((p) => `
             <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 16px; background: #ffffff; display: flex; justify-content: space-between; align-items: center;">
               <div>
                 <span style="font-size: 11px; font-weight: 700; color: #2563eb; background: #eff6ff; padding: 2px 8px; border-radius: 4px;">${p.examType.toUpperCase()} • ${p.year}</span>
+                ${p.duration ? `<span style="font-size: 11px; color: #64748b; margin-left: 8px;">⏱️ ${p.duration}</span>` : ''}
+                ${p.maxMarks ? `<span style="font-size: 11px; color: #64748b; margin-left: 8px;">🎯 ${p.maxMarks} Marks</span>` : ''}
                 <h3 style="font-size: 15px; font-weight: 700; margin: 4px 0 0 0; color: #0f172a;">${p.title}</h3>
               </div>
               <a href="${p.fileUrl}" target="_blank" rel="noopener noreferrer" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;">View PDF ↗</a>
