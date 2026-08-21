@@ -79,6 +79,9 @@ const SubjectPage = () => {
             <span className="text-xs font-semibold text-[var(--text-muted)] bg-[var(--bg-elevated)] px-2.5 py-1 rounded">
               {subject.credits} Credits
             </span>
+            <span className="text-[11px] font-bold font-mono uppercase bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/30 px-2 py-0.5 rounded">
+              Beta
+            </span>
           </div>
 
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">

@@ -26,17 +26,27 @@ const DsuHubLanding = () => {
       {/* Hero Header */}
       <section className="relative overflow-hidden border-b border-[var(--border)] bg-[var(--bg-surface)] py-14 px-6 sm:px-10">
         <div className="mx-auto max-w-5xl">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3.5 py-1 text-xs font-semibold text-[var(--accent)] mb-4">
-            <GraduationCap size={14} />
-            <span>Dayananda Sagar University (DSU) Archive</span>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3.5 py-1 text-xs font-semibold text-[var(--accent)]">
+              <GraduationCap size={14} />
+              <span>Dayananda Sagar University (DSU) Archive</span>
+            </div>
+            <span className="rounded-full border border-[var(--border-strong)] bg-[var(--bg-elevated)] px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-[var(--text-muted)] font-mono">
+              Beta v1.0
+            </span>
           </div>
 
           <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl text-[var(--text-primary)]">
-            DSU Question Papers &amp; Exam Notes
+            DSU Question Papers &amp; Exam Notes <span className="text-xs sm:text-sm font-bold align-super bg-[var(--accent)] text-white px-2 py-0.5 rounded-md uppercase font-mono">Beta</span>
           </h1>
           <p className="mt-3 max-w-2xl text-sm sm:text-base text-[var(--text-secondary)] leading-relaxed">
             Free, unblocked access to branch-wise previous year question papers (PYQs), passing strategies, and high-yield module guidance for DSU engineering semesters.
           </p>
+
+          <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-[var(--border-accent)] bg-[var(--bg-elevated)] px-3.5 py-2 text-xs text-[var(--text-secondary)]">
+            <Sparkles size={14} className="text-[var(--accent)] flex-shrink-0" />
+            <span><strong>Beta Note:</strong> Syllabus and exam strategy guides are active across all 8 branches. PDF paper digitization is continuously being updated.</span>
+          </div>
 
           {/* Search Bar */}
           <div className="mt-8 relative max-w-xl">
