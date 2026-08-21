@@ -96,43 +96,8 @@ const BranchPage = () => {
                 </ul>
 
                 <div className="mt-5 pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs font-semibold text-[var(--accent)]">
-                  <span>Browse Question Papers</span>
+                  <span>View Semester {sem.number} Subjects</span>
                   <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* All Subjects Directory for this Branch */}
-        <div className="mt-14">
-          <h2 className="text-lg font-bold text-[var(--text-primary)] mb-4 flex items-center gap-2">
-            <BookOpen size={18} className="text-[var(--accent)]" />
-            <span>All Subjects in {branch.shortName}</span>
-          </h2>
-
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] divide-y divide-[var(--border)] overflow-hidden">
-            {allSubjects.map((sub) => (
-              <Link
-                key={sub.code}
-                to={`/dsu-hub/${branch.slug}/${sub.semesterNumber}/${sub.slug}`}
-                className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 px-6 hover:bg-[var(--bg-elevated)] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs font-mono font-bold text-[var(--accent)] bg-[var(--accent)]/10 px-2 py-0.5 rounded">
-                    {sub.code}
-                  </span>
-                  <div>
-                    <h3 className="text-sm font-bold text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors">
-                      {sub.name}
-                    </h3>
-                    <span className="text-xs text-[var(--text-muted)]">Semester {sub.semesterNumber}</span>
-                  </div>
-                </div>
-
-                <div className="mt-2 sm:mt-0 flex items-center gap-4 text-xs font-semibold text-[var(--text-muted)] group-hover:text-[var(--accent)]">
-                  <span>{sub.pyqs?.length || 0} Papers</span>
-                  <ChevronRight size={16} />
                 </div>
               </Link>
             ))}
