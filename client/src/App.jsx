@@ -19,6 +19,10 @@ const Settings = lazyWithRetry(() => import('./pages/Settings'));
 const StatsDashboard = lazyWithRetry(() => import('./components/StatsDashboard'));
 const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'));
 const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'));
+const DsuHubLanding = lazyWithRetry(() => import('./pages/dsu-hub/DsuHubLanding'));
+const BranchPage = lazyWithRetry(() => import('./pages/dsu-hub/BranchPage'));
+const SemesterPage = lazyWithRetry(() => import('./pages/dsu-hub/SemesterPage'));
+const SubjectPage = lazyWithRetry(() => import('./pages/dsu-hub/SubjectPage'));
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'));
 
 const RouteFallback = () => (
@@ -75,6 +79,10 @@ function App() {
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                     <Route path="/privacy" element={<PrivacyPolicy />} />
                     <Route path="/terms" element={<TermsOfService />} />
+                    <Route path="/dsu-hub" element={<DsuHubLanding />} />
+                    <Route path="/dsu-hub/:branchSlug" element={<BranchPage />} />
+                    <Route path="/dsu-hub/:branchSlug/:semesterNum" element={<SemesterPage />} />
+                    <Route path="/dsu-hub/:branchSlug/:semesterNum/:subjectCode" element={<SubjectPage />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

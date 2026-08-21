@@ -59,6 +59,7 @@ app.use('/api/stats', require('./routes/stats'));
 app.use('/api/jobs', require('./routes/jobs'));
 app.use('/api/search', aiLimiter, require('./routes/search'));
 app.use('/api/adaptive', aiLimiter, require('./routes/adaptive'));
+app.use('/api/dsu-hub', require('./routes/dsuHub'));
 
 app.get('/api/health', (_req, res) => {
     const redisConfigured = Boolean(process.env.REDIS_URL?.trim());

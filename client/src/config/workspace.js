@@ -1,6 +1,7 @@
 import {
   BarChart3,
   BookOpen,
+  GraduationCap,
   LayoutDashboard,
   Settings,
   Upload,
@@ -34,6 +35,13 @@ export const workspaceNavigation = [
     icon: BarChart3,
     description: 'Sprint accuracy and review momentum',
     keywords: ['analytics', 'stats', 'insights', 'progress'],
+  },
+  {
+    label: 'DSU Hub',
+    path: '/dsu-hub',
+    icon: GraduationCap,
+    description: 'Question papers (PYQs) & exam notes',
+    keywords: ['dsu', 'hub', 'pyq', 'question', 'papers', 'exams', 'notes', 'syllabus'],
   },
   {
     label: 'Settings',
