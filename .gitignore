@@ -39,6 +39,11 @@ eslint_*.txt
 lint_*.txt
 lint_*.json
 
+# Raw exam scans & uploads (preserve locally, exclude from git tracking)
+sem1chemsitrycycle/
+raw_scans/
+*.heic
+
 # OS
 .DS_Store
 Thumbs.db
