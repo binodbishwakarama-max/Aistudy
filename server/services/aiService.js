@@ -27,13 +27,10 @@ const getErrorMessage = (error) => error?.message || 'Unknown AI provider error.
 
 const shouldDisableProvider = (error) => {
     const message = getErrorMessage(error).toLowerCase();
+    // Only temporarily backoff for quota exhaustion or bad keys
     return (
         message.includes('429')
         || message.includes('quota')
-        || message.includes('not found')
-        || message.includes('invalid')
-        || message.includes('permission')
-        || message.includes('unsupported')
         || message.includes('api key')
     );
 };
@@ -44,15 +41,15 @@ const recordFailure = (provider, error) => {
 
     if (shouldDisableProvider(error)) {
         providerState[provider].available = false;
-        logger.warn(`${provider} disabled after provider error. Will attempt auto-recovery in 5 minutes.`, { reason: message });
+        logger.warn(`${provider} backed off after error. Will attempt auto-recovery in 15 seconds.`, { reason: message });
         
-        // Auto-recovery cooldown (5 minutes)
+        // Fast auto-recovery (15 seconds)
         setTimeout(() => {
-            if (!providerState[provider].available && providerState[provider].configured) {
+            if (providerState[provider].configured) {
                 providerState[provider].available = true;
-                logger.info(`Auto-recovery: ${provider} re-enabled after cooldown.`);
+                logger.info(`Auto-recovery: ${provider} re-enabled.`);
             }
-        }, 5 * 60 * 1000);
+        }, 15 * 1000);
     }
 };
 
@@ -222,9 +219,11 @@ const buildProviderFailure = (failures) => {
 const generateText = async ({ prompt, systemInstruction }) => {
     const failures = [];
 
-    if (providerState.gemini.available && geminiClient) {
+    if (geminiClient && (providerState.gemini.available || !groqClient)) {
         try {
             const text = await tryGeminiText({ prompt, systemInstruction });
+            providerState.gemini.available = true;
+            providerState.gemini.lastError = null;
             return { text, provider: 'Gemini' };
         } catch (error) {
             recordFailure('gemini', error);
@@ -232,9 +231,11 @@ const generateText = async ({ prompt, systemInstruction }) => {
         }
     }
 
-    if (providerState.groq.available && groqClient) {
+    if (groqClient && (providerState.groq.available || !geminiClient)) {
         try {
             const text = await tryGroqText({ prompt, systemInstruction });
+            providerState.groq.available = true;
+            providerState.groq.lastError = null;
             return { text, provider: 'Groq' };
         } catch (error) {
             recordFailure('groq', error);
@@ -248,9 +249,11 @@ const generateText = async ({ prompt, systemInstruction }) => {
 const generateChatReply = async ({ message, history, systemInstruction }) => {
     const failures = [];
 
-    if (providerState.gemini.available && geminiClient) {
+    if (geminiClient && (providerState.gemini.available || !groqClient)) {
         try {
             const text = await tryGeminiChat({ message, history, systemInstruction });
+            providerState.gemini.available = true;
+            providerState.gemini.lastError = null;
             return { text, provider: 'Gemini' };
         } catch (error) {
             recordFailure('gemini', error);
@@ -258,9 +261,11 @@ const generateChatReply = async ({ message, history, systemInstruction }) => {
         }
     }
 
-    if (providerState.groq.available && groqClient) {
+    if (groqClient && (providerState.groq.available || !geminiClient)) {
         try {
             const text = await tryGroqChat({ message, history, systemInstruction });
+            providerState.groq.available = true;
+            providerState.groq.lastError = null;
             return { text, provider: 'Groq' };
         } catch (error) {
             recordFailure('groq', error);
