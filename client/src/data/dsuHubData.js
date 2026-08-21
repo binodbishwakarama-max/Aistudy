@@ -17,33 +17,90 @@ export const DSU_BRANCHES = [
         number: 1,
         subjects: [
           {
-            name: 'Calculus and Linear Algebra',
-            code: '21MAT11',
-            slug: 'calculus-and-linear-algebra',
+            name: 'Chemistry for Computer Science Cluster',
+            code: '25EN1103',
+            slug: 'chemistry-for-computer-science-cluster',
             credits: 4,
             guidance: {
-              notes: 'Focus on Eigenvalues & Eigenvectors, Cayley-Hamilton theorem, Taylor/Maclaurin series, Partial derivatives (Euler’s theorem), and Rank of a matrix via Row-Echelon form.',
-              passingTips: 'Master Cayley-Hamilton theorem inverse calculation and Gauss-Jordan elimination for 3x3 matrices.',
-              highYieldTopics: ['Cayley-Hamilton Theorem & Matrix Inverses', 'Eigenvalues and Eigenvectors of 3x3 Matrices', 'Euler’s Theorem on Homogeneous Functions', 'Taylor Series Expansion in Two Variables', 'Gauss-Elimination & Consistency of Equations']
+              notes: 'Focus on 5 Core Modules: (1) Electrochemical & Potentiometric Sensors, Dissolved Oxygen measurement, QDSSCs; (2) Pitting & Water-line corrosion, Electroless plating; (3) VSEPR Theory, Z-matrix of H2O, MO diagram of O2; (4) Polymer molecular weights (Mn, Mw), Polycarbonate, Polypyrrole; (5) E-waste toxic hazards, Pyrometallurgical vs Hydrometallurgical copper extraction.',
+              passingTips: 'Copper extraction from e-waste, MO diagram of O2, and Potentiometric sensor principles are guaranteed 16-mark questions.',
+              highYieldTopics: [
+                'Electrochemical & Potentiometric Sensors (Dissolved O2)',
+                'Quantum Dot Sensitized Solar Cells (QDSSCs)',
+                'Pitting & Water-Line Corrosion with Labelled Diagrams',
+                'Electroless Plating Mechanism & Advantages',
+                'MO Diagram of O2 & VSEPR Z-Matrix for H2O',
+                'Polycarbonate Preparation & Polypyrrole Synthesis',
+                'E-Waste Toxic Hazards & Copper Extraction (Hydro vs Pyrometallurgical)'
+              ]
             },
             pyqs: [
-              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21MAT11-2024-EndSem.pdf' },
-              { year: 2023, examType: 'end_sem', title: 'End Semester Exam 2023', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21MAT11-2023-EndSem.pdf' }
+              { year: 2026, examType: 'end_sem', title: 'End Semester Exam Dec 2025 / Jan 2026 (Max Marks: 80)', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1103-2025-Dec-EndSem.pdf' },
+              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1103-2024-EndSem.pdf' }
             ]
           },
           {
-            name: 'Problem Solving through Programming in C',
-            code: '21CS13',
-            slug: 'problem-solving-through-c',
+            name: 'Object Oriented Programming (Python)',
+            code: '25EN1107',
+            slug: 'object-oriented-programming-python',
             credits: 4,
             guidance: {
-              notes: 'Covers Control Statements, Arrays, Strings, Functions (Recursion), Pointers, Dynamic Memory Allocation (malloc/calloc), and Structures/Unions.',
-              passingTips: 'Always write clean C code syntax with comments. Practice string manipulation without built-in library functions and recursive Fibonacci/Factorial programs.',
-              highYieldTopics: ['Pointer Arithmetic & Array of Pointers', 'Dynamic Memory Allocation (malloc, calloc, realloc, free)', 'String Operations (Copy, Reverse, Palindrome without string.h)', 'Structures vs Unions Memory Layout', 'Recursive vs Iterative Algorithms']
+              notes: 'Covers OOP Pillars (Encapsulation, Inheritance, Polymorphism, Data Abstraction), Function Argument Types (Positional, Keyword, Default, *args), Loop Tracing (for, while, continue, break), Recursion Call Stack Tracing, and File I/O with Exception Handling.',
+              passingTips: 'Practice writing standard Python programs: Student marks calculation (total, average, grade), Recursive Fibonacci/Factorial call trees, and custom Class inheritance structures.',
+              highYieldTopics: [
+                'Key OOP Concepts (Classes, Objects, Inheritance, Polymorphism)',
+                'Python Function Argument Types (Positional, Keyword, Default)',
+                'Loop Output Prediction (range, continue, while break)',
+                'Recursion Tracing & Call Stack Output',
+                'Dictionary & List Comprehensions',
+                'File I/O and Exception Handling Blocks (try-except-finally)'
+              ]
             },
             pyqs: [
-              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21CS13-2024-EndSem.pdf' },
-              { year: 2023, examType: 'end_sem', title: 'End Semester Exam 2023', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21CS13-2023-EndSem.pdf' }
+              { year: 2026, examType: 'end_sem', title: 'End Semester Exam Dec 2025 / Jan 2026 (Max Marks: 80)', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1107-2026-Jan-EndSem.pdf' },
+              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1107-2024-EndSem.pdf' }
+            ]
+          },
+          {
+            name: 'Engineering Graphics and Design Thinking',
+            code: '25EN1102',
+            slug: 'engineering-graphics-and-design-thinking',
+            credits: 3,
+            guidance: {
+              notes: 'Focus on Orthographic Projections from 3D Isometric Machine Components (Front, Top, and Side Views), Development of Lateral Surfaces of Prisms and Pyramids, Section of Solids (Hexagonal Prism with Cone), and 3D CAD Modeling (AutoCAD / Fusion 360).',
+              passingTips: 'Always use First Angle Projection. Ensure exact dimensioning and projection alignment between Front View and Top View.',
+              highYieldTopics: [
+                'Orthographic Projections (Front, Top, Side Views from Isometric 3D)',
+                'Development of Lateral Surface of Prisms (Square / Hexagonal)',
+                'Section of Solids with Inclined Cutting Planes (45° to HP)',
+                'Isometric Projections of Frustums and Combined Solids',
+                'AutoCAD & Fusion 360 3D Part Modeling'
+              ]
+            },
+            pyqs: [
+              { year: 2025, examType: 'end_sem', title: 'End Semester Exam Dec 2025 (Set III, Max Marks: 60)', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1102-2025-Dec-EndSem.pdf' },
+              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1102-2024-EndSem.pdf' }
+            ]
+          },
+          {
+            name: 'Linear Algebra and Calculus',
+            code: '25EN1101',
+            slug: 'linear-algebra-and-calculus',
+            credits: 4,
+            guidance: {
+              notes: 'Focus on Eigenvalues & Eigenvectors of 3x3 matrices, Cayley-Hamilton theorem, Taylor & Maclaurin series expansion in two variables, Partial derivatives (Euler’s theorem on homogeneous functions), and Gauss Elimination / Rank of a matrix.',
+              passingTips: 'Master Cayley-Hamilton theorem inverse calculation and Gauss-Jordan elimination for 3x3 matrices for guaranteed full marks.',
+              highYieldTopics: [
+                'Cayley-Hamilton Theorem & Matrix Inverses',
+                'Eigenvalues and Eigenvectors of 3x3 Matrices',
+                'Euler’s Theorem on Homogeneous Functions',
+                'Taylor Series Expansion in Two Variables',
+                'Gauss-Elimination & Consistency of System of Linear Equations'
+              ]
+            },
+            pyqs: [
+              { year: 2026, examType: 'end_sem', title: 'End Semester Exam Dec 2025 / Jan 2026', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1101-2026-Jan-EndSem.pdf' },
+              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1101-2024-EndSem.pdf' }
             ]
           }
         ]
@@ -53,31 +110,45 @@ export const DSU_BRANCHES = [
         subjects: [
           {
             name: 'Differential Equations and Vector Calculus',
-            code: '21MAT21',
+            code: '25EN1201',
             slug: 'differential-equations-and-vector-calculus',
             credits: 4,
             guidance: {
-              notes: 'Linear differential equations with constant coefficients, Method of Variation of Parameters, Cauchy-Euler equations, Vector differentiation (Gradient, Divergence, Curl), and Green’s / Stokes’ Theorems.',
-              passingTips: 'Variation of Parameters and Stokes’ theorem integration problems are guaranteed 10-mark questions.',
+              notes: 'Higher order linear differential equations with constant coefficients, Method of Variation of Parameters, Cauchy-Euler equations, Vector differentiation (Gradient, Divergence, Curl), and Green’s / Stokes’ / Gauss Divergence Theorems.',
+              passingTips: 'Variation of Parameters and Stokes’ theorem surface integration problems are guaranteed 10-mark questions.',
               highYieldTopics: ['Method of Variation of Parameters', 'Stokes’ and Gauss Divergence Theorems', 'Cauchy-Euler Homogeneous Linear Equations', 'Gradient, Divergence, and Curl Solenoidal / Irrotational Vector Fields']
             },
             pyqs: [
-              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21MAT21-2024-EndSem.pdf' },
-              { year: 2023, examType: 'end_sem', title: 'End Semester Exam 2023', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21MAT21-2023-EndSem.pdf' }
+              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2025-EndSem.pdf' },
+              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2024-EndSem.pdf' }
             ]
           },
           {
-            name: 'Python for Computational Thinking',
-            code: '21CS23',
-            slug: 'python-for-computational-thinking',
-            credits: 3,
+            name: 'Applied Physics for Engineering',
+            code: '25EN1203',
+            slug: 'applied-physics-for-engineering',
+            credits: 4,
             guidance: {
-              notes: 'Python Data Structures (Lists, Tuples, Dictionaries, Sets), List Comprehensions, File Handling, Exception Handling, OOP in Python, and basic NumPy arrays.',
-              passingTips: 'Write concise Python scripts. Practice dictionary key-value counting and file reading/writing exercises.',
-              highYieldTopics: ['Dictionary & List Comprehensions', 'File I/O Operations with Error Handling', 'Object-Oriented Programming (Classes, Inheritance, Polymorphism)', 'NumPy Array Manipulation & Slicing']
+              notes: 'Quantum Mechanics (de Broglie hypothesis, Heisenberg uncertainty, 1D Schrödinger wave equation), Lasers & Fiber Optics (He-Ne laser, numerical aperture), Semiconductor Physics, and Dielectric Materials.',
+              passingTips: 'Derive 1D time-independent Schrödinger wave equation and solve for energy eigenvalues of a particle in an infinite potential well.',
+              highYieldTopics: ['1D Schrödinger Wave Equation & Particle in a Box', 'Numerical Aperture & Fiber Optic Loss', 'He-Ne & Semiconductor Lasers Principle', 'Hall Effect & Carrier Concentration']
             },
             pyqs: [
-              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/21CS23-2024-EndSem.pdf' }
+              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1203-2025-EndSem.pdf' }
+            ]
+          },
+          {
+            name: 'Basic Electronics & Communication',
+            code: '25EN1205',
+            slug: 'basic-electronics-communication',
+            credits: 3,
+            guidance: {
+              notes: 'Semiconductor Diodes, Bipolar Junction Transistors (BJT in CE configuration), Operational Amplifiers (Op-Amps as Inverting, Non-inverting, Adder, Subtractor), and Digital Logic Gates.',
+              passingTips: 'Draw clear circuit diagrams for Full Wave Bridge Rectifiers with capacitor filter and Op-Amp inverting amplifier with formula derivations.',
+              highYieldTopics: ['Full Wave Bridge Rectifier & Ripple Factor', 'BJT Input/Output Characteristics in CE Mode', 'Op-Amp Inverting, Non-Inverting & Summer Circuits', 'Boolean Algebra & De Morgan Theorems']
+            },
+            pyqs: [
+              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1205-2025-EndSem.pdf' }
             ]
           }
         ]
