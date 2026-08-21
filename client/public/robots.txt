@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /upload
+Disallow: /study
+Disallow: /flashcards
+Disallow: /quizzes
+Disallow: /analytics
+Disallow: /stats
+Disallow: /settings
+
+Sitemap: https://www.mindflowlearn.co.in/sitemap.xml

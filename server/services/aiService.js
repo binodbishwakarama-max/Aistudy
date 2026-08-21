@@ -86,29 +86,48 @@ const sanitizeHistory = (history, latestUserMessage) => {
     return sanitized;
 };
 
+const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
+    let timer;
+    const timeoutPromise = new Promise((_, reject) => {
+        timer = setTimeout(() => {
+            reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`));
+        }, ms);
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => {
+        if (timer) clearTimeout(timer);
+    });
+};
+
 const tryGeminiText = async ({ prompt, systemInstruction }) => {
     const model = geminiClient.getGenerativeModel({
         model: serverConfig.ai.geminiModel,
         systemInstruction
     });
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    return response.text();
+    return withTimeout(
+        model.generateContent(prompt).then(async (result) => {
+            const response = await result.response;
+            return response.text();
+        }),
+        25000,
+        'Gemini text generation'
+    );
 };
 
 const tryGroqText = async ({ prompt, systemInstruction }) => {
-    const completion = await groqClient.chat.completions.create({
-        messages: [
-            { role: 'system', content: systemInstruction },
-            { role: 'user', content: prompt }
-        ],
-        model: serverConfig.ai.groqModel,
-        temperature: 0.4,
-        max_tokens: 4096
-    });
-
-    return completion.choices[0]?.message?.content || '';
+    return withTimeout(
+        groqClient.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemInstruction },
+                { role: 'user', content: prompt }
+            ],
+            model: serverConfig.ai.groqModel,
+            temperature: 0.4,
+            max_tokens: 4096
+        }).then((completion) => completion.choices[0]?.message?.content || ''),
+        25000,
+        'Groq text generation'
+    );
 };
 
 const tryGeminiChat = async ({ message, history, systemInstruction }) => {
@@ -125,28 +144,35 @@ const tryGeminiChat = async ({ message, history, systemInstruction }) => {
         }))
     });
 
-    const result = await chat.sendMessage(message);
-    const response = await result.response;
-    return response.text();
+    return withTimeout(
+        chat.sendMessage(message).then(async (result) => {
+            const response = await result.response;
+            return response.text();
+        }),
+        25000,
+        'Gemini chat reply'
+    );
 };
 
 const tryGroqChat = async ({ message, history, systemInstruction }) => {
     const sanitizedHistory = sanitizeHistory(history, message);
-    const completion = await groqClient.chat.completions.create({
-        messages: [
-            { role: 'system', content: systemInstruction },
-            ...sanitizedHistory.map((entry) => ({
-                role: entry.role,
-                content: entry.content
-            })),
-            { role: 'user', content: message }
-        ],
-        model: serverConfig.ai.groqModel,
-        temperature: 0.4,
-        max_tokens: 2048
-    });
-
-    return completion.choices[0]?.message?.content || '';
+    return withTimeout(
+        groqClient.chat.completions.create({
+            messages: [
+                { role: 'system', content: systemInstruction },
+                ...sanitizedHistory.map((entry) => ({
+                    role: entry.role,
+                    content: entry.content
+                })),
+                { role: 'user', content: message }
+            ],
+            model: serverConfig.ai.groqModel,
+            temperature: 0.4,
+            max_tokens: 2048
+        }).then((completion) => completion.choices[0]?.message?.content || ''),
+        25000,
+        'Groq chat reply'
+    );
 };
 
 const buildProviderFailure = (failures) => {
@@ -243,7 +269,11 @@ const embedText = async (text) => {
     }
     try {
         const model = geminiClient.getGenerativeModel({ model: 'text-embedding-004' });
-        const result = await model.embedContent(text);
+        const result = await withTimeout(
+            model.embedContent(text),
+            15000,
+            'Gemini embedding'
+        );
         return result.embedding.values; // Returns an array of 768 floats
     } catch (error) {
         logger.error('Failed to generate embedding', { reason: getErrorMessage(error) });

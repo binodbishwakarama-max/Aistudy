@@ -115,16 +115,6 @@ export const getStructuredDataFromGeneration = (response, contentType) => {
     return contentType === 'flashcards' ? [] : contentType === 'quiz' ? [] : null;
   }
 
-  // Debug: log the shape so we can diagnose issues
-  console.log('[StudyContent] Response shape:', {
-    hasData: !!response?.data,
-    dataType: typeof response?.data,
-    dataIsArray: Array.isArray(response?.data),
-    dataLength: Array.isArray(response?.data) ? response.data.length : 'N/A',
-    hasContent: !!response?.content,
-    contentType
-  });
-
   if (contentType === 'flashcards') {
     // Strategy 1: Pre-validated data from server
     const directData = normalizeFlashcards(response?.data);

@@ -14,14 +14,69 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <title>MindFlow | PDF → 45-min exam review</title>
+    <link rel="canonical" href="https://www.mindflowlearn.co.in/" />
+
+    <!-- Open Graph / WhatsApp / Social Sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.mindflowlearn.co.in/" />
+    <meta property="og:title" content="MindFlow — AI Study Assistant for DSU Students" />
+    <meta property="og:description" content="Turn your lecture PDFs into flashcards, adaptive quizzes, and spaced repetition reviews in seconds." />
+    <meta property="og:image" content="https://www.mindflowlearn.co.in/og-image.png" />
+    <meta property="og:site_name" content="MindFlow" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="MindFlow — AI Study Assistant" />
+    <meta name="twitter:description" content="Turn your lecture PDFs into flashcards, adaptive quizzes, and spaced repetition reviews in seconds." />
+    <meta name="twitter:image" content="https://www.mindflowlearn.co.in/og-image.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700&family=JetBrains+Mono:wght@400;500;600&family=Syne:wght@500;600;700;800&display=swap"
       rel="stylesheet"
     />
+    <!-- Structured Data (JSON-LD) for Search Engines -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "MindFlow",
+        "url": "https://www.mindflowlearn.co.in/",
+        "applicationCategory": "EducationalApplication",
+        "operatingSystem": "Web, Android, iOS",
+        "description": "MindFlow turns lecture PDFs into focused 45-minute exam review sessions with AI flashcards, adaptive quizzes, and SM-2 spaced repetition.",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "MindFlow",
+          "url": "https://www.mindflowlearn.co.in"
+        }
+      }
+    </script>
   </head>
   <body>
+    <noscript>
+      <header>
+        <h1>MindFlow — AI-Powered Study Assistant</h1>
+        <p>Turn lecture notes and PDFs into active study materials in seconds.</p>
+      </header>
+      <main>
+        <h2>Key Features</h2>
+        <ul>
+          <li><strong>AI Flashcard Generation:</strong> Instant flashcards extracted from lecture slides and documents.</li>
+          <li><strong>Adaptive Quizzes:</strong> Dynamic multiple-choice questions calibrated to your mastery level.</li>
+          <li><strong>Spaced Repetition (SM-2):</strong> Science-backed review scheduling for long-term memory retention.</li>
+          <li><strong>PDF Chat Tutor:</strong> Interactive Q&amp;A grounded in your uploaded course materials.</li>
+        </ul>
+        <nav>
+          <a href="/login">Log In</a> | <a href="/register">Sign Up</a> | <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a>
+        </nav>
+      </main>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

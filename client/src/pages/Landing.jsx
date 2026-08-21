@@ -428,9 +428,9 @@ const Landing = () => {
               © {new Date().getFullYear()} MindFlow Inc. All rights reserved. Built for master-level learning.
             </div>
             <div className="flex items-center gap-4 font-mono">
-              <span>Privacy Policy</span>
+              <Link to="/privacy" className="hover:text-[var(--text-primary)] transition-colors">Privacy Policy</Link>
               <span>·</span>
-              <span>Terms of Service</span>
+              <Link to="/terms" className="hover:text-[var(--text-primary)] transition-colors">Terms of Service</Link>
             </div>
           </div>
         </div>

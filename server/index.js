@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
+const helmet = require('helmet');
 const { serverConfig } = require('./config');
 const { logger } = require('./utils/logger');
 const { getAIStatus, probePrimaryProvider } = require('./services/aiService');
 const { initializeWorker } = require('./queue/worker');
+const { isRedisAvailable } = require('./utils/redis');
+const { globalLimiter, aiLimiter } = require('./middleware/rateLimiter');
 const app = express();
 
 // Start Background Worker
@@ -21,30 +23,30 @@ process.on('unhandledRejection', (reason) => {
 });
 
 app.set('trust proxy', 1);
+app.use(helmet());
 
-// --- Rate Limiters ---
-const globalLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 1000, // Up to 1000 requests per 15 minutes per unique IP
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS' || req.path === '/api/health',
-    message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' }
-});
+const ALLOWED_ORIGINS = [
+    'https://www.mindflowlearn.co.in',
+    'https://mindflowlearn.co.in',
+];
 
-const aiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 150, // Up to 150 AI requests per 15 minutes per unique IP
-    standardHeaders: true,
-    legacyHeaders: false,
-    skip: (req) => req.method === 'OPTIONS',
-    message: { error: 'AI request limit reached. Please wait 15 minutes before generating more content.' }
-});
+// Allow localhost in development
+if (process.env.NODE_ENV !== 'production') {
+    ALLOWED_ORIGINS.push('http://localhost:5173', 'http://localhost:3000');
+}
 
 app.use(cors({
-    origin: '*', // Allow all origins (Vercel, localhost, etc.)
+    origin: (origin, callback) => {
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (ALLOWED_ORIGINS.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(globalLimiter);

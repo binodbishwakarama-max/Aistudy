@@ -3,6 +3,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { serverConfig } = require('../config');
 const supabase = require('../utils/db');
 const authMiddleware = require('../middleware/auth');
+const { aiLimiter } = require('../middleware/rateLimiter');
 const {
     normalizeDeckResponse,
     normalizeFlashcardForClient,
@@ -53,7 +54,7 @@ const fetchQuizRowsForDeck = async (deckId) => {
     return data || [];
 };
 
-router.post('/save', async (req, res) => {
+router.post('/save', aiLimiter, async (req, res) => {
     let userSupabase;
     let createdDeckId = null;
 
@@ -541,7 +542,7 @@ router.patch('/card/:id', async (req, res) => {
     }
 });
 
-router.post('/card/:id/regenerate', async (req, res) => {
+router.post('/card/:id/regenerate', aiLimiter, async (req, res) => {
     try {
         const { id } = req.params;
         const { feedback = '' } = req.body;
@@ -572,7 +573,7 @@ router.post('/card/:id/regenerate', async (req, res) => {
     }
 });
 
-router.post('/regenerate-weak', async (req, res) => {
+router.post('/regenerate-weak', aiLimiter, async (req, res) => {
     try {
         const { deckId, cardIds = [], limit = 3 } = req.body;
 

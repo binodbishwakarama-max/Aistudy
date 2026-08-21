@@ -2,6 +2,8 @@
 
 An intelligent study companion that turns your lecture notes and PDFs into interactive flashcards and quizzes using AI. MindFlow 2.0 represents a huge architectural leap from synchronous processing to an asynchronous, stateful, and adaptive learning platform.
 
+🌐 **Live Website**: [https://www.mindflowlearn.co.in/](https://www.mindflowlearn.co.in/)
+
 ## 🚀 Key Features
 - **Semantic Search (RAG)**: Uses Supabase `pgvector` to find insights across your entire knowledge base instantly using 768-dimensional AI embeddings.
 - **Spaced Repetition (SM-2)**: Smartly schedules your flashcard reviews so you review weak concepts earlier and strong concepts later.
@@ -63,7 +65,7 @@ VITE_SUPABASE_ANON_KEY=eyJ...
 - **Auth**: Supabase Auth + JWT
 
 ## 📝 Usage
-1. Open the app at `http://localhost:5173`.
+1. Open the live app at [mindflowlearn.co.in](https://www.mindflowlearn.co.in/) (or `http://localhost:5173` for local development).
 2. **Login/Register** to save progress.
 3. Upload study notes or PDFs.
 4. **Adaptive Quiz Mode** automatically adapts to what you know.

@@ -17,6 +17,8 @@ const Upload = lazyWithRetry(() => import('./pages/Upload'));
 const Study = lazyWithRetry(() => import('./pages/Study'));
 const Settings = lazyWithRetry(() => import('./pages/Settings'));
 const StatsDashboard = lazyWithRetry(() => import('./components/StatsDashboard'));
+const PrivacyPolicy = lazyWithRetry(() => import('./pages/PrivacyPolicy'));
+const TermsOfService = lazyWithRetry(() => import('./pages/TermsOfService'));
 const NotFound = lazyWithRetry(() => import('./pages/NotFound'));
 
 const RouteFallback = () => (
@@ -71,6 +73,8 @@ function App() {
                     <Route path="/analytics" element={<ProtectedRoute><StatsDashboard /></ProtectedRoute>} />
                     <Route path="/stats" element={<ProtectedRoute><StatsDashboard /></ProtectedRoute>} />
                     <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                    <Route path="/privacy" element={<PrivacyPolicy />} />
+                    <Route path="/terms" element={<TermsOfService />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
