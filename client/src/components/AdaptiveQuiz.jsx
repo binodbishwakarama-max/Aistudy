@@ -18,6 +18,7 @@ import {
 import confetti from 'canvas-confetti';
 import { generateAdaptiveQuiz, submitAdaptiveResults } from '../services/api';
 import { toast } from 'react-hot-toast';
+import { getFriendlyErrorMessage } from '../utils/errorHandler';
 import { playSound } from '../utils/soundEngine';
 import ProgressiveLoader from './ui/ProgressiveLoader';
 
@@ -81,7 +82,7 @@ const AdaptiveQuiz = () => {
       setQuestionTimes([]);
       setPhase('playing');
     } catch (error) {
-      toast.error(error?.response?.data?.error || error?.message || 'Failed to generate adaptive quiz.');
+      toast.error(getFriendlyErrorMessage(error, 'Failed to generate adaptive quiz. Please try again.'));
       setPhase('idle');
     }
   };

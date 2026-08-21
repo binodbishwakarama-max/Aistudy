@@ -77,7 +77,13 @@ router.post('/', async (req, res) => {
     }
   } catch (error) {
     logger.error('Generation route failed', { reason: error.message });
-    res.status(500).json({ error: error.message || 'Failed to enqueue content generation.' });
+    const isAiBusy = /high demand|503|timeout|all ai providers failed|overloaded/i.test(error.message);
+    const friendlyError = isAiBusy
+      ? 'The AI study engine is currently busy. Please wait a moment and try again.'
+      : (error.message && error.message.length < 80 && !error.message.includes('[') && !error.message.includes('{'))
+        ? error.message
+        : 'Failed to generate study materials. Please try again in a moment.';
+    res.status(isAiBusy ? 503 : 500).json({ error: friendlyError });
   }
 });
 

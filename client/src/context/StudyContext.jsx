@@ -6,17 +6,14 @@ import {
     normalizeFlashcards,
     normalizeQuizQuestions
 } from '../utils/studyContent';
+import { getFriendlyErrorMessage } from '../utils/errorHandler';
 import { DEMO_DECK } from '../data/demoDeck';
 
 const DEMO_STORAGE_KEY = 'mindflow_demo';
 
 const StudyContext = createContext();
 
-const getErrorMessage = (error, fallback) => (
-    error?.response?.data?.error
-    || error?.message
-    || fallback
-);
+const getErrorMessage = (error, fallback) => getFriendlyErrorMessage(error, fallback);
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useStudy = () => useContext(StudyContext);
