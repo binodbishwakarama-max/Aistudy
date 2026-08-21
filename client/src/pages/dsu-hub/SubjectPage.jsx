@@ -169,19 +169,29 @@ const SubjectPage = () => {
                       className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 sm:p-5 transition-all hover:border-[var(--border-accent)] hover:shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4"
                     >
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className={`text-[10px] sm:text-[11px] font-bold px-2 py-0.5 rounded ${typeInfo.bg} ${typeInfo.text}`}>
                             {typeInfo.label}
                           </span>
                           <span className="text-xs font-mono font-bold text-[var(--text-muted)]">
                             Year {paper.year}
                           </span>
+                          {paper.duration && (
+                            <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
+                              ⏱️ {paper.duration}
+                            </span>
+                          )}
+                          {paper.maxMarks && (
+                            <span className="text-[10px] sm:text-[11px] font-medium px-2 py-0.5 rounded bg-[var(--bg-elevated)] text-[var(--text-secondary)] border border-[var(--border)]">
+                              🎯 {paper.maxMarks} Marks
+                            </span>
+                          )}
                         </div>
                         <h3 className="text-sm font-bold text-[var(--text-primary)] leading-snug">
                           {paper.title}
                         </h3>
                         <p className="text-[11px] text-[var(--text-muted)] font-mono">
-                          Dayananda Sagar University • {subject.code}
+                          Dayananda Sagar University • {subject.code} {paper.date ? `• Exam Date: ${paper.date}` : ''}
                         </p>
                       </div>
 

@@ -109,46 +109,195 @@ export const DSU_BRANCHES = [
         number: 2,
         subjects: [
           {
-            name: 'Differential Equations and Vector Calculus',
+            name: 'Single and Multivariate Calculus',
             code: '25EN1201',
-            slug: 'differential-equations-and-vector-calculus',
+            slug: 'single-and-multivariate-calculus',
             credits: 4,
             guidance: {
-              notes: 'Higher order linear differential equations with constant coefficients, Method of Variation of Parameters, Cauchy-Euler equations, Vector differentiation (Gradient, Divergence, Curl), and Green’s / Stokes’ / Gauss Divergence Theorems.',
-              passingTips: 'Variation of Parameters and Stokes’ theorem surface integration problems are guaranteed 10-mark questions.',
-              highYieldTopics: ['Method of Variation of Parameters', 'Stokes’ and Gauss Divergence Theorems', 'Cauchy-Euler Homogeneous Linear Equations', 'Gradient, Divergence, and Curl Solenoidal / Irrotational Vector Fields']
+              notes: 'Focus on 5 Core Modules: (1) Multivariable Limits, Continuity tests at origin (e.g. (x^4 - y^2)/(x^4 + y^2)), Total derivative chain rule dw/dt; (2) Absolute extrema on bounded regions and Lagrange Multipliers constrained optimization; (3) Double and Triple Integrals (Cartesian, Polar, and Cylindrical coordinates); (4) Vector Calculus (Green’s Theorem, Conservative vector fields with scalar potential, Gauss Divergence Theorem); (5) Infinite Series convergence tests (D’Alembert’s Ratio Test, Cauchy’s Root Test, Alternating Series, Power Series Interval of Convergence, Maclaurin Series).',
+              passingTips: 'Lagrange Multipliers optimization, Gauss Divergence Theorem cylinder flux, and D’Alembert Ratio Test are guaranteed 16-mark end-sem questions.',
+              highYieldTopics: [
+                'Multivariable Continuity Test at Origin',
+                'Total Derivative Chain Rule (dw/dt)',
+                'Lagrange Multipliers Constrained Optimization',
+                'Double & Triple Integrals (Polar & Cylindrical)',
+                'Green’s Theorem on Bounded Curves',
+                'Conservative Vector Field & Scalar Potential',
+                'Gauss Divergence Theorem Surface Flux',
+                'D’Alembert’s Ratio Test & Cauchy’s Root Test',
+                'Power Series Interval of Convergence'
+              ]
             },
             pyqs: [
-              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2025-EndSem.pdf' },
-              { year: 2024, examType: 'end_sem', title: 'End Semester Exam 2024', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2024-EndSem.pdf' }
+              {
+                year: 2026,
+                examType: 'end_sem',
+                title: 'End Semester Exam May 2026 (Max Marks: 80, Duration: 2h 30m)',
+                date: '14-05-2026',
+                duration: '2h 30m',
+                maxMarks: 80,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2026-May-EndSem.pdf'
+              },
+              {
+                year: 2026,
+                examType: 'mid1',
+                title: 'Mid Semester Exam (CIA-1) March 2026 (Max Marks: 40, Duration: 75m)',
+                date: '13-03-2026',
+                duration: '75 Mins',
+                maxMarks: 40,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1201-2026-Mar-MidSem.pdf'
+              }
             ]
           },
           {
-            name: 'Applied Physics for Engineering',
-            code: '25EN1203',
-            slug: 'applied-physics-for-engineering',
+            name: 'C Programming for Problem Solving (CPPS)',
+            code: '25EN1114',
+            slug: 'c-programming-for-problem-solving',
             credits: 4,
             guidance: {
-              notes: 'Quantum Mechanics (de Broglie hypothesis, Heisenberg uncertainty, 1D Schrödinger wave equation), Lasers & Fiber Optics (He-Ne laser, numerical aperture), Semiconductor Physics, and Dielectric Materials.',
-              passingTips: 'Derive 1D time-independent Schrödinger wave equation and solve for energy eigenvalues of a particle in an infinite potential well.',
-              highYieldTopics: ['1D Schrödinger Wave Equation & Particle in a Box', 'Numerical Aperture & Fiber Optic Loss', 'He-Ne & Semiconductor Lasers Principle', 'Hall Effect & Carrier Concentration']
+              notes: 'Covers: (1) Flowcharts, Algorithms, and C Operator Precedence (Prefix/Postfix ++/-- expressions); (2) Conditional Branching & Loops (Electricity billing with surcharge, Selection sort algorithm & pass-by-pass tracing, 1D/2D arrays); (3) String & Character Handling built-in functions (strcpy, strcat, strlen, strcmp, strchr, isdigit, toupper); (4) Functions, Call-by-Value vs Call-by-Reference, Recursion, Pointers swapping; (5) Nested Structures vs Unions; (6) Dynamic Memory Allocation (malloc, calloc, realloc, free) & File I/O (file creation, writing characters).',
+              passingTips: 'Master the Selection Sort trace on arbitrary arrays, Electricity Billing slab program with surcharge, Dynamic memory functions table, and Nested Structures for student records.',
+              highYieldTopics: [
+                'Algorithm & Flowchart (Largest of 3 Numbers)',
+                'Prefix/Postfix Operator Expression Evaluation',
+                'Electricity Billing Slab Program (with 15% Surcharge)',
+                'Selection Sort Step-by-Step Array Trace',
+                'Built-in String & Character Handling Functions',
+                'Call-by-Value vs Call-by-Reference & Pointer Swap',
+                'Recursion Call Stack Tracing',
+                'Nested Structures vs Unions Differences',
+                'Dynamic Memory: malloc(), calloc(), realloc(), free()',
+                'File I/O Program (Create & Write to File)'
+              ]
             },
             pyqs: [
-              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1203-2025-EndSem.pdf' }
+              {
+                year: 2026,
+                examType: 'end_sem',
+                title: 'End Semester Exam May 2026 (Max Marks: 80, Duration: 2h 30m)',
+                date: '25-05-2026',
+                duration: '2h 30m',
+                maxMarks: 80,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1114-2026-May-EndSem.pdf'
+              },
+              {
+                year: 2026,
+                examType: 'mid1',
+                title: 'Mid Semester Exam (CIA-1) March 2026 (Max Marks: 40, Duration: 75m)',
+                date: '14-03-2026',
+                duration: '75 Mins',
+                maxMarks: 40,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1114-2026-Mar-MidSem.pdf'
+              }
             ]
           },
           {
-            name: 'Basic Electronics & Communication',
-            code: '25EN1205',
-            slug: 'basic-electronics-communication',
+            name: 'Introduction to Electrical and Electronics Engineering',
+            code: '25EN1109',
+            slug: 'intro-to-electrical-and-electronics-engineering',
+            credits: 4,
+            guidance: {
+              notes: 'Focus on 5 Core Modules: (1) DC Circuits (Energy calculation in kWh, Electricity bill calculation, Active/Passive elements, Series/Parallel resistors, KCL/KVL nodal analysis, Current division rule); (2) Electromagnetism & AC Machines (Faraday’s laws, Mutual EMF, 440kVA Transformer voltage/current calculations, DC Generator Lap/Wave EMF equation); (3) Semiconductor Devices (PN junction characteristics, BJT Transistor in CB and CE modes, alpha/beta relationships, Half-wave/Full-wave rectifiers with RC capacitor filter and ripple calculation); (4) Operational Amplifiers (Inverting, Non-Inverting, Summing, Integrator, Differentiator & Ideal Op-Amp characteristics); (5) Digital Logic & Embedded (NAND/NOR universal gates, JK Flip-Flop using NAND, Microcontroller architecture block diagram).',
+              passingTips: 'Solve KCL node equations numericals, Transformer turn ratio calculations, BJT alpha/beta current gain numericals, and draw clear Op-Amp Integrator/Differentiator circuit schematics.',
+              highYieldTopics: [
+                'Monthly Energy (kWh) & Electricity Bill Calculation',
+                'KCL & KVL Nodal Circuit Analysis',
+                'Faraday’s Law & Transformer Primary/Secondary Calculations',
+                'DC Generator Lap vs Wave Winding EMF Equation',
+                'Half-Wave & Full-Wave Rectifiers with RC Smoothing Filter',
+                'BJT CB & CE Configurations (Alpha & Beta Current Gains)',
+                'Op-Amp Inverting, Non-Inverting & Summing Circuits',
+                'Op-Amp Integrator and Differentiator Circuit Diagrams',
+                'Universal Gates (NAND & NOR Realizations)',
+                'JK Flip-Flop Circuit with NAND Gates',
+                'Microcontroller Architecture Block Diagram'
+              ]
+            },
+            pyqs: [
+              {
+                year: 2026,
+                examType: 'end_sem',
+                title: 'End Semester Exam May 2026 (Max Marks: 80, Duration: 2h 30m)',
+                date: '18-05-2026',
+                duration: '2h 30m',
+                maxMarks: 80,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1109-2026-May-EndSem.pdf'
+              },
+              {
+                year: 2026,
+                examType: 'mid1',
+                title: 'Mid Semester Exam (CIA-1) March 2026 (Max Marks: 40, Duration: 75m)',
+                date: '14-03-2026',
+                duration: '75 Mins',
+                maxMarks: 40,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1109-2026-Mar-MidSem.pdf'
+              }
+            ]
+          },
+          {
+            name: 'Physics for Computer Science Cluster',
+            code: '25EN1115',
+            slug: 'physics-for-computer-science-cluster',
+            credits: 4,
+            guidance: {
+              notes: 'Focus on 5 Core Modules: (1) Quantum Mechanics (Wave function physical significance, Born interpretation, Normalization, 1D Schrödinger equation derivation, Particle in an infinite potential well discrete energy eigenvalues & numericals); (2) Quantum Computing (Qubit, Quantum Entanglement, Quantum Parallelism, Pauli-X matrix representation, Quantum Key Distribution - QKD BB84); (3) Lasers & Optical Fibers (Spontaneous vs Stimulated emission, Nd:YAG 4-level laser energy level diagram, Optical fiber loss mechanisms and attenuation); (4) Semiconductor Physics & Devices (Hall Effect & Hall Voltage derivation, Fermi-Dirac distribution & Fermi level occupation probability, Photodiode vs Solar Cell comparison, LED working principle); (5) Nanoscience & Thin Films (Ball milling nanomaterial synthesis, Top-down vs Bottom-up approaches, Advantages of thin films over bulk materials, Sputtering deposition technique).',
+              passingTips: '1D Schrödinger wave equation derivation for infinite potential well, Nd:YAG laser diagram, Hall Voltage derivation, and Ball Milling vs Sputtering are guaranteed 16-mark questions.',
+              highYieldTopics: [
+                'Wave Function Physical Significance & Normalization Conditions',
+                '1D Schrödinger Equation & Infinite Potential Well Eigenvalues',
+                'Qubit, Quantum Entanglement & Quantum Parallelism',
+                'Pauli-X Gate Matrix Representation & Action on Qubit',
+                'Quantum Key Distribution (QKD) Protocol',
+                'Spontaneous vs Stimulated Emission',
+                'Nd:YAG Laser Energy Level Diagram & Operation',
+                'Losses in Optical Fibers (Attenuation, Scattering, Dispersion)',
+                'Hall Effect & Hall Voltage (VH) Derivation',
+                'Fermi-Dirac Distribution Probability Calculation',
+                'Photodiode vs Solar Cell Comparison & LED Working',
+                'Nanomaterials Ball Milling Synthesis & Sputtering Technique'
+              ]
+            },
+            pyqs: [
+              {
+                year: 2026,
+                examType: 'end_sem',
+                title: 'End Semester Exam May 2026 (Max Marks: 80, Duration: 2h 30m)',
+                date: '21-05-2026',
+                duration: '2h 30m',
+                maxMarks: 80,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1115-2026-May-EndSem.pdf'
+              }
+            ]
+          },
+          {
+            name: 'Introduction to Sustainable Engineering',
+            code: '25EN1120',
+            slug: 'intro-to-sustainable-engineering',
             credits: 3,
             guidance: {
-              notes: 'Semiconductor Diodes, Bipolar Junction Transistors (BJT in CE configuration), Operational Amplifiers (Op-Amps as Inverting, Non-inverting, Adder, Subtractor), and Digital Logic Gates.',
-              passingTips: 'Draw clear circuit diagrams for Full Wave Bridge Rectifiers with capacitor filter and Op-Amp inverting amplifier with formula derivations.',
-              highYieldTopics: ['Full Wave Bridge Rectifier & Ripple Factor', 'BJT Input/Output Characteristics in CE Mode', 'Op-Amp Inverting, Non-Inverting & Summer Circuits', 'Boolean Algebra & De Morgan Theorems']
+              notes: 'Focus on: (1) Circular Economy model vs Linear Economy, Product Stewardship, and Life Cycle Assessment (LCA); (2) Sustainable Material Sourcing, Embodied Energy, and Decarbonization; (3) Thermodynamics and Energy Efficiency (Modes of heat transfer - Conduction, Convection, Radiation, Bernoulli’s fluid equation in inclined pipes, Thermal engine efficiency); (4) UN Sustainable Development Goals (SDGs) and role of engineers in global sustainability.',
+              passingTips: 'Focus on Circular Economy principles, Product Stewardship definitions, Bernoulli equation inclined pipe numericals, and Engine thermal efficiency calculations.',
+              highYieldTopics: [
+                'Circular Economy vs Linear Take-Make-Dispose Model',
+                'Product Stewardship & Life Cycle Assessment (LCA)',
+                'Sustainable Sourcing & Embodied Energy Reduction',
+                'Modes of Heat Transfer (Conduction, Convection, Radiation)',
+                'Core Principles of Sustainable Engineering Design',
+                'Bernoulli’s Equation Fluid Flow in Inclined Pipe Numerical',
+                'Heat Engine & Thermal Efficiency Numericals',
+                'UN Sustainable Development Goals (SDGs) for Engineers'
+              ]
             },
             pyqs: [
-              { year: 2025, examType: 'end_sem', title: 'End Semester Exam 2025', fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1205-2025-EndSem.pdf' }
+              {
+                year: 2026,
+                examType: 'mid1',
+                title: 'Mid Semester Exam (CIA-1) March 2026 (Max Marks: 40, Duration: 75m)',
+                date: '13-03-2026',
+                duration: '75 Mins',
+                maxMarks: 40,
+                fileUrl: 'https://www.mindflowlearn.co.in/sample-pyqs/25EN1120-2026-Mar-MidSem.pdf'
+              }
             ]
           }
         ]
