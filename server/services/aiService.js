@@ -98,20 +98,39 @@ const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
     });
 };
 
-const tryGeminiText = async ({ prompt, systemInstruction }) => {
-    const model = geminiClient.getGenerativeModel({
-        model: serverConfig.ai.geminiModel,
-        systemInstruction
-    });
+const GEMINI_FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
 
-    return withTimeout(
-        model.generateContent(prompt).then(async (result) => {
-            const response = await result.response;
-            return response.text();
-        }),
-        25000,
-        'Gemini text generation'
-    );
+const tryGeminiText = async ({ prompt, systemInstruction }) => {
+    const modelsToTry = [serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS.filter((m) => m !== serverConfig.ai.geminiModel)];
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            const model = geminiClient.getGenerativeModel({
+                model: modelName,
+                systemInstruction
+            });
+
+            return await withTimeout(
+                model.generateContent(prompt).then(async (result) => {
+                    const response = await result.response;
+                    return response.text();
+                }),
+                25000,
+                `Gemini (${modelName}) text generation`
+            );
+        } catch (err) {
+            lastError = err;
+            const msg = (err?.message || '').toLowerCase();
+            if (msg.includes('503') || msg.includes('high demand') || msg.includes('not found') || msg.includes('overloaded')) {
+                logger.warn(`Gemini model ${modelName} busy/unavailable (${err.message}), trying backup model...`);
+                continue;
+            }
+            throw err;
+        }
+    }
+
+    throw lastError || new Error('All Gemini models failed.');
 };
 
 const tryGroqText = async ({ prompt, systemInstruction }) => {
@@ -131,27 +150,44 @@ const tryGroqText = async ({ prompt, systemInstruction }) => {
 };
 
 const tryGeminiChat = async ({ message, history, systemInstruction }) => {
-    const model = geminiClient.getGenerativeModel({
-        model: serverConfig.ai.geminiModel,
-        systemInstruction
-    });
-
+    const modelsToTry = [serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS.filter((m) => m !== serverConfig.ai.geminiModel)];
     const sanitizedHistory = sanitizeHistory(history, message);
-    const chat = model.startChat({
-        history: sanitizedHistory.map((entry) => ({
-            role: entry.role === 'user' ? 'user' : 'model',
-            parts: [{ text: entry.content }]
-        }))
-    });
+    let lastError = null;
 
-    return withTimeout(
-        chat.sendMessage(message).then(async (result) => {
-            const response = await result.response;
-            return response.text();
-        }),
-        25000,
-        'Gemini chat reply'
-    );
+    for (const modelName of modelsToTry) {
+        try {
+            const model = geminiClient.getGenerativeModel({
+                model: modelName,
+                systemInstruction
+            });
+
+            const chat = model.startChat({
+                history: sanitizedHistory.map((entry) => ({
+                    role: entry.role === 'user' ? 'user' : 'model',
+                    parts: [{ text: entry.content }]
+                }))
+            });
+
+            return await withTimeout(
+                chat.sendMessage(message).then(async (result) => {
+                    const response = await result.response;
+                    return response.text();
+                }),
+                25000,
+                `Gemini (${modelName}) chat reply`
+            );
+        } catch (err) {
+            lastError = err;
+            const msg = (err?.message || '').toLowerCase();
+            if (msg.includes('503') || msg.includes('high demand') || msg.includes('not found') || msg.includes('overloaded')) {
+                logger.warn(`Gemini model ${modelName} busy/unavailable (${err.message}), trying backup model...`);
+                continue;
+            }
+            throw err;
+        }
+    }
+
+    throw lastError || new Error('All Gemini models failed.');
 };
 
 const tryGroqChat = async ({ message, history, systemInstruction }) => {
