@@ -3,8 +3,15 @@
 -- Run this in Supabase Dashboard -> SQL Editor to initialize DSU Hub tables.
 -- ==============================================================================
 
+-- Drop old conflicting tables if they existed with different column types
+DROP TABLE IF EXISTS public.pyqs CASCADE;
+DROP TABLE IF EXISTS public.subject_guidance CASCADE;
+DROP TABLE IF EXISTS public.subjects CASCADE;
+DROP TABLE IF EXISTS public.semesters CASCADE;
+DROP TABLE IF EXISTS public.branches CASCADE;
+
 -- 1. Create Branches Table
-CREATE TABLE IF NOT EXISTS public.branches (
+CREATE TABLE public.branches (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL,
   slug text NOT NULL UNIQUE,
@@ -14,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public.branches (
 );
 
 -- 2. Create Semesters Table
-CREATE TABLE IF NOT EXISTS public.semesters (
+CREATE TABLE public.semesters (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   branch_id uuid REFERENCES public.branches(id) ON DELETE CASCADE NOT NULL,
   number integer NOT NULL CHECK (number >= 1 AND number <= 8),
@@ -23,7 +30,7 @@ CREATE TABLE IF NOT EXISTS public.semesters (
 );
 
 -- 3. Create Subjects Table
-CREATE TABLE IF NOT EXISTS public.subjects (
+CREATE TABLE public.subjects (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   semester_id uuid REFERENCES public.semesters(id) ON DELETE CASCADE NOT NULL,
   name text NOT NULL,
@@ -35,7 +42,7 @@ CREATE TABLE IF NOT EXISTS public.subjects (
 );
 
 -- 4. Create PYQs (Question Papers) Table
-CREATE TABLE IF NOT EXISTS public.pyqs (
+CREATE TABLE public.pyqs (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   subject_id uuid REFERENCES public.subjects(id) ON DELETE CASCADE NOT NULL,
   title text NOT NULL,
@@ -47,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.pyqs (
 );
 
 -- 5. Create Subject Guidance Notes Table
-CREATE TABLE IF NOT EXISTS public.subject_guidance (
+CREATE TABLE public.subject_guidance (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   subject_id uuid REFERENCES public.subjects(id) ON DELETE CASCADE NOT NULL UNIQUE,
   notes text NOT NULL,
