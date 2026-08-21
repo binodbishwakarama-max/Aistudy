@@ -108,15 +108,11 @@ let prerenderedCount = 0;
   const bodyContent = `
   <div style="max-width: 1000px; margin: 0 auto; padding: 40px 20px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #1e293b;">
     <div style="margin-bottom: 24px;">
-      <span style="background: rgba(37,99,235,0.1); color: #2563eb; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;">🎓 Dayananda Sagar University Archive</span>
-      <span style="background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; margin-left: 8px; text-transform: uppercase;">Beta v1.0</span>
-      <h1 style="font-size: 32px; font-weight: 800; margin-top: 12px; color: #0f172a;">DSU Question Papers &amp; Exam Notes <span style="font-size: 14px; background: #2563eb; color: #ffffff; padding: 2px 8px; border-radius: 6px; vertical-align: super;">BETA</span></h1>
+      <span style="background: rgba(37,99,235,0.1); color: #2563eb; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 600;">Dayananda Sagar University</span>
+      <h1 style="font-size: 32px; font-weight: 800; margin-top: 12px; color: #0f172a;">DSU Question Papers &amp; Exam Notes</h1>
       <p style="color: #64748b; font-size: 15px; max-width: 700px; line-height: 1.6;">
         Free, unblocked access to branch-wise previous year question papers (PYQs), passing strategies, and high-yield module guidance for DSU engineering semesters.
       </p>
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 16px; font-size: 12px; color: #64748b; margin-top: 12px;">
-        💡 <strong>Beta Notice:</strong> Exam guidance notes &amp; high-yield syllabus breakdowns are live. Additional previous year question paper PDFs are actively being added.
-      </div>
     </div>
 
     <h2 style="font-size: 20px; font-weight: 700; margin-top: 32px; margin-bottom: 16px;">Engineering Branches (${DSU_BRANCHES.length})</h2>

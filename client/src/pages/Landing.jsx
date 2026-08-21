@@ -115,10 +115,9 @@ const Landing = () => {
               </span>
             </Link>
 
-            <nav className="hidden items-center gap-7 md:flex">
-              <Link to="/dsu-hub" className="inline-flex items-center gap-1.5 rounded-full border border-[var(--accent)]/30 bg-[var(--accent)]/10 px-3 py-1 text-xs font-semibold text-[var(--accent)] hover:bg-[var(--accent)]/20 transition-all">
-                <span>🎓 DSU Hub</span>
-                <span className="text-[10px] uppercase font-bold bg-[var(--accent)] text-white px-1.5 py-0.2 rounded-full">PYQs</span>
+            <nav className="hidden items-center gap-8 md:flex">
+              <Link to="/dsu-hub" className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                DSU Hub
               </Link>
               <a href="#simulator" className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
                 Memory Model
@@ -398,7 +397,7 @@ const Landing = () => {
                 Product
               </div>
               <ul className="space-y-1.5">
-                <li><Link to="/dsu-hub" className="font-semibold text-[var(--accent)] hover:underline flex items-center gap-1"><span>🎓 DSU Hub (PYQs &amp; Notes)</span></Link></li>
+                <li><Link to="/dsu-hub" className="hover:text-[var(--text-primary)] transition-colors">DSU Hub (PYQs &amp; Notes)</Link></li>
                 <li><a href="#simulator" className="hover:text-[var(--text-primary)] transition-colors">Ebbinghaus Memory Simulator</a></li>
                 <li><a href="#features" className="hover:text-[var(--text-primary)] transition-colors">Neural RAG Search</a></li>
                 <li><a href="#how" className="hover:text-[var(--text-primary)] transition-colors">SM-2 Spaced Algorithm</a></li>
