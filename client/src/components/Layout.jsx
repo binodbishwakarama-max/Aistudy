@@ -190,7 +190,7 @@ const Layout = ({ children }) => {
   return (
     <div
       className={
-        isMarketing || isDemo
+        isPublic || isDemo
           ? 'relative min-h-screen overflow-hidden text-[var(--text-primary)]'
           : 'workspace-shell relative overflow-hidden text-[var(--text-primary)]'
       }
