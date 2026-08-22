@@ -1,19 +1,8 @@
 {
+  "cleanUrls": false,
   "rewrites": [
     {
-      "source": "/robots.txt",
-      "destination": "/robots.txt"
-    },
-    {
-      "source": "/sitemap.xml",
-      "destination": "/sitemap.xml"
-    },
-    {
-      "source": "/sample-pyqs/(.*)",
-      "destination": "/sample-pyqs/$1"
-    },
-    {
-      "source": "/(.*)",
+      "source": "/((?!sample-pyqs/|assets/|favicon\\.svg|apple-touch-icon\\.png|og-image\\.png|pwa-.*\\.png|sw\\.js|workbox-.*\\.js|robots\\.txt|sitemap\\.xml).*)",
       "destination": "/index.html"
     }
   ],
