@@ -95,10 +95,12 @@ const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
     });
 };
 
-const GEMINI_FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b'];
+const GEMINI_FALLBACK_MODELS = ['gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-2.5-flash', 'gemini-1.5-pro'];
+const GROQ_FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768'];
 
 const tryGeminiText = async ({ prompt, systemInstruction }) => {
-    const modelsToTry = [serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS.filter((m) => m !== serverConfig.ai.geminiModel)];
+    const configuredModel = serverConfig.ai.geminiModel === 'gemini-1.5-flash-8b' ? 'gemini-2.0-flash' : serverConfig.ai.geminiModel;
+    const modelsToTry = Array.from(new Set([configuredModel, ...GEMINI_FALLBACK_MODELS]));
     let lastError = null;
 
     for (const modelName of modelsToTry) {
@@ -118,12 +120,7 @@ const tryGeminiText = async ({ prompt, systemInstruction }) => {
             );
         } catch (err) {
             lastError = err;
-            const msg = (err?.message || '').toLowerCase();
-            if (msg.includes('503') || msg.includes('high demand') || msg.includes('not found') || msg.includes('overloaded')) {
-                logger.warn(`Gemini model ${modelName} busy/unavailable (${err.message}), trying backup model...`);
-                continue;
-            }
-            throw err;
+            logger.warn(`Gemini model ${modelName} failed (${err.message}), trying backup model...`);
         }
     }
 
@@ -131,23 +128,36 @@ const tryGeminiText = async ({ prompt, systemInstruction }) => {
 };
 
 const tryGroqText = async ({ prompt, systemInstruction }) => {
-    return withTimeout(
-        groqClient.chat.completions.create({
-            messages: [
-                { role: 'system', content: systemInstruction },
-                { role: 'user', content: prompt }
-            ],
-            model: serverConfig.ai.groqModel,
-            temperature: 0.4,
-            max_tokens: 4096
-        }).then((completion) => completion.choices[0]?.message?.content || ''),
-        25000,
-        'Groq text generation'
-    );
+    const modelsToTry = Array.from(new Set([serverConfig.ai.groqModel, ...GROQ_FALLBACK_MODELS]));
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            return await withTimeout(
+                groqClient.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: systemInstruction },
+                        { role: 'user', content: prompt }
+                    ],
+                    model: modelName,
+                    temperature: 0.4,
+                    max_tokens: 4096
+                }).then((completion) => completion.choices[0]?.message?.content || ''),
+                25000,
+                `Groq (${modelName}) text generation`
+            );
+        } catch (err) {
+            lastError = err;
+            logger.warn(`Groq model ${modelName} failed (${err.message}), trying backup model...`);
+        }
+    }
+
+    throw lastError || new Error('All Groq models failed.');
 };
 
 const tryGeminiChat = async ({ message, history, systemInstruction }) => {
-    const modelsToTry = [serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS.filter((m) => m !== serverConfig.ai.geminiModel)];
+    const configuredModel = serverConfig.ai.geminiModel === 'gemini-1.5-flash-8b' ? 'gemini-2.0-flash' : serverConfig.ai.geminiModel;
+    const modelsToTry = Array.from(new Set([configuredModel, ...GEMINI_FALLBACK_MODELS]));
     const sanitizedHistory = sanitizeHistory(history, message);
     let lastError = null;
 
@@ -175,12 +185,7 @@ const tryGeminiChat = async ({ message, history, systemInstruction }) => {
             );
         } catch (err) {
             lastError = err;
-            const msg = (err?.message || '').toLowerCase();
-            if (msg.includes('503') || msg.includes('high demand') || msg.includes('not found') || msg.includes('overloaded')) {
-                logger.warn(`Gemini model ${modelName} busy/unavailable (${err.message}), trying backup model...`);
-                continue;
-            }
-            throw err;
+            logger.warn(`Gemini model ${modelName} chat failed (${err.message}), trying backup model...`);
         }
     }
 
@@ -188,24 +193,36 @@ const tryGeminiChat = async ({ message, history, systemInstruction }) => {
 };
 
 const tryGroqChat = async ({ message, history, systemInstruction }) => {
+    const modelsToTry = Array.from(new Set([serverConfig.ai.groqModel, ...GROQ_FALLBACK_MODELS]));
     const sanitizedHistory = sanitizeHistory(history, message);
-    return withTimeout(
-        groqClient.chat.completions.create({
-            messages: [
-                { role: 'system', content: systemInstruction },
-                ...sanitizedHistory.map((entry) => ({
-                    role: entry.role,
-                    content: entry.content
-                })),
-                { role: 'user', content: message }
-            ],
-            model: serverConfig.ai.groqModel,
-            temperature: 0.4,
-            max_tokens: 2048
-        }).then((completion) => completion.choices[0]?.message?.content || ''),
-        25000,
-        'Groq chat reply'
-    );
+    let lastError = null;
+
+    for (const modelName of modelsToTry) {
+        try {
+            return await withTimeout(
+                groqClient.chat.completions.create({
+                    messages: [
+                        { role: 'system', content: systemInstruction },
+                        ...sanitizedHistory.map((entry) => ({
+                            role: entry.role,
+                            content: entry.content
+                        })),
+                        { role: 'user', content: message }
+                    ],
+                    model: modelName,
+                    temperature: 0.4,
+                    max_tokens: 2048
+                }).then((completion) => completion.choices[0]?.message?.content || ''),
+                25000,
+                `Groq (${modelName}) chat reply`
+            );
+        } catch (err) {
+            lastError = err;
+            logger.warn(`Groq model ${modelName} chat failed (${err.message}), trying backup model...`);
+        }
+    }
+
+    throw lastError || new Error('All Groq models failed.');
 };
 
 const buildProviderFailure = (failures) => {
