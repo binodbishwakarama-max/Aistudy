@@ -57,3 +57,6 @@ jobs:
 
       - name: Syntax check
         run: node --check index.js
+
+      - name: Server tests
+        run: npm test
