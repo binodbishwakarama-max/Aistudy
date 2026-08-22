@@ -95,8 +95,8 @@ const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
     });
 };
 
-const GEMINI_FALLBACK_MODELS = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-lite'];
-const GROQ_FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
+const GEMINI_FALLBACK_MODELS = ['gemini-1.5-flash', 'gemini-1.5-flash-latest', 'gemini-1.5-pro', 'gemini-2.0-flash'];
+const GROQ_FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'llama3-70b-8192', 'llama3-8b-8192', 'mixtral-8x7b-32768'];
 
 const tryGeminiText = async ({ prompt, systemInstruction }) => {
     const modelsToTry = Array.from(new Set([serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS]));
@@ -104,10 +104,13 @@ const tryGeminiText = async ({ prompt, systemInstruction }) => {
 
     for (const modelName of modelsToTry) {
         try {
-            const model = geminiClient.getGenerativeModel({
-                model: modelName,
-                systemInstruction
-            });
+            const modelOptions = { model: modelName };
+            if (systemInstruction) {
+                modelOptions.systemInstruction = {
+                    parts: [{ text: typeof systemInstruction === 'string' ? systemInstruction : String(systemInstruction) }]
+                };
+            }
+            const model = geminiClient.getGenerativeModel(modelOptions);
 
             return await withTimeout(
                 model.generateContent(prompt).then(async (result) => {
@@ -161,10 +164,13 @@ const tryGeminiChat = async ({ message, history, systemInstruction }) => {
 
     for (const modelName of modelsToTry) {
         try {
-            const model = geminiClient.getGenerativeModel({
-                model: modelName,
-                systemInstruction
-            });
+            const modelOptions = { model: modelName };
+            if (systemInstruction) {
+                modelOptions.systemInstruction = {
+                    parts: [{ text: typeof systemInstruction === 'string' ? systemInstruction : String(systemInstruction) }]
+                };
+            }
+            const model = geminiClient.getGenerativeModel(modelOptions);
 
             const chat = model.startChat({
                 history: sanitizedHistory.map((entry) => ({
