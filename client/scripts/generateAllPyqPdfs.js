@@ -51,6 +51,8 @@ async function createPdfFromImages(images, targetPdfPath) {
     });
   }
 
+  if (pdfDoc.getPageCount() === 0) return;
+
   const pdfBytes = await pdfDoc.save();
   fs.writeFileSync(targetPdfPath, pdfBytes);
 }
@@ -268,12 +270,15 @@ async function generateAll() {
         for (const paper of subject.pyqs) {
           const urlObj = new URL(paper.fileUrl);
           const filename = path.basename(urlObj.pathname);
-          const targetPdfPath = path.join(outputDir, filename);
+          const hasScannedImages = 
+            scannedMap[filename] && 
+            fs.existsSync(scannedImagesDir) && 
+            scannedMap[filename].some(img => fs.existsSync(path.join(scannedImagesDir, img)));
 
-          if (scannedMap[filename]) {
+          if (hasScannedImages) {
             console.log(`📸 Compiling scanned JPGs into: ${filename}`);
-            await createPdfFromImages(scannedMap[filename], targetPdfPath, subject.name, subject.code);
-          } else {
+            await createPdfFromImages(scannedMap[filename], targetPdfPath);
+          } else if (!fs.existsSync(targetPdfPath)) {
             console.log(`📄 Generating official paper PDF: ${filename}`);
             await createVectorQuestionPaperPdf(subject, paper, targetPdfPath);
           }
