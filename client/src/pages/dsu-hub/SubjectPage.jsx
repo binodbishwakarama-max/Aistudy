@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useParams, Navigate, useNavigate } from 'react-router-dom';
+import { Link, useParams, Navigate } from 'react-router-dom';
 import {
   ChevronRight,
   BookOpen,
@@ -35,7 +35,6 @@ const EXAM_TYPE_LABELS = {
 const SubjectPage = () => {
   const { branchSlug, semesterNum, subjectCode } = useParams();
   const subject = getSubject(branchSlug, semesterNum, subjectCode);
-  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
   const [expandedQuestions, setExpandedQuestions] = useState({});
 

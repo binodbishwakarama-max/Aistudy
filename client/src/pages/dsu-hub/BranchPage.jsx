@@ -19,10 +19,6 @@ const BranchPage = () => {
     return <Navigate to="/dsu-hub" replace />;
   }
 
-  const allSubjects = branch.semesters.flatMap((s) =>
-    s.subjects.map((sub) => ({ ...sub, semesterNumber: s.number }))
-  );
-
   return (
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] pb-20">
       {/* Breadcrumb & Header */}

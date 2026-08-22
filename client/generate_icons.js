@@ -1,5 +1,3 @@
-/* global Buffer */
-export {};
 import path from 'path';
 import sharp from 'sharp';
 import { fileURLToPath } from 'url';
