@@ -32,6 +32,21 @@ const EXAM_TYPE_LABELS = {
   other: { label: 'Supplementary / Model', bg: 'bg-[var(--text-muted)]/10', text: 'text-[var(--text-muted)]' },
 };
 
+const resolveFileUrl = (url) => {
+  if (!url) return '#';
+  try {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      const parsed = new URL(url);
+      if (parsed.pathname.startsWith('/sample-pyqs/')) {
+        return parsed.pathname;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return url;
+};
+
 const SubjectPage = () => {
   const { branchSlug, semesterNum, subjectCode } = useParams();
   const subject = getSubject(branchSlug, semesterNum, subjectCode);
@@ -377,7 +392,7 @@ const SubjectPage = () => {
 
                         <div className="w-full sm:w-auto pt-2 sm:pt-0">
                           <a
-                            href={paper.fileUrl}
+                            href={resolveFileUrl(paper.fileUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-2.5 text-xs font-semibold text-[var(--text-primary)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all active:scale-[0.98]"
