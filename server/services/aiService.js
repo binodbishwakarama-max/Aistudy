@@ -95,14 +95,11 @@ const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
     });
 };
 
-const GEMINI_FALLBACK_MODELS = ['gemini-3.6-flash', 'gemini-2.5-flash', 'gemini-1.5-flash', 'gemini-1.5-pro'];
-const GROQ_FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant', 'llama-3.1-70b-versatile', 'mixtral-8x7b-32768'];
+const GEMINI_FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-flash', 'gemini-pro'];
+const GROQ_FALLBACK_MODELS = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'gemma2-9b-it'];
 
 const tryGeminiText = async ({ prompt, systemInstruction }) => {
-    const configuredModel = ['gemini-1.5-flash-8b', 'gemini-2.0-flash'].includes(serverConfig.ai.geminiModel)
-        ? 'gemini-3.6-flash'
-        : serverConfig.ai.geminiModel;
-    const modelsToTry = Array.from(new Set([configuredModel, ...GEMINI_FALLBACK_MODELS]));
+    const modelsToTry = Array.from(new Set([serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS]));
     let lastError = null;
 
     for (const modelName of modelsToTry) {
@@ -158,10 +155,7 @@ const tryGroqText = async ({ prompt, systemInstruction }) => {
 };
 
 const tryGeminiChat = async ({ message, history, systemInstruction }) => {
-    const configuredModel = ['gemini-1.5-flash-8b', 'gemini-2.0-flash'].includes(serverConfig.ai.geminiModel)
-        ? 'gemini-3.6-flash'
-        : serverConfig.ai.geminiModel;
-    const modelsToTry = Array.from(new Set([configuredModel, ...GEMINI_FALLBACK_MODELS]));
+    const modelsToTry = Array.from(new Set([serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS]));
     const sanitizedHistory = sanitizeHistory(history, message);
     let lastError = null;
 
