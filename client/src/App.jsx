@@ -8,8 +8,8 @@ import { AuthProvider } from './context/AuthContext';
 import { GamificationProvider } from './context/GamificationContext';
 import { StudyProvider } from './context/StudyContext';
 import { lazyWithRetry } from './utils/lazyWithRetry';
+import Landing from './pages/Landing';
 
-const Landing = lazyWithRetry(() => import('./pages/Landing'));
 const Login = lazyWithRetry(() => import('./pages/Login'));
 const Register = lazyWithRetry(() => import('./pages/Register'));
 const Dashboard = lazyWithRetry(() => import('./pages/Dashboard'));
