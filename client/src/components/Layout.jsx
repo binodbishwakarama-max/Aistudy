@@ -13,6 +13,7 @@ import {
   BookOpen,
   Upload,
   BarChart3,
+  GraduationCap,
   X,
 } from 'lucide-react';
 import { AnimatePresence, motion as Motion } from 'framer-motion';
@@ -28,13 +29,6 @@ import DemoBanner from './DemoBanner';
 
 const marketingRoutes = new Set(['/', '/login', '/register']);
 
-const isPublicPath = (pathname) => (
-  marketingRoutes.has(pathname) ||
-  pathname.startsWith('/dsu-hub') ||
-  pathname === '/privacy' ||
-  pathname === '/terms'
-);
-
 const isDemoPath = (pathname) => pathname.startsWith('/demo');
 
 const isPathActive = (pathname, path) => {
@@ -43,6 +37,9 @@ const isPathActive = (pathname, path) => {
   }
   if (path === '/study') {
     return ['/study', '/flashcards', '/quizzes'].includes(pathname);
+  }
+  if (path === '/dsu-hub') {
+    return pathname.startsWith('/dsu-hub');
   }
   return pathname === path;
 };
@@ -114,6 +111,7 @@ const workspaceNavItems = [
   { path: '/dashboard', label: 'Home', icon: LayoutDashboard, match: (p) => p === '/dashboard' },
   { path: '/study', label: 'Study', icon: BookOpen, match: (p) => ['/study', '/flashcards', '/quizzes'].includes(p) },
   { path: '/upload', label: 'Upload', icon: Upload, match: (p) => p === '/upload' },
+  { path: '/dsu-hub', label: 'DSU Hub', icon: GraduationCap, match: (p) => p.startsWith('/dsu-hub') },
   { path: '/analytics', label: 'Progress', icon: BarChart3, match: (p) => p === '/analytics' || p === '/stats' },
 ];
 
@@ -134,7 +132,12 @@ const Layout = ({ children }) => {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const searchInputRef = useRef(null);
 
-  const isPublic = isPublicPath(location.pathname);
+  const isMarketing = marketingRoutes.has(location.pathname);
+  const isPublicDoc = location.pathname === '/privacy' || location.pathname === '/terms';
+  const isDsuHub = location.pathname.startsWith('/dsu-hub');
+  // If user is authenticated, render DSU Hub inside the full workspace layout!
+  // Unauthenticated guests see the public standalone page with Sign In link.
+  const isPublic = isMarketing || (!user && (isDsuHub || isPublicDoc));
   const isDemo = isDemoPath(location.pathname);
 
   const userName = useMemo(() => {
