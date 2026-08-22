@@ -2,7 +2,7 @@
   "cleanUrls": false,
   "rewrites": [
     {
-      "source": "/((?!sample-pyqs/|assets/|favicon\\.svg|apple-touch-icon\\.png|og-image\\.png|pwa-.*\\.png|sw\\.js|workbox-.*\\.js|robots\\.txt|sitemap\\.xml).*)",
+      "source": "/((?!sample-pyqs/|assets/|favicon\\.svg|apple-touch-icon\\.png|og-image\\.png|pwa-.*\\.png|manifest\\.webmanifest|sw\\.js|workbox-.*\\.js|robots\\.txt|sitemap\\.xml).*)",
       "destination": "/index.html"
     }
   ],

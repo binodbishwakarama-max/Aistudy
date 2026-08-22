@@ -1,5 +1,5 @@
 const { Worker } = require('bullmq');
-const { connection, isRedisAvailable, onRedisReady } = require('../utils/redis');
+const { getConnection, isRedisAvailable, onRedisReady } = require('../utils/redis');
 const { QUEUE_NAME } = require('./jobs');
 const { generateText } = require('../services/aiService');
 const { parseStructuredGeneration } = require('../utils/aiPayloads');
@@ -8,6 +8,7 @@ const { logger } = require('../utils/logger');
 let worker;
 
 const startWorker = () => {
+  const connection = getConnection();
   if (worker || !isRedisAvailable() || !connection) {
     return;
   }
@@ -60,7 +61,7 @@ const startWorker = () => {
 };
 
 const initializeWorker = () => {
-  if (!connection) {
+  if (!getConnection()) {
     logger.warn('Skipping worker initialization: No Redis connection configured.');
     return;
   }

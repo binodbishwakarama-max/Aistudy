@@ -59,6 +59,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
       });
       setIsEditing(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- keyed on currentCard?.id intentionally
   }, [currentCard?.id, currentIndex]);
 
   const saveFavorites = (newFavorites) => {
@@ -177,12 +178,12 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
     setRegenerating(false);
   };
 
-  const prevCard = () => {
+  const prevCard = useCallback(() => {
     if (currentIndex > 0) {
       setIsFlipped(false);
       setCurrentIndex((prev) => prev - 1);
     }
-  };
+  }, [currentIndex]);
 
   const shuffleCards = () => {
     setShuffledCards([...cards].sort(() => Math.random() - 0.5));
@@ -243,7 +244,7 @@ const Flashcard = ({ cards, deckId = null, isDemoMode = false }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCompleted, isFlipped, handleReview, nextCard]);
+  }, [isCompleted, isFlipped, handleReview, nextCard, prevCard]);
 
   if (isCompleted) {
     const durationMinutes = Math.max(1, Math.round(sessionDurationMs / 60000));

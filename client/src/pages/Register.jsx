@@ -64,7 +64,7 @@ const Register = () => {
     setSubmitting(true);
     try {
       await register(name.trim(), email, password);
-      navigate('/dashboard');
+      navigate('/login');
     } finally {
       setSubmitting(false);
     }

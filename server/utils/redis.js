@@ -108,8 +108,13 @@ function initRedis() {
 
 initRedis();
 
+function getConnection() {
+  return connection;
+}
+
 module.exports = {
-  connection,
+  getConnection,
+  connection, // Keep for backwards compat with BullMQ constructors that read it once
   isRedisAvailable,
   isFatalRedisError,
   disableRedis,

@@ -179,7 +179,7 @@ router.get('/history', async (req, res) => {
         res.json(decks);
     } catch (error) {
         logger.error('Fetch history failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to load study history.' });
     }
 });
 
@@ -214,7 +214,7 @@ router.get('/deck/:id', async (req, res) => {
         }));
     } catch (error) {
         logger.error('Load deck failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to load study set.' });
     }
 });
 
@@ -282,7 +282,7 @@ router.post('/review', async (req, res) => {
         res.json({ success: true, nextReview: nextReviewDate, interval });
     } catch (error) {
         logger.error('Review flashcard failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to record review.' });
     }
 });
 
@@ -446,7 +446,7 @@ router.get('/due', async (req, res) => {
         });
     } catch (error) {
         logger.error('Fetch due cards failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to fetch due cards.' });
     }
 });
 
@@ -497,7 +497,7 @@ router.post('/session', async (req, res) => {
         res.json({ success: true, session: data });
     } catch (error) {
         logger.error('Record study session failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to record study session.' });
     }
 });
 
@@ -667,7 +667,7 @@ router.delete('/deck/:id', async (req, res) => {
         res.json({ success: true });
     } catch (error) {
         logger.error('Delete deck failed', { reason: error.message });
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: 'Failed to delete study set.' });
     }
 });
 

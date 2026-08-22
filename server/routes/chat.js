@@ -52,7 +52,7 @@ router.post('/', async (req, res) => {
                 .eq('id', deckId)
                 .single();
 
-            if (!deckError && deck?.user_id === req.user.id) {
+            if (!deckError && deck && deck.user_id === req.user.id) {
                 if (deck.source_text) {
                     sourceText = deck.source_text;
                     retrievedChunks.push(...findRelevantChunks(deck.source_text, message.trim(), 3));

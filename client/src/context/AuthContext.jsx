@@ -3,7 +3,6 @@ import { supabase, supabaseConfigError } from '../services/supabaseClient';
 import { toast } from 'react-hot-toast';
 
 const AuthContext = createContext();
-const AUTH_BOOT_TIMEOUT_MS = 4000;
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const useAuth = () => useContext(AuthContext);
@@ -23,76 +22,69 @@ export const AuthProvider = ({ children }) => {
             return undefined;
         }
 
-        const hasAuthParams = 
-            typeof window !== 'undefined' && 
-            (window.location.hash.includes('access_token=') || 
-             window.location.search.includes('code=') || 
+        // Detect OAuth callback params so we keep the loading spinner visible
+        // until Supabase's `detectSessionInUrl` (configured in supabaseClient.js)
+        // finishes exchanging tokens and fires onAuthStateChange('SIGNED_IN').
+        const hasAuthParams =
+            typeof window !== 'undefined' &&
+            (window.location.hash.includes('access_token=') ||
+             window.location.search.includes('code=') ||
              window.location.hash.includes('error='));
 
-        // Keep the UI responsive even if auth bootstrap is slow.
-        const getSession = async () => {
-            const timeoutId = window.setTimeout(() => {
-                if (!isMounted) return;
-                setAuthError(hasAuthParams ? null : 'Authentication is taking longer than expected.');
-                setLoading(false);
-            }, 6000);
+        // Safety net: if auth bootstrap stalls, unblock the UI after 8s.
+        const timeoutId = window.setTimeout(() => {
+            if (!isMounted) return;
+            if (!hasAuthParams) {
+                setAuthError('Authentication is taking longer than expected.');
+            }
+            setLoading(false);
+        }, 8000);
 
+        // 1. Restore existing session (regular page loads, returning users).
+        //    For OAuth callbacks, `detectSessionInUrl: true` handles token
+        //    exchange automatically — we just need to call getSession() to
+        //    trigger it, then onAuthStateChange fires SIGNED_IN.
+        const bootstrap = async () => {
             try {
-                // If OAuth returned with ?code=, explicitly exchange it
-                if (typeof window !== 'undefined' && window.location.search.includes('code=')) {
-                    try {
-                        const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(window.location.href);
-                        if (!exchangeError && exchangeData?.session?.user) {
-                            if (isMounted) {
-                                setUser(exchangeData.session.user);
-                                setAuthError(null);
-                                setLoading(false);
-                                const cleanUrl = window.location.pathname;
-                                window.history.replaceState(null, '', cleanUrl);
-                            }
-                            return;
-                        }
-                    } catch (e) {
-                        console.warn('PKCE exchangeCodeForSession attempted:', e);
-                    }
-                }
-
                 const { data: { session }, error } = await supabase.auth.getSession();
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 if (!isMounted) return;
                 setUser(session?.user ?? null);
                 setAuthError(null);
+
+                // Only clear loading here if there are NO auth params.
+                // If there ARE auth params, wait for onAuthStateChange('SIGNED_IN')
+                // to confirm the token exchange completed before unblocking.
+                if (!hasAuthParams) {
+                    setLoading(false);
+                }
             } catch (error) {
                 console.error('Failed to restore auth session:', error);
-
                 if (!isMounted) return;
                 setUser(null);
                 setAuthError(error?.message || 'Unable to verify your session right now.');
-            } finally {
-                window.clearTimeout(timeoutId);
-                if (isMounted) {
-                    setLoading(false);
-                }
+                setLoading(false);
             }
         };
 
-        getSession();
+        bootstrap();
 
-        // 2. Listen for auth changes (Login, Logout, Auto-refresh, OAuth SIGNED_IN)
+        // 2. Listen for auth state changes (login, logout, token refresh, OAuth callback).
         const { data } = supabase.auth.onAuthStateChange((event, session) => {
             if (!isMounted) return;
             setUser(session?.user ?? null);
             setAuthError(null);
-            setLoading(false);
+            setLoading(false); // Always unblock UI after any auth event
 
             if (event === 'SIGNED_IN' && session?.user) {
-                // Clean hash / query params from URL
-                if (typeof window !== 'undefined' && (window.location.hash.includes('access_token=') || window.location.search.includes('code='))) {
-                    const cleanUrl = window.location.pathname;
-                    window.history.replaceState(null, '', cleanUrl);
+                // Clean OAuth hash / query params from the URL bar
+                if (
+                    typeof window !== 'undefined' &&
+                    (window.location.hash.includes('access_token=') ||
+                     window.location.search.includes('code='))
+                ) {
+                    window.history.replaceState(null, '', window.location.pathname);
                 }
             }
         });
@@ -101,6 +93,7 @@ export const AuthProvider = ({ children }) => {
 
         return () => {
             isMounted = false;
+            window.clearTimeout(timeoutId);
             subscription?.unsubscribe();
         };
     }, []);
@@ -138,7 +131,7 @@ export const AuthProvider = ({ children }) => {
             password,
             options: {
                 data: {
-                    full_name: name, // This goes into user_metadata
+                    full_name: name,
                 },
             },
         });
