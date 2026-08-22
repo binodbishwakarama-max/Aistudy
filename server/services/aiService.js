@@ -234,7 +234,7 @@ const buildProviderFailure = (failures) => {
 const generateText = async ({ prompt, systemInstruction }) => {
     const failures = [];
 
-    if (geminiClient && (providerState.gemini.available || !groqClient)) {
+    if (geminiClient) {
         try {
             const text = await tryGeminiText({ prompt, systemInstruction });
             providerState.gemini.available = true;
@@ -243,10 +243,11 @@ const generateText = async ({ prompt, systemInstruction }) => {
         } catch (error) {
             recordFailure('gemini', error);
             failures.push(`Gemini: ${getErrorMessage(error)}`);
+            logger.warn('Gemini failed, falling back to Groq...', { error: getErrorMessage(error) });
         }
     }
 
-    if (groqClient && (providerState.groq.available || !geminiClient)) {
+    if (groqClient) {
         try {
             const text = await tryGroqText({ prompt, systemInstruction });
             providerState.groq.available = true;
@@ -264,7 +265,7 @@ const generateText = async ({ prompt, systemInstruction }) => {
 const generateChatReply = async ({ message, history, systemInstruction }) => {
     const failures = [];
 
-    if (geminiClient && (providerState.gemini.available || !groqClient)) {
+    if (geminiClient) {
         try {
             const text = await tryGeminiChat({ message, history, systemInstruction });
             providerState.gemini.available = true;
@@ -273,10 +274,11 @@ const generateChatReply = async ({ message, history, systemInstruction }) => {
         } catch (error) {
             recordFailure('gemini', error);
             failures.push(`Gemini: ${getErrorMessage(error)}`);
+            logger.warn('Gemini chat failed, falling back to Groq...', { error: getErrorMessage(error) });
         }
     }
 
-    if (groqClient && (providerState.groq.available || !geminiClient)) {
+    if (groqClient) {
         try {
             const text = await tryGroqChat({ message, history, systemInstruction });
             providerState.groq.available = true;
