@@ -270,6 +270,7 @@ async function generateAll() {
         for (const paper of subject.pyqs) {
           const urlObj = new URL(paper.fileUrl);
           const filename = path.basename(urlObj.pathname);
+          const targetPdfPath = path.join(outputDir, filename);
           const hasScannedImages = 
             scannedMap[filename] && 
             fs.existsSync(scannedImagesDir) && 

@@ -33,13 +33,30 @@ export const AuthProvider = ({ children }) => {
         const getSession = async () => {
             const timeoutId = window.setTimeout(() => {
                 if (!isMounted) return;
-                if (!hasAuthParams) {
-                    setAuthError('Authentication is taking longer than expected. Showing the app without blocking.');
-                    setLoading(false);
-                }
-            }, AUTH_BOOT_TIMEOUT_MS);
+                setAuthError(hasAuthParams ? null : 'Authentication is taking longer than expected.');
+                setLoading(false);
+            }, 6000);
 
             try {
+                // If OAuth returned with ?code=, explicitly exchange it
+                if (typeof window !== 'undefined' && window.location.search.includes('code=')) {
+                    try {
+                        const { data: exchangeData, error: exchangeError } = await supabase.auth.exchangeCodeForSession(window.location.href);
+                        if (!exchangeError && exchangeData?.session?.user) {
+                            if (isMounted) {
+                                setUser(exchangeData.session.user);
+                                setAuthError(null);
+                                setLoading(false);
+                                const cleanUrl = window.location.pathname;
+                                window.history.replaceState(null, '', cleanUrl);
+                            }
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn('PKCE exchangeCodeForSession attempted:', e);
+                    }
+                }
+
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (error) {
                     throw error;
@@ -56,7 +73,7 @@ export const AuthProvider = ({ children }) => {
                 setAuthError(error?.message || 'Unable to verify your session right now.');
             } finally {
                 window.clearTimeout(timeoutId);
-                if (isMounted && (!hasAuthParams || user)) {
+                if (isMounted) {
                     setLoading(false);
                 }
             }
@@ -72,8 +89,8 @@ export const AuthProvider = ({ children }) => {
             setLoading(false);
 
             if (event === 'SIGNED_IN' && session?.user) {
-                // If there's an OAuth hash or code in URL, clean it up cleanly
-                if (window.location.hash.includes('access_token=') || window.location.search.includes('code=')) {
+                // Clean hash / query params from URL
+                if (typeof window !== 'undefined' && (window.location.hash.includes('access_token=') || window.location.search.includes('code='))) {
                     const cleanUrl = window.location.pathname;
                     window.history.replaceState(null, '', cleanUrl);
                 }
