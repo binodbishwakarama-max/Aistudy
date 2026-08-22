@@ -23,12 +23,20 @@ export const AuthProvider = ({ children }) => {
             return undefined;
         }
 
+        const hasAuthParams = 
+            typeof window !== 'undefined' && 
+            (window.location.hash.includes('access_token=') || 
+             window.location.search.includes('code=') || 
+             window.location.hash.includes('error='));
+
         // Keep the UI responsive even if auth bootstrap is slow.
         const getSession = async () => {
             const timeoutId = window.setTimeout(() => {
                 if (!isMounted) return;
-                setAuthError('Authentication is taking longer than expected. Showing the app without blocking.');
-                setLoading(false);
+                if (!hasAuthParams) {
+                    setAuthError('Authentication is taking longer than expected. Showing the app without blocking.');
+                    setLoading(false);
+                }
             }, AUTH_BOOT_TIMEOUT_MS);
 
             try {
@@ -48,7 +56,7 @@ export const AuthProvider = ({ children }) => {
                 setAuthError(error?.message || 'Unable to verify your session right now.');
             } finally {
                 window.clearTimeout(timeoutId);
-                if (isMounted) {
+                if (isMounted && (!hasAuthParams || user)) {
                     setLoading(false);
                 }
             }
@@ -56,12 +64,20 @@ export const AuthProvider = ({ children }) => {
 
         getSession();
 
-        // 2. Listen for auth changes (Login, Logout, Auto-refresh)
-        const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+        // 2. Listen for auth changes (Login, Logout, Auto-refresh, OAuth SIGNED_IN)
+        const { data } = supabase.auth.onAuthStateChange((event, session) => {
             if (!isMounted) return;
             setUser(session?.user ?? null);
             setAuthError(null);
             setLoading(false);
+
+            if (event === 'SIGNED_IN' && session?.user) {
+                // If there's an OAuth hash or code in URL, clean it up cleanly
+                if (window.location.hash.includes('access_token=') || window.location.search.includes('code=')) {
+                    const cleanUrl = window.location.pathname;
+                    window.history.replaceState(null, '', cleanUrl);
+                }
+            }
         });
 
         subscription = data.subscription;
