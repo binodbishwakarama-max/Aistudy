@@ -29,8 +29,8 @@ const serverConfig = {
     ai: {
         geminiApiKey: process.env.GEMINI_API_KEY || '',
         groqApiKey: process.env.GROQ_API_KEY || '',
-        geminiModel: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
-        groqModel: process.env.GROQ_MODEL || 'llama-3.1-8b-instant'
+        geminiModel: process.env.GEMINI_MODEL || 'gemini-1.5-flash',
+        groqModel: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile'
     }
 };
 

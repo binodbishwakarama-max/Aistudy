@@ -95,8 +95,8 @@ const withTimeout = (promise, ms = 25000, label = 'AI Operation') => {
     });
 };
 
-const GEMINI_FALLBACK_MODELS = ['gemini-2.5-flash', 'gemini-2.5-pro', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-flash', 'gemini-pro'];
-const GROQ_FALLBACK_MODELS = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile', 'gemma2-9b-it'];
+const GEMINI_FALLBACK_MODELS = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro', 'gemini-2.0-flash-lite'];
+const GROQ_FALLBACK_MODELS = ['llama-3.3-70b-versatile', 'llama-3.1-8b-instant'];
 
 const tryGeminiText = async ({ prompt, systemInstruction }) => {
     const modelsToTry = Array.from(new Set([serverConfig.ai.geminiModel, ...GEMINI_FALLBACK_MODELS]));
