@@ -59,12 +59,14 @@ export const AuthProvider = ({ children }) => {
                 if (!hasAuthParams) {
                     setLoading(false);
                 }
+                window.clearTimeout(timeoutId);
             } catch (error) {
                 console.error('Failed to restore auth session:', error);
                 if (!isMounted) return;
                 setUser(null);
                 setAuthError(error?.message || 'Unable to verify your session right now.');
                 setLoading(false);
+                window.clearTimeout(timeoutId);
             }
         };
 
