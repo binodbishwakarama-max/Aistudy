@@ -8,7 +8,13 @@
       <feDropShadow dx="0" dy="6" stdDeviation="10" flood-opacity="0.25" flood-color="#002D62" />
     </filter>
   </defs>
+  
+  <!-- Rounded App Icon Background -->
   <rect width="512" height="512" rx="116" fill="url(#mindflowBg)" />
+  
+  <!-- Bold Geometric 'M' Glyph with Optical Balance -->
   <path d="M128 384V128H184L256 252L328 128H384V384H328V228L268 332H244L184 228V384H128Z" fill="#FFFFFF" filter="url(#iconShadow)" />
+  
+  <!-- Warm Intellect Spark / Spaced Repetition Node -->
   <circle cx="396" cy="116" r="28" fill="#FFD60A" stroke="#0071E3" stroke-width="6" />
 </svg>
